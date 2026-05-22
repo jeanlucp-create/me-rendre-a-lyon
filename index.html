@@ -703,12 +703,20 @@ function updateDetail(p){
   const isDepl=(type==='velov'||type==='citiz'||type==='leo');
   tclDetBtn.style.display=isDepl?'none':'flex';
   if(p.lat&&p.lng){
-    navBtn.href=`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}&travelmode=driving`;
+    // "S'y rendre" — destination universelle (geo: fonctionne sur iOS/Android/autres)
+    navBtn.href=`geo:${p.lat},${p.lng}?q=${encodeURIComponent(p.nom)}`;
     navBtn.style.opacity='1'; navBtn.style.pointerEvents='auto';
     mapDetBtn.style.display='flex';
-    // "Partir d'ici" : depuis ce point, choisir son mode de transport
+    // "Partir d'ici" — point de départ universel
+    // iOS Plans: maps://maps.apple.com/?saddr=lat,lng&saddrname=Nom
+    // Android/autres: https://maps.google.com/maps?saddr=lat,lng (fallback)
+    // On utilise un lien qui détecte la plateforme
+    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+    const nomEnc=encodeURIComponent(p.nom);
     partirBtn.style.display='flex';
-    partirBtn.href=`https://www.google.com/maps/dir/?api=1&origin=${p.lat},${p.lng}`;
+    partirBtn.href=isIOS
+      ?`maps://maps.apple.com/?saddr=${p.lat},${p.lng}&saddrname=${nomEnc}`
+      :`https://maps.google.com/maps?saddr=${p.lat},${p.lng}&saddr_label=${nomEnc}`;
   }else{
     navBtn.href='#'; navBtn.style.opacity='.4'; navBtn.style.pointerEvents='none';
     mapDetBtn.style.display='none';
@@ -796,7 +804,7 @@ function addM(lat,lng,color,sz,lbl,name,sub,type){
   const icon=L.divIcon({className:'',
     html:`<div style="background:${color};color:white;border-radius:50%;width:${sz}px;height:${sz}px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:${sz>=30?11:9}px;font-weight:700;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.2)">${lbl}</div>`,
     iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
-  const navUrl=`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  const navUrl=`geo:${lat},${lng}?q=${encodeURIComponent(name)}`;
   const tclBtn=type==='parking'?`<a href="https://www.tcl.fr/itineraires" target="_blank" class="lp-btn lp-btn-tcl">🚇 Itinéraire TCL</a>`:'';
   const popup=L.popup({maxWidth:200,minWidth:160}).setContent(
     `<div class="lp-popup"><div class="lp-name">${name}</div><div class="lp-num" style="color:${color}">${lbl}</div><div class="lp-sub">${sub}</div>
