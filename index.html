@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
-  <title>Lyon en mouvement</title>
-  <meta name="description" content="De la voiture à la ville — P+R TCL, Vélo'v, Parkings"/>
+  <title>Me rendre à Lyon</title>
+  <meta name="description" content="P+R TCL, Vélo'v, Parkings — Mobilité urbaine Lyon"/>
   <link rel="manifest" href="manifest.json"/>
   <meta name="theme-color" content="#FF6B35"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-title" content="Lyon en mouvement"/>
+  <meta name="apple-mobile-web-app-title" content="Me rendre à Lyon"/>
   <link rel="apple-touch-icon" href="icons/icon-192.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
@@ -21,7 +21,7 @@
       --orange:#FF6B35; --orange-dim:#FFF3EE; --orange-mid:#FFD9C8; --orange-dk:#CC4A1A;
       --green:#3FB950; --green-dim:#EAF8ED; --green-mid:#A8DFB2; --green-dk:#1A6B30;
       --blue:#185FA5; --blue-dim:#EBF4FF; --blue-mid:#B5D4F4;
-      --amber:#D29922; --amber-bg:#FEF3C7;
+      --amber:#F0A500; --amber-bg:#FEF3C7;
       --red:#F85149; --red-bg:#FEE2E2;
     }
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -33,10 +33,9 @@
     .hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
     .logo{width:40px;height:40px;border-radius:11px;background:var(--orange);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(255,107,53,.3)}
     .logo svg{width:22px;height:22px}
-    .brand-name{font-size:18px;font-weight:800;letter-spacing:-.3px;line-height:1;color:var(--text)}
+    .brand-name{font-size:18px;font-weight:800;letter-spacing:-.3px;line-height:1.1;color:var(--text)}
     .brand-name span{color:var(--orange)}
-    .brand-sub{font-size:9px;color:var(--muted);margin-top:1px}
-    .brand-sub em{color:var(--orange);font-style:italic}
+    .brand-sub{font-size:9px;color:var(--muted);margin-top:1px;letter-spacing:.04em}
     .menu-btn{margin-left:auto;width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 
     /* PAVÉS */
@@ -51,7 +50,7 @@
     .pave-v .pave-title{color:var(--orange-dk)}
     .pave-d .pave-title{color:var(--green-dk)}
     .pave-body{padding:6px 7px;display:flex;flex-direction:column;gap:4px;background:var(--surface)}
-    .pave-btn{border-radius:8px;padding:7px 9px;display:flex;align-items:center;gap:6px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);transition:all .15s;font-family:'Outfit',sans-serif}
+    .pave-btn{border-radius:8px;padding:7px 9px;display:flex;align-items:center;gap:6px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);transition:all .15s;font-family:'Outfit',sans-serif;text-decoration:none}
     .pave-btn:active{opacity:.8;transform:scale(.97)}
     .pave-btn.active-pr{background:var(--green-dim);border-color:var(--green-mid)}
     .pave-btn.active-pk{background:var(--orange-dim);border-color:var(--orange-mid)}
@@ -79,8 +78,8 @@
     /* MAIN */
     .main{flex:1;overflow:hidden;position:relative}
     .list-view{height:100%;overflow-y:auto;padding:6px 14px 24px;-webkit-overflow-scrolling:touch}
-    .map-view{height:100%;display:none;position:relative}
-    #map{width:100%;height:100%}
+    .map-view{height:100%;display:none;position:relative;flex-direction:column}
+    #map{flex:1;width:100%;height:100%}
 
     /* SEC LABEL */
     .sec-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 2px 5px;color:#BA7517}
@@ -109,9 +108,9 @@
     .item-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
     .item-cap{font-size:8px;color:var(--hint);text-align:right}
     .item-old{font-size:8px;color:var(--red);text-align:right}
-    /* Couleurs vives */
-    .c-green{color:#2A9440} .c-amber{color:#C17B10} .c-red{color:#E03030} .c-muted{color:var(--hint)}
-    .bg-green{background:#3FB950} .bg-amber{background:#D29922} .bg-red{background:#F85149} .bg-hint{background:var(--hint)}
+    /* Couleurs VIVES */
+    .c-green{color:#3FB950} .c-amber{color:#F0A500} .c-red{color:#F85149} .c-muted{color:var(--hint)}
+    .bg-green{background:#3FB950} .bg-amber{background:#F0A500} .bg-red{background:#F85149} .bg-hint{background:var(--hint)}
 
     /* ITEM SIMPLE vélo'v */
     .item-s{background:var(--surface);border-radius:11px;border:1px solid var(--border);padding:10px 12px;display:flex;align-items:center;gap:7px;cursor:pointer}
@@ -122,6 +121,7 @@
     .vv-badges{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap}
 
     /* MAP */
+    .map-back-btn{position:absolute;top:10px;left:10px;z-index:999;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:7px 14px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;display:none;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
     .map-overlay-btns{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:999;display:flex;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:5px 8px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
     .map-toggle{padding:5px 11px;border-radius:100px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid transparent;display:flex;align-items:center;gap:4px;font-family:'Outfit',sans-serif;transition:all .2s;color:var(--muted);background:transparent}
     .map-toggle.on-pr{background:var(--green-dim);border-color:var(--green-mid);color:var(--green-dk)}
@@ -160,11 +160,11 @@
     .vv-near-ico{width:28px;height:28px;border-radius:7px;background:var(--orange);color:white;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
     .vv-near-name{font-size:11px;font-weight:700;color:var(--text)}
     .vv-near-dist{font-size:11px;font-weight:700;color:var(--orange);font-family:'Space Mono',monospace;flex-shrink:0}
-    .btn-o{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--orange);color:white;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;padding:13px;border-radius:10px;text-decoration:none;margin-bottom:7px;border:none;cursor:pointer;letter-spacing:.02em}
+    .btn-o{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--orange);color:white;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;padding:13px;border-radius:10px;text-decoration:none;margin-bottom:7px;border:none;cursor:pointer}
     .btn-o:active{opacity:.85}
     .btn-row{display:grid;grid-template-columns:1fr auto;gap:6px;margin-bottom:7px}
-    .btn-tcl{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--green-dim);color:var(--green-dk);border:1.5px solid var(--green-mid);font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;padding:12px 14px;border-radius:10px;text-decoration:none;cursor:pointer;letter-spacing:.02em}
-    .btn-map-det{display:flex;align-items:center;justify-content:center;background:var(--surface2);color:var(--muted);border:1px solid var(--border);padding:12px 14px;border-radius:10px;cursor:pointer;font-size:14px}
+    .btn-tcl{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--green-dim);color:var(--green-dk);border:1.5px solid var(--green-mid);font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;padding:12px 14px;border-radius:10px;text-decoration:none;cursor:pointer}
+    .btn-map-det{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);padding:12px 13px;border-radius:10px;cursor:pointer;font-size:11px;font-weight:700;font-family:'Outfit',sans-serif;white-space:nowrap}
     .btn-tcl:active,.btn-map-det:active{opacity:.8}
     .det-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
     .upd-time{font-size:9px;color:var(--muted)}
@@ -188,7 +188,7 @@
     .lp-num{font-size:22px;font-weight:700;font-family:'Space Mono',monospace;line-height:1}
     .lp-sub{font-size:9px;color:var(--muted);margin-bottom:9px}
     .lp-btns{display:flex;flex-direction:column;gap:5px}
-    .lp-btn{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;padding:8px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;text-decoration:none;text-align:center}
+    .lp-btn{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;padding:8px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;text-decoration:none}
     .lp-btn-nav{background:var(--orange);color:white}
     .lp-btn-tcl{background:var(--green-dim);color:var(--green-dk);border:1px solid var(--green-mid)}
 
@@ -209,8 +209,8 @@
       </svg>
     </div>
     <div>
-      <div class="brand-name">Lyon <span>en mouvement</span></div>
-      <div class="brand-sub">Mobilité urbaine · Temps réel · <em>De la voiture à la ville</em></div>
+      <div class="brand-name">Me rendre <span>à Lyon</span></div>
+      <div class="brand-sub">Mobilité urbaine · Temps réel</div>
     </div>
     <div class="menu-btn" onclick="toggleMenu()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -219,7 +219,6 @@
 
   <!-- 2 PAVÉS -->
   <div class="paves">
-    <!-- STATIONNEMENT -->
     <div class="pave pave-v">
       <div class="pave-head">
         <div class="pave-title">
@@ -241,7 +240,6 @@
       </div>
     </div>
 
-    <!-- DÉPLACEMENTS -->
     <div class="pave pave-d">
       <div class="pave-head">
         <div class="pave-title">
@@ -264,7 +262,7 @@
     </div>
   </div>
 
-  <!-- BARRE ACTIONS : boutons à gauche, recherche à droite -->
+  <!-- BARRE ACTIONS -->
   <div class="action-bar">
     <div class="act-left">
       <button class="act-btn" id="map-btn" onclick="toggleMap()">🗺 Carte</button>
@@ -286,6 +284,11 @@
 
   <div class="map-view" id="map-view">
     <div id="map"></div>
+    <!-- Bouton retour fiche depuis carte -->
+    <button class="map-back-btn" id="map-back-btn" onclick="returnToDetail()">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      Retour fiche
+    </button>
     <div class="map-overlay-btns">
       <div class="map-toggle" id="mt-pr" onclick="toggleMapLayer('pr')">🚇 P+R</div>
       <div class="map-toggle" id="mt-pk" onclick="toggleMapLayer('pk')">🅿 Parkings</div>
@@ -320,7 +323,6 @@
           <div class="prog-track"><div class="prog-fill bg-green" id="det-prog" style="width:0%"></div></div>
         </div>
         <div class="status-pill c-green" id="det-status">—</div>
-
         <div id="sec-tarifs">
           <div class="tarifs-title">Tarifs</div>
           <div class="tarifs-grid">
@@ -372,7 +374,9 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1"/><circle cx="16" cy="19" r="1"/></svg>
           Calculer mon itinéraire TCL
         </a>
-        <button id="map-det-btn" class="btn-map-det" onclick="showOnMap()">🗺</button>
+        <button id="map-det-btn" class="btn-map-det" onclick="showOnMap()">
+          🗺 Carte
+        </button>
       </div>
       <div class="det-footer">
         <div class="upd-time" id="det-upd">—</div>
@@ -401,6 +405,7 @@ const WORKER = 'https://lyon-mouvement.jean-luc-perrotto.workers.dev';
 let data = {parkings:{tcl:[],operateurs:[]},velov:[]};
 let sub = 'pr';
 let mapVisible = false;
+let fromDetail = false; // true si on vient d'une fiche
 let favOnly = false;
 let favorites = JSON.parse(localStorage.getItem('lm_fav')||'[]');
 let selected = null, refTimer = null;
@@ -417,7 +422,7 @@ function toggleFav(id, e) {
   localStorage.setItem('lm_fav', JSON.stringify(favorites));
   renderList(); if(map) renderMap();
 }
-function dist(a,b,c,d) {
+function dist(a,b,c,d){
   const R=6371000,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180;
   const x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2;
   return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
@@ -429,7 +434,7 @@ function fmtDate(s){
   if(d.toDateString()===new Date().toDateString()) return null;
   return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'});
 }
-function getStatus(nb, cap) {
+function getStatus(nb,cap){
   if(nb===null||nb===undefined||nb<0) return {lbl:'Données indisponibles',c:'muted',pct:0};
   if(nb===0) return {lbl:'Complet',c:'red',pct:0};
   if(!cap) return {lbl:'Disponible',c:'green',pct:80};
@@ -441,117 +446,107 @@ function getStatus(nb, cap) {
 function gIcon(g){
   return g==='TCL'?{l:'TCL',c:'ic-tcl'}:g==='LPA'?{l:'LPA',c:'ic-lpa'}:g==='INDIGO'?{l:'IND',c:'ic-ind'}:{l:'Q',c:'ic-qpk'};
 }
-function colHex(c){return {green:'#3FB950',amber:'#D29922',red:'#F85149',muted:'#9CA3AF'}[c]||'#9CA3AF'}
+function colHex(c){return {green:'#3FB950',amber:'#F0A500',red:'#F85149',muted:'#9CA3AF'}[c]||'#9CA3AF'}
 
 // ── CHARGEMENT ──
-async function loadData() {
-  document.getElementById('err-zone').innerHTML = '';
-  try {
-    const r = await fetch(WORKER);
+async function loadData(){
+  document.getElementById('err-zone').innerHTML='';
+  try{
+    const r=await fetch(WORKER);
     if(!r.ok) throw new Error('Erreur HTTP '+r.status);
-    data = await r.json();
+    data=await r.json();
     updateBadges(); renderList(); if(map) renderMap();
-  } catch(e) {
-    document.getElementById('err-zone').innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
-    document.getElementById('item-list').innerHTML = '';
+  }catch(e){
+    document.getElementById('err-zone').innerHTML=`<div class="error-msg">⚠️ ${e.message}</div>`;
+    document.getElementById('item-list').innerHTML='';
   }
 }
 
-function updateBadges() {
-  const tcl=data.parkings?.tcl||[], op=data.parkings?.operateurs||[], vv=data.velov||[];
-  document.getElementById('badge-pr').textContent = tcl.filter(p=>p.places_disponibles>0).length+'/'+tcl.length;
-  document.getElementById('badge-pk').textContent = op.filter(p=>p.places_disponibles>0).length+'/'+op.length;
-  document.getElementById('badge-vv').textContent = vv.filter(v=>v.velos_dispo>0).length+' st.';
+function updateBadges(){
+  const tcl=data.parkings?.tcl||[],op=data.parkings?.operateurs||[],vv=data.velov||[];
+  document.getElementById('badge-pr').textContent=tcl.filter(p=>p.places_disponibles>0).length+'/'+tcl.length;
+  document.getElementById('badge-pk').textContent=op.filter(p=>p.places_disponibles>0).length+'/'+op.length;
+  document.getElementById('badge-vv').textContent=vv.filter(v=>v.velos_dispo>0).length+' st.';
 }
 
 // ── NAVIGATION ──
-function switchSub(s) {
+function switchSub(s){
   if(selected) closeDetail();
-  sub = s;
-  document.getElementById('search').value = '';
-  // Styles boutons pavé
-  ['pr','pk','vv'].forEach(k => {
-    const el = document.getElementById('btn-'+k);
+  sub=s;
+  document.getElementById('search').value='';
+  ['pr','pk','vv'].forEach(k=>{
+    const el=document.getElementById('btn-'+k);
     if(!el) return;
-    const lbl = el.querySelector('.pb-label');
-    const badge = el.querySelector('.pb-badge');
-    if(k===s) {
-      el.className = 'pave-btn active-'+k;
-    } else {
-      el.className = 'pave-btn';
-      lbl.style.color = ''; badge.style.background = ''; badge.style.color = '';
-    }
+    el.className=k===s?'pave-btn active-'+k:'pave-btn';
   });
-  // Layers carte selon onglet
-  mapLayers = {pr: s==='pr', pk: s==='pk', vv: s==='vv'};
+  mapLayers={pr:s==='pr',pk:s==='pk',vv:s==='vv'};
   updateMapToggleUI();
   renderList(); if(map) renderMap();
 }
 
-function toggleMap() {
-  mapVisible = !mapVisible;
+function toggleMap(){
+  mapVisible=!mapVisible;
   const lv=document.getElementById('list-view');
   const mv=document.getElementById('map-view');
   const btn=document.getElementById('map-btn');
-  if(mapVisible) {
+  if(mapVisible){
     lv.style.display='none'; mv.style.display='block';
     btn.textContent='☰ Liste';
-    if(!map) initMap(); else {map.invalidateSize(); renderMap();}
-  } else {
+    if(!map) initMap(); else{map.invalidateSize();renderMap();}
+  }else{
     lv.style.display='block'; mv.style.display='none';
     btn.textContent='🗺 Carte';
   }
 }
 
-function toggleFavFilter() {
-  favOnly = !favOnly;
-  document.getElementById('fav-btn').classList.toggle('fav-on', favOnly);
+function toggleFavFilter(){
+  favOnly=!favOnly;
+  document.getElementById('fav-btn').classList.toggle('fav-on',favOnly);
   renderList();
 }
 
-function toggleMenu() { /* à développer */ }
+function toggleMenu(){}
 
 // ── CARTE LAYERS ──
-function toggleMapLayer(layer) {
-  mapLayers[layer] = !mapLayers[layer];
+function toggleMapLayer(layer){
+  mapLayers[layer]=!mapLayers[layer];
   updateMapToggleUI(); renderMap();
 }
-function updateMapToggleUI() {
-  document.getElementById('mt-pr').className = 'map-toggle'+(mapLayers.pr?' on-pr':'');
-  document.getElementById('mt-pk').className = 'map-toggle'+(mapLayers.pk?' on-pk':'');
-  document.getElementById('mt-vv').className = 'map-toggle'+(mapLayers.vv?' on-vv':'');
+function updateMapToggleUI(){
+  document.getElementById('mt-pr').className='map-toggle'+(mapLayers.pr?' on-pr':'');
+  document.getElementById('mt-pk').className='map-toggle'+(mapLayers.pk?' on-pk':'');
+  document.getElementById('mt-vv').className='map-toggle'+(mapLayers.vv?' on-vv':'');
 }
 
 // ── RENDU LISTE ──
-function getSrc() {
+function getSrc(){
   if(sub==='pr') return data.parkings?.tcl||[];
   if(sub==='pk') return data.parkings?.operateurs||[];
   if(sub==='vv') return data.velov||[];
   return [];
 }
 
-function renderList() {
+function renderList(){
   const q=document.getElementById('search').value.toLowerCase().trim();
   let list=getSrc();
   if(q) list=list.filter(p=>(p.nom||'').toLowerCase().includes(q)||(p.adresse||'').toLowerCase().includes(q));
   if(favOnly&&sub!=='vv') list=list.filter(p=>isFav(p.id));
   const el=document.getElementById('item-list');
   if(!list.length){el.innerHTML='<div class="empty-msg">Aucun résultat</div>';return;}
-
   let html='';
-  if(sub==='pr'||sub==='pk') {
-    const favs=list.filter(p=>isFav(p.id)), rest=list.filter(p=>!isFav(p.id));
+  if(sub==='pr'||sub==='pk'){
+    const favs=list.filter(p=>isFav(p.id)),rest=list.filter(p=>!isFav(p.id));
     if(favs.length){
       html+=`<div class="sec-lbl">★ Favoris</div><div class="item-list">`;
       favs.forEach(p=>html+=pHTML(p)); html+=`</div>`;
     }
-    const lbl=sub==='pr'?`🚇 P+R TCL`:` 🅿 Parkings ville`;
+    const lbl=sub==='pr'?'🚇 P+R TCL':'🅿 Parkings ville';
     const open=list.filter(p=>p.places_disponibles>0).length;
     if(rest.length){
       html+=`<div class="sec-lbl${favs.length?' sec-lbl-gray':''}">${lbl} · ${open} ouverts</div><div class="item-list">`;
       rest.forEach(p=>html+=pHTML(p)); html+=`</div>`;
     }
-  } else if(sub==='vv') {
+  }else if(sub==='vv'){
     const open=list.filter(v=>v.velos_dispo>0).length;
     html+=`<div class="sec-lbl">🚲 Vélo'v · ${open} stations avec vélos</div><div class="item-list">`;
     list.forEach(v=>html+=vvHTML(v)); html+=`</div>`;
@@ -560,13 +555,12 @@ function renderList() {
   el.innerHTML=html;
 }
 
-function pHTML(p) {
-  const nb=p.places_disponibles, cap=p.nb_places, s=getStatus(nb,cap), g=gIcon(p.gestionnaire), fav=isFav(p.id);
+function pHTML(p){
+  const nb=p.places_disponibles,cap=p.nb_places,s=getStatus(nb,cap),g=gIcon(p.gestionnaire),fav=isFav(p.id);
   const numStr=(nb===null||nb<0)?'—':nb;
   const meta=sub==='pk'?`${p.adresse||''} · ${p.tarif_1h?p.tarif_1h+' €/h':'Tarif N/D'}`:`${cap||'?'} places · Gratuit TCL`;
   const old=fmtDate(p.last_update);
-  const dimCls=(nb===null||nb<0)?'dim':'';
-  return `<div class="item ${fav?'fav':''} ${dimCls}" onclick="showDetail('${p.id}','parking')">
+  return `<div class="item ${fav?'fav':''} ${(nb===null||nb<0)?'dim':''}" onclick="showDetail('${p.id}','parking')">
     <button class="star-btn ${fav?'on':''}" onclick="toggleFav('${p.id}',event)" ontouchend="toggleFav('${p.id}',event)">${fav?'★':'☆'}</button>
     <div class="item-icon ${g.c}">${g.l}</div>
     <div class="item-info"><div class="item-name">${p.nom}</div><div class="item-meta">${meta}</div></div>
@@ -574,11 +568,10 @@ function pHTML(p) {
       <div class="item-row"><div class="item-num c-${s.c}">${numStr}</div><div class="item-dot bg-${s.c}"></div></div>
       <div class="item-cap">/ ${cap||'?'}</div>
       ${old?`<div class="item-old">⚠ ${old}</div>`:''}
-    </div>
-  </div>`;
+    </div></div>`;
 }
 
-function vvHTML(v) {
+function vvHTML(v){
   const ok=v.en_service&&v.velos_dispo>0;
   return `<div class="item-s" onclick="showDetail('${v.id}','velov')">
     <div class="item-icon ic-vv">🚲</div>
@@ -593,95 +586,96 @@ function vvHTML(v) {
     <div class="item-right">
       <div class="item-row"><div class="item-num ${ok?'c-green':'c-muted'}">${v.velos_dispo}</div><div class="item-dot ${ok?'bg-green':'bg-hint'}"></div></div>
       <div class="item-cap">/ ${v.capacite}</div>
-    </div>
-  </div>`;
+    </div></div>`;
 }
 
 // ── DÉTAIL ──
-function showDetail(id, type) {
-  id = String(id);
+function showDetail(id,type){
+  id=String(id);
   let item;
   if(type==='parking') item=[...(data.parkings?.tcl||[]),...(data.parkings?.operateurs||[])].find(p=>p.id===id);
   else item=(data.velov||[]).find(v=>String(v.id)===id);
   if(!item) return;
   selected={...item,type};
+  fromDetail=false;
   document.getElementById('detail-view').style.display='block';
   document.getElementById('list-view').style.display='none';
   document.getElementById('map-view').style.display='none';
+  // Reset map-btn label si on était en carte
+  if(mapVisible){mapVisible=false;document.getElementById('map-btn').textContent='🗺 Carte';}
   updateDetail(selected);
   if(refTimer) clearInterval(refTimer);
   refTimer=setInterval(refreshDetail,120000);
 }
 
-function closeDetail() {
+function closeDetail(){
   if(refTimer) clearInterval(refTimer);
-  selected=null;
+  selected=null; fromDetail=false;
   document.getElementById('detail-view').style.display='none';
-  document.getElementById('list-view').style.display=mapVisible?'none':'block';
-  document.getElementById('map-view').style.display=mapVisible?'block':'none';
+  document.getElementById('map-back-btn').style.display='none';
+  document.getElementById('list-view').style.display='block';
+  document.getElementById('map-view').style.display='none';
+  mapVisible=false;
+  document.getElementById('map-btn').textContent='🗺 Carte';
 }
 
-async function refreshDetail() {
+// Retour à la fiche depuis la carte
+function returnToDetail(){
+  if(!selected) return;
+  document.getElementById('map-view').style.display='none';
+  document.getElementById('map-back-btn').style.display='none';
+  document.getElementById('detail-view').style.display='block';
+  mapVisible=false;
+  document.getElementById('map-btn').textContent='🗺 Carte';
+}
+
+async function refreshDetail(){
   const btn=document.getElementById('ref-btn');
   btn.disabled=true; btn.classList.add('spinning');
-  try {
+  try{
     const r=await fetch(WORKER); if(!r.ok) throw new Error('Erreur '+r.status);
     data=await r.json(); updateBadges();
-    const type=selected.type, id=String(selected.id);
+    const type=selected.type,id=String(selected.id);
     let fresh=type==='parking'
       ?[...(data.parkings?.tcl||[]),...(data.parkings?.operateurs||[])].find(p=>p.id===id)
       :(data.velov||[]).find(v=>String(v.id)===id);
     if(fresh){selected={...fresh,type};updateDetail(selected);}
     renderList();
-  } catch(e){document.getElementById('det-err').innerHTML=`<div class="error-msg">⚠️ ${e.message}</div>`;}
+  }catch(e){document.getElementById('det-err').innerHTML=`<div class="error-msg">⚠️ ${e.message}</div>`;}
   finally{btn.disabled=false;btn.classList.remove('spinning');}
 }
 
-function updateDetail(p) {
+function updateDetail(p){
   const type=p.type;
   document.getElementById('sec-parking').style.display=type==='parking'?'block':'none';
   document.getElementById('sec-velov').style.display=type==='velov'?'block':'none';
-
-  // Icon & header
   let ic,cc;
   if(type==='parking'){const g=gIcon(p.gestionnaire);ic=g.l;cc=g.c;}
   else{ic='🚲';cc='ic-vv';}
   const icEl=document.getElementById('det-icon');
   icEl.className='det-icon '+cc; icEl.textContent=ic;
   document.getElementById('det-name').textContent=p.nom;
-  // Timestamp dans le header
   const ts=p.last_update||p.last_reported;
   const d=ts?(typeof ts==='number'?new Date(ts*1000):new Date(ts)):null;
   const old=fmtDate(p.last_update||p.last_reported);
-  let metaStr = old ? `⚠ données du ${old}` : (d?'màj '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—');
-  if(p.adresse) metaStr += ' · '+p.adresse;
+  let metaStr=old?`⚠ données du ${old}`:(d?'màj '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—');
+  if(p.adresse) metaStr+=' · '+p.adresse;
   const metaEl=document.getElementById('det-meta');
-  metaEl.textContent=metaStr;
-  metaEl.style.color=old?'var(--red)':'var(--muted)';
-
-  // GPS
+  metaEl.textContent=metaStr; metaEl.style.color=old?'var(--red)':'var(--muted)';
   const navBtn=document.getElementById('nav-btn');
   const mapDetBtn=document.getElementById('map-det-btn');
   if(p.lat&&p.lng){
     navBtn.href=`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}&travelmode=driving`;
     navBtn.style.opacity='1'; navBtn.style.pointerEvents='auto';
     mapDetBtn.style.display='flex';
-  } else {
+  }else{
     navBtn.href='#'; navBtn.style.opacity='.4'; navBtn.style.pointerEvents='none';
     mapDetBtn.style.display='none';
   }
-
-  // Bouton TCL — toujours tcl.fr/itineraires, pas de pré-remplissage qui casse le lien
   const tclBtn=document.getElementById('tcl-btn');
   tclBtn.style.display=type==='velov'?'none':'flex';
-  tclBtn.href='https://www.tcl.fr/itineraires';
-
-  // Mise à jour footer
-  const updEl=document.getElementById('det-upd');
-  updEl.textContent='';
-
-  if(type==='parking') {
-    const nb=p.places_disponibles, cap=p.nb_places, s=getStatus(nb,cap), isOp=p.gestionnaire!=='TCL';
+  if(type==='parking'){
+    const nb=p.places_disponibles,cap=p.nb_places,s=getStatus(nb,cap),isOp=p.gestionnaire!=='TCL';
     document.getElementById('det-num').textContent=(nb===null||nb<0)?'—':nb;
     document.getElementById('det-num').className='det-num c-'+s.c;
     document.getElementById('det-pct').textContent=(cap&&s.pct!==undefined)?(100-s.pct)+'% occupé':'—';
@@ -701,12 +695,10 @@ function updateDetail(p) {
     const hc=document.getElementById('sec-horaires');
     if(p.horaires){hc.style.display='block';document.getElementById('det-horaires').textContent=p.horaires;}
     else hc.style.display='none';
-    // Vélo'v proche
     const vvn=document.getElementById('sec-vv-near');
     if(p.lat&&p.lng&&data.velov?.length){
       const nearest=(data.velov||[]).filter(v=>v.en_service)
-        .map(v=>({...v,d:dist(p.lat,p.lng,v.lat,v.lng)}))
-        .sort((a,b)=>a.d-b.d)[0];
+        .map(v=>({...v,d:dist(p.lat,p.lng,v.lat,v.lng)})).sort((a,b)=>a.d-b.d)[0];
       if(nearest){
         vvn.style.display='block';
         document.getElementById('vn-name').textContent=nearest.nom;
@@ -715,11 +707,10 @@ function updateDetail(p) {
           (nearest.velos_meca?`<span class="badge bm">⚙ ${nearest.velos_meca}</span>`:'')+
           (nearest.velos_elec?`<span class="badge be">⚡ ${nearest.velos_elec}</span>`:'')+
           `<span class="badge" style="background:var(--surface2);color:var(--muted)">${nearest.places_libres} places libres</span>`;
-      } else vvn.style.display='none';
-    } else vvn.style.display='none';
+      }else vvn.style.display='none';
+    }else vvn.style.display='none';
   }
-
-  if(type==='velov') {
+  if(type==='velov'){
     document.getElementById('vv-dispo').textContent=p.velos_dispo||0;
     document.getElementById('vv-docks').textContent=p.places_libres||0;
     document.getElementById('vv-cap').textContent=p.capacite||'—';
@@ -731,39 +722,37 @@ function updateDetail(p) {
 }
 
 // ── CARTE ──
-function initMap() {
+function initMap(){
   map=L.map('map',{zoomControl:true}).setView([45.748,4.846],12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(map);
   setTimeout(()=>{map.invalidateSize();renderMap();},200);
 }
 
-function renderMap() {
+function renderMap(){
   markers.forEach(m=>map.removeLayer(m)); markers=[];
   if(mapLayers.pr)(data.parkings?.tcl||[]).forEach(p=>{
     if(!p.lat||!p.lng) return;
     const nb=p.places_disponibles,cap=p.nb_places,s=getStatus(nb,cap),fav=isFav(p.id);
-    const lbl=(nb===null||nb<0)?'?':nb>999?'1k+':String(nb);
-    addMarker(p.lat,p.lng,colHex(s.c),fav?34:26,lbl,p.nom,s.lbl,p.lat,p.lng,'parking');
+    addMarker(p.lat,p.lng,colHex(s.c),fav?34:26,(nb===null||nb<0)?'?':nb>999?'1k+':String(nb),p.nom,s.lbl,'parking');
   });
   if(mapLayers.pk)(data.parkings?.operateurs||[]).forEach(p=>{
     if(!p.lat||!p.lng) return;
     const nb=p.places_disponibles,cap=p.nb_places,s=getStatus(nb,cap);
-    addMarker(p.lat,p.lng,colHex(s.c),24,String(nb===null||nb<0?'?':nb),p.nom,s.lbl,p.lat,p.lng,'parking');
+    addMarker(p.lat,p.lng,colHex(s.c),24,String(nb===null||nb<0?'?':nb),p.nom,s.lbl,'parking');
   });
   if(mapLayers.vv)(data.velov||[]).filter(v=>v.en_service).forEach(v=>{
     if(!v.lat||!v.lng) return;
     const c=v.velos_dispo>0?colHex('green'):colHex('muted');
-    addMarker(v.lat,v.lng,c,22,String(v.velos_dispo),'🚲 '+v.nom,v.velos_dispo+' vélos',v.lat,v.lng,'velov');
+    addMarker(v.lat,v.lng,c,22,String(v.velos_dispo),'🚲 '+v.nom,v.velos_dispo+' vélos','velov');
   });
 }
 
-function addMarker(lat,lng,color,sz,lbl,name,sub,plat,plng,type) {
+function addMarker(lat,lng,color,sz,lbl,name,sub,type){
   const icon=L.divIcon({className:'',
     html:`<div style="background:${color};color:white;border-radius:50%;width:${sz}px;height:${sz}px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:${sz>=30?11:9}px;font-weight:700;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.2)">${lbl}</div>`,
     iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
-  const navUrl=`https://www.google.com/maps/dir/?api=1&destination=${plat},${plng}`;
-  const tclBtn=type==='parking'
-    ?`<a href="https://www.tcl.fr/itineraires" target="_blank" class="lp-btn lp-btn-tcl">🚇 Itinéraire TCL</a>`:'';
+  const navUrl=`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  const tclBtn=type==='parking'?`<a href="https://www.tcl.fr/itineraires" target="_blank" class="lp-btn lp-btn-tcl">🚇 Itinéraire TCL</a>`:'';
   const popup=L.popup({maxWidth:200,minWidth:160}).setContent(
     `<div class="lp-popup">
       <div class="lp-name">${name}</div>
@@ -788,21 +777,34 @@ function locateUser(){
   });
 }
 
-function showOnMap() {
+function showOnMap(){
   if(!selected) return;
   const p=selected;
+  fromDetail=true;
   mapLayers={pr:p.gestionnaire==='TCL',pk:p.gestionnaire!=='TCL'&&p.type==='parking',vv:p.type==='velov'};
   updateMapToggleUI();
-  closeDetail();
-  if(!mapVisible) toggleMap();
+  // Afficher carte, masquer fiche
+  document.getElementById('detail-view').style.display='none';
+  document.getElementById('map-view').style.display='block';
+  document.getElementById('list-view').style.display='none';
+  // Afficher bouton retour fiche
+  document.getElementById('map-back-btn').style.display='flex';
+  mapVisible=true;
+  document.getElementById('map-btn').textContent='☰ Liste';
+  if(!map) initMap();
+  else map.invalidateSize();
   setTimeout(()=>{
-    if(!map||!p.lat||!p.lng) return;
-    map.setView([p.lat,p.lng],16);
-    markers.forEach(m=>{
-      const ll=m.getLatLng();
-      if(Math.abs(ll.lat-p.lat)<0.0001&&Math.abs(ll.lng-p.lng)<0.0001) m.openPopup();
-    });
-  },400);
+    renderMap();
+    if(p.lat&&p.lng){
+      map.setView([p.lat,p.lng],16);
+      setTimeout(()=>{
+        markers.forEach(m=>{
+          const ll=m.getLatLng();
+          if(Math.abs(ll.lat-p.lat)<0.0001&&Math.abs(ll.lng-p.lng)<0.0001) m.openPopup();
+        });
+      },300);
+    }
+  },250);
 }
 
 // Init
