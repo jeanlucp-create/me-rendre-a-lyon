@@ -715,8 +715,27 @@ function updateDetail(p){
   const isDepl=(type==='velov'||type==='citiz'||type==='leo');
   // TCL : visible sur parking uniquement
   tclDetBtn.style.display=isDepl?'none':'flex';
+  const vvDetBtn=document.getElementById('vv-det-btn');
   // Vélo'v : visible sur parking (station proche) + fiche velov
-  vvDetBtn.style.display=(type==='parking'||type==='velov')?'flex':'none';
+  if(type==='parking'||type==='velov'){
+    vvDetBtn.style.display='flex';
+    // Coordonnées : station elle-même si fiche velov, station proche si fiche parking
+    let vvLat, vvLng;
+    if(type==='velov'){
+      vvLat=p.lat; vvLng=p.lng;
+    } else if(p.lat&&p.lng&&data.velov?.length){
+      const nearest=(data.velov||[]).filter(v=>v.en_service&&v.nom&&v.nom.trim()!=='')
+        .map(v=>({...v,d:dist(p.lat,p.lng,v.lat,v.lng)})).sort((a,b)=>a.d-b.d)[0];
+      if(nearest){vvLat=nearest.lat;vvLng=nearest.lng;}
+    }
+    if(vvLat&&vvLng){
+      vvDetBtn.href=`https://velov.grandlyon.com/#/map?lat=${vvLat}&lng=${vvLng}&zoom=17`;
+    } else {
+      vvDetBtn.href='https://velov.grandlyon.com';
+    }
+  } else {
+    vvDetBtn.style.display='none';
+  }
   if(p.lat&&p.lng){
     // "S'y rendre" — destination universelle (geo: fonctionne sur iOS/Android/autres)
     navBtn.href=`geo:${p.lat},${p.lng}?q=${encodeURIComponent(p.nom)}`;
@@ -810,9 +829,11 @@ function addM(lat,lng,color,sz,lbl,name,sub,type){
     iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
   const navUrl=`geo:${lat},${lng}?q=${encodeURIComponent(name)}`;
   const tclBtn=type==='parking'?`<a href="https://www.tcl.fr/itineraires" target="_blank" class="lp-btn lp-btn-tcl">🚇 Itinéraire TCL</a>`:'';
+  const vvBtn=type==='velov'?`<a href="https://velov.grandlyon.com/#/map?lat=${lat}&lng=${lng}&zoom=17" target="_blank" class="lp-btn lp-btn-tcl">🚲 Réserver sur Vélo'v</a>`:'';
+  const parkingVvBtn=type==='parking'?`<a href="https://velov.grandlyon.com/#/map?lat=${lat}&lng=${lng}&zoom=16" target="_blank" class="lp-btn lp-btn-tcl">🚲 Vélo'v à proximité</a>`:'';
   const popup=L.popup({maxWidth:200,minWidth:160}).setContent(
     `<div class="lp-popup"><div class="lp-name">${name}</div><div class="lp-num" style="color:${color}">${lbl}</div><div class="lp-sub">${sub}</div>
-    <div class="lp-btns"><a href="${navUrl}" target="_blank" class="lp-btn lp-btn-nav">📍 S'y rendre</a>${tclBtn}</div></div>`);
+    <div class="lp-btns"><a href="${navUrl}" target="_blank" class="lp-btn lp-btn-nav">📍 S'y rendre</a>${tclBtn}${parkingVvBtn}${vvBtn}</div></div>`);
   const m=L.marker([lat,lng],{icon}).addTo(map).bindPopup(popup);
   m.on('click',()=>m.openPopup()); markers.push(m);
 }
