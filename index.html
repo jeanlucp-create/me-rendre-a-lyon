@@ -338,7 +338,7 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
           S'y rendre
         </a>
-        <a id="tcl-det-btn" class="tcl-btn" href="https://www.tcl.fr/itineraires" target="_blank" rel="noopener">
+        <a id="tcl-det-btn" class="tcl-btn" href="#" onclick="openTCL(event)" rel="noopener">
           🚇 TCL
         </a>
         <a id="vv-det-btn" class="vv-btn" href="https://velov.grandlyon.com" target="_blank" rel="noopener" style="display:none">
@@ -504,7 +504,7 @@ function renderList(){
     el.innerHTML=`
       <div style="padding:12px 0">
         <div class="sec-lbl">🚇 Transports en commun lyonnais</div>
-        <a href="https://www.tcl.fr/itineraires" target="_blank" rel="noopener" class="tcl-link-item">
+        <a href="#" onclick="openTCL(event)" class="tcl-link-item">
           <div><div class="tcl-link-left">Calculer mon itinéraire TCL</div><div class="tcl-link-sub">Horaires, lignes, perturbations — tcl.fr</div></div>
           <div class="tcl-link-arrow">→</div>
         </a>
@@ -828,7 +828,7 @@ function addM(lat,lng,color,sz,lbl,name,sub,type){
     html:`<div style="background:${color};color:white;border-radius:50%;width:${sz}px;height:${sz}px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:${sz>=30?11:9}px;font-weight:700;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.2)">${lbl}</div>`,
     iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
   const navUrl=`geo:${lat},${lng}?q=${encodeURIComponent(name)}`;
-  const tclBtn=type==='parking'?`<a href="https://www.tcl.fr/itineraires" target="_blank" class="lp-btn lp-btn-tcl">🚇 Itinéraire TCL</a>`:'';
+  const tclBtn=type==='parking'?`<a href="#" onclick="openTCL(event)" class="lp-btn lp-btn-tcl">🚇 Itinéraire TCL</a>`:'';
   const vvBtn=type==='velov'?`<a href="https://velov.grandlyon.com/#/map?lat=${lat}&lng=${lng}&zoom=17" target="_blank" class="lp-btn lp-btn-tcl">🚲 Réserver sur Vélo'v</a>`:'';
   const parkingVvBtn=type==='parking'?`<a href="https://velov.grandlyon.com/#/map?lat=${lat}&lng=${lng}&zoom=16" target="_blank" class="lp-btn lp-btn-tcl">🚲 Vélo'v à proximité</a>`:'';
   const popup=L.popup({maxWidth:200,minWidth:160}).setContent(
@@ -873,7 +873,27 @@ function showOnMap(){
   },250);
 }
 
-// ── COPIER ADRESSE ──
+// ── OUVRIR TCL ──
+function openTCL(e){
+  if(e) e.preventDefault();
+  const fallback='https://www.tcl.fr/itineraires';
+  // Tenter d'ouvrir l'app TCL via deep link
+  const appUrl='tcl://itineraires';
+  const start=Date.now();
+  // Créer un iframe invisible pour tenter le deep link sans quitter la page
+  const iframe=document.createElement('iframe');
+  iframe.style.display='none';
+  iframe.src=appUrl;
+  document.body.appendChild(iframe);
+  // Si l'app ne répond pas dans 600ms → ouvrir le site
+  setTimeout(()=>{
+    document.body.removeChild(iframe);
+    // Si la page est toujours visible (app non ouverte), fallback site
+    if(Date.now()-start < 1500){
+      window.open(fallback,'_blank');
+    }
+  },600);
+}
 function copyAddress(){
   if(!selected) return;
   const btn=document.getElementById('copy-btn');
