@@ -106,9 +106,9 @@
     /* ── DETAIL ── */
     .detail-view{position:absolute;inset:0;background:var(--cream);overflow-y:auto;display:none;z-index:100;padding:12px 16px 32px;-webkit-overflow-scrolling:touch}
     /* Barre fixe actions */
-    .det-action-bar{position:sticky;top:0;z-index:10;background:var(--white);border-bottom:1px solid var(--orange-border);padding:8px 12px;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.06);flex-wrap:nowrap;overflow-x:auto}
-    .det-back-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:100px;border:1.5px solid var(--orange-border);background:var(--orange-light);color:var(--orange-dark);font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0}
-    .det-actions{display:flex;gap:5px;margin-left:auto;flex-shrink:0}
+    .det-action-bar{position:sticky;top:0;z-index:10;background:var(--white);border-bottom:1px solid var(--orange-border);padding:8px 12px;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .det-back-btn{display:none}
+    .det-actions{display:flex;gap:5px;width:100%;justify-content:center}
     .det-act-btn{display:flex;align-items:center;gap:4px;padding:7px 11px;border-radius:100px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;text-decoration:none;border:1.5px solid transparent}
     .det-act-map{background:var(--surface2);color:var(--muted);border-color:var(--border)}
     .det-act-nav{background:var(--orange);color:white}
@@ -119,6 +119,7 @@
     .back-btn{display:none}
     .det-card{background:var(--white);border-radius:18px;border:1.5px solid var(--border);padding:16px;margin-bottom:10px}
     .det-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    .det-back-inline{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:100px;border:1.5px solid var(--orange-border);background:var(--orange-light);color:var(--orange-dark);font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0}
     .det-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex-shrink:0}
     .det-name{font-size:17px;font-weight:900;line-height:1.1;letter-spacing:-.2px;margin-bottom:1px}
     .det-meta{font-size:9px;color:var(--muted);font-weight:600}
@@ -129,7 +130,7 @@
     .prog-meta{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px}
     .prog-track{height:4px;background:var(--border);border-radius:99px;overflow:hidden}
     .prog-fill{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.16,1,.3,1)}
-    .status-pill{display:inline-flex;align-items:center;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:100px;border:1.5px solid currentColor;margin-bottom:14px}
+    .status-pill{display:inline-flex;align-items:center;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:100px;border:1.5px solid currentColor;margin-left:10px;vertical-align:middle}
     .tarifs-title{font-size:9px;color:var(--muted);font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
     .tarifs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px}
     .tarif-cell{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 4px;text-align:center}
@@ -261,12 +262,8 @@
 
   <div class="detail-view" id="detail-view">
 
-    <!-- BARRE FIXE : Retour + toutes les actions -->
+    <!-- BARRE FIXE : actions uniquement -->
     <div class="det-action-bar">
-      <button class="det-back-btn" onclick="closeDetail()">
-        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-        Retour
-      </button>
       <div class="det-actions">
         <button id="map-det-btn" class="det-act-btn det-act-map" onclick="showOnMap()" style="display:none">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
@@ -290,8 +287,12 @@
     </div>
 
     <div class="det-card">
-      <!-- EN-TÊTE : icône + nom + horaires inline -->
+      <!-- EN-TÊTE : bouton Retour + icône + nom -->
       <div class="det-header">
+        <button class="det-back-inline" onclick="closeDetail()">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+          Retour
+        </button>
         <div class="det-icon" id="det-icon"></div>
         <div style="flex:1;min-width:0">
           <div class="det-name" id="det-name"></div>
@@ -303,15 +304,18 @@
 
       <!-- PARKING -->
       <div id="sec-parking">
-        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:3px">
-          <div class="det-num c-green" id="det-num">—</div>
-          <div class="det-label">places libres</div>
+        <!-- Nombre + statut sur même ligne -->
+        <div style="display:flex;align-items:center;gap:0;margin-bottom:8px;flex-wrap:wrap">
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <div class="det-num c-green" id="det-num">—</div>
+            <div class="det-label">places libres</div>
+          </div>
+          <div class="status-pill c-green" id="det-status">—</div>
         </div>
         <div class="prog-wrap">
           <div class="prog-meta"><span>OCCUPATION</span><span id="det-pct">—</span></div>
           <div class="prog-track"><div class="prog-fill bg-green" id="det-prog" style="width:0%"></div></div>
         </div>
-        <div class="status-pill c-green" id="det-status">—</div>
         <div id="sec-tarifs">
           <div class="tarifs-title">Tarifs</div>
           <div class="tarifs-grid">
