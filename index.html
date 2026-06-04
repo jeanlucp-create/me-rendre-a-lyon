@@ -173,7 +173,8 @@
     .leaflet-popup-content{margin:14px !important}
     .leaflet-popup-tip-container{display:none}
     .lp-popup{font-family:'Nunito',sans-serif;min-width:160px}
-    .lp-name{font-size:13px;font-weight:800;margin-bottom:3px;color:var(--text)}
+    .lp-name{font-size:13px;font-weight:800;margin-bottom:3px;color:var(--text);cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px}
+    .lp-name:hover{color:var(--orange)}
     .lp-num{font-size:24px;font-weight:900;font-family:'Space Mono',monospace;line-height:1}
     .lp-sub{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:10px}
     .lp-btns{display:flex;flex-direction:column;gap:5px}
@@ -395,7 +396,7 @@ const WORKER = 'https://lyon-mouvement.jean-luc-perrotto.workers.dev';
 let data = {parkings:{tcl:[],operateurs:[]},velov:[],autopartage:{citiz:[],leoandgo:[]}};
 let mode = 'stat'; // stat | dep
 let sub = 'pr';    // pr | pk | tcl | vv | ap
-let mapVisible = false, fromDetail = false;
+let mapVisible = false, fromDetail = false, fromMap = false;
 let favOnly = false;
 let favorites = JSON.parse(localStorage.getItem('mral_fav')||'[]');
 let selected = null, refTimer = null;
@@ -658,7 +659,7 @@ function showDetail(id,type){
   else item=(data.autopartage?.leoandgo||[]).find(v=>String(v.id)===id);
   if(!item) return;
   selected={...item,type};
-  fromDetail=false;
+  fromDetail=false; fromMap=false;
   document.getElementById('detail-view').style.display='block';
   document.getElementById('list-view').style.display='none';
   document.getElementById('map-view').style.display='none';
@@ -668,15 +669,49 @@ function showDetail(id,type){
   refTimer=setInterval(refreshDetail,120000);
 }
 
+// Ouvre une fiche depuis la carte — le retour reviendra à la carte
+function showDetailFromMap(id,type){
+  id=String(id);
+  let item;
+  if(type==='parking') item=[...(data.parkings?.tcl||[]),...(data.parkings?.operateurs||[])].find(p=>p.id===id);
+  else if(type==='velov') item=(data.velov||[]).find(v=>String(v.id)===id);
+  if(!item) return;
+  selected={...item,type};
+  fromMap=true;
+  document.getElementById('detail-view').style.display='block';
+  document.getElementById('map-view').style.display='none';
+  document.getElementById('list-view').style.display='none';
+  // Changer le label du bouton Retour
+  const backBtn=document.querySelector('.det-back-inline');
+  if(backBtn) backBtn.innerHTML=`<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg> Carte`;
+  updateDetail(selected);
+  if(refTimer) clearInterval(refTimer);
+  refTimer=setInterval(refreshDetail,120000);
+}
+
 function closeDetail(){
   if(refTimer) clearInterval(refTimer);
-  selected=null; fromDetail=false;
+  // Remettre le label Retour par défaut
+  const backBtn=document.querySelector('.det-back-inline');
+  if(backBtn) backBtn.innerHTML=`<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg> Retour`;
   document.getElementById('detail-view').style.display='none';
-  document.getElementById('map-back-btn').style.display='none';
-  document.getElementById('list-view').style.display='block';
-  document.getElementById('map-view').style.display='none';
-  mapVisible=false;
-  document.getElementById('map-btn').textContent='🗺 Carte';
+  if(fromMap){
+    // Retour à la carte
+    document.getElementById('map-view').style.display='block';
+    document.getElementById('list-view').style.display='none';
+    mapVisible=true;
+    document.getElementById('map-btn').textContent='☰ Liste';
+    if(map) map.invalidateSize();
+    fromMap=false;
+  } else {
+    // Retour à la liste
+    selected=null; fromDetail=false;
+    document.getElementById('map-back-btn').style.display='none';
+    document.getElementById('list-view').style.display='block';
+    document.getElementById('map-view').style.display='none';
+    mapVisible=false;
+    document.getElementById('map-btn').textContent='🗺 Carte';
+  }
 }
 
 function returnToDetail(){
@@ -816,20 +851,20 @@ function renderMap(){
   if(mapLayers.pr)(data.parkings?.tcl||[]).forEach(p=>{
     if(!p.lat||!p.lng) return;
     const nb=p.places_disponibles,cap=p.nb_places,s=getStatus(nb,cap),fav=isFav(p.id);
-    addM(p.lat,p.lng,colHex(s.c),fav?34:26,(nb===null||nb<0)?'?':nb>999?'1k+':String(nb),p.nom,s.lbl,'parking','#1565C0');
+    addM(p.lat,p.lng,colHex(s.c),fav?34:26,(nb===null||nb<0)?'?':nb>999?'1k+':String(nb),p.nom,s.lbl,'parking','#1565C0',0,0,p.id);
   });
   if(mapLayers.pk)(data.parkings?.operateurs||[]).forEach(p=>{
     if(!p.lat||!p.lng) return;
     const nb=p.places_disponibles,cap=p.nb_places,s=getStatus(nb,cap);
-    addM(p.lat,p.lng,colHex(s.c),24,String(nb===null||nb<0?'?':nb),p.nom,s.lbl,'parking','#9C2A5A');
+    addM(p.lat,p.lng,colHex(s.c),24,String(nb===null||nb<0?'?':nb),p.nom,s.lbl,'parking','#9C2A5A',0,0,p.id);
   });
   if(mapLayers.vv)(data.velov||[]).filter(v=>v.en_service&&v.nom&&v.nom.trim()!=='').forEach(v=>{
     if(!v.lat||!v.lng) return;
-    addM(v.lat,v.lng,v.velos_dispo>0?colHex('green'):colHex('gray'),22,String(v.velos_dispo),'🚲 '+v.nom,v.velos_dispo+' vélos','velov','#1A6B30',v.velos_meca||0,v.velos_elec||0);
+    addM(v.lat,v.lng,v.velos_dispo>0?colHex('green'):colHex('gray'),22,String(v.velos_dispo),'🚲 '+v.nom,v.velos_dispo+' vélos','velov','#1A6B30',v.velos_meca||0,v.velos_elec||0,v.id);
   });
 }
 
-function addM(lat,lng,color,sz,lbl,name,sub,type,borderColor,vvMeca,vvElec){
+function addM(lat,lng,color,sz,lbl,name,sub,type,borderColor,vvMeca,vvElec,itemId){
   const border=borderColor||'white';
   const icon=L.divIcon({className:'',
     html:`<div style="background:${color};color:white;border-radius:50%;width:${sz}px;height:${sz}px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:${sz>=30?11:9}px;font-weight:700;border:3px solid ${border};box-shadow:0 2px 6px rgba(0,0,0,.25)">${lbl}</div>`,
@@ -837,12 +872,16 @@ function addM(lat,lng,color,sz,lbl,name,sub,type,borderColor,vvMeca,vvElec){
   const navUrl=`geo:${lat},${lng}?q=${encodeURIComponent(name)}`;
   const tclBtn=type==='parking'?`<a href="#" onclick="openTCL(event)" class="lp-btn lp-btn-tcl">🚇 Itinéraire TCL</a>`:'';
   const vvBtn=type==='velov'?`<a href="https://velov.grandlyon.com/#/map?lat=${lat}&lng=${lng}&zoom=17" target="_blank" class="lp-btn lp-btn-tcl">🚲 Réserver sur Vélo'v</a>`:'';
-  // Détail mécanique/électrique pour Vélo'v
   const vvDetail=type==='velov'?`<div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
     ${vvMeca?`<span style="background:#FFF3EE;color:#CC5500;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #FFD9C8">⚙ ${vvMeca}</span>`:''}
     ${vvElec?`<span style="background:#EBF4FF;color:#1565C0;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #B5D4F4">⚡ ${vvElec}</span>`:''}
-  </div>`:'';  const popup=L.popup({maxWidth:200,minWidth:160}).setContent(
-    `<div class="lp-popup"><div class="lp-name">${name}</div><div class="lp-num" style="color:${color}">${lbl}</div><div class="lp-sub">${sub}</div>${vvDetail}
+  </div>`:'';
+  const cleanName=name.replace('🚲 ','');
+  const nameHtml=itemId
+    ?`<div class="lp-name" onclick="showDetailFromMap('${itemId}','${type}')">${cleanName} <span style="color:var(--orange);font-size:11px">→</span></div>`
+    :`<div class="lp-name">${cleanName}</div>`;
+  const popup=L.popup({maxWidth:200,minWidth:160}).setContent(
+    `<div class="lp-popup">${nameHtml}<div class="lp-num" style="color:${color}">${lbl}</div><div class="lp-sub">${sub}</div>${vvDetail}
     <div class="lp-btns"><a href="${navUrl}" target="_blank" class="lp-btn lp-btn-nav">📍 S'y rendre</a>${tclBtn}${vvBtn}</div></div>`);
   const m=L.marker([lat,lng],{icon}).addTo(map).bindPopup(popup);
   m.on('click',()=>m.openPopup()); markers.push(m);
