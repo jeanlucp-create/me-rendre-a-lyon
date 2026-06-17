@@ -67,6 +67,7 @@
     .map-toggle.on-pr{background:#EBF4FF;border-color:#1565C0;color:#1565C0}
     .map-toggle.on-pk{background:#F9EEF4;border-color:#9C2A5A;color:#9C2A5A}
     .map-toggle.on-vv{background:var(--green-dim);border-color:#1A6B30;color:#1A6B30}
+    .map-toggle.on-ve{background:#E8F5E9;border-color:#2E7D32;color:#2E7D32}
     .locate-btn{position:absolute;bottom:70px;right:14px;z-index:999;background:var(--orange);color:white;border:none;border-radius:50%;width:46px;height:46px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(255,107,53,.5)}
 
     /* ── LISTE ── */
@@ -182,6 +183,25 @@
     .lp-btn-nav{background:var(--orange);color:white}
     .lp-btn-tcl{background:var(--orange-light);color:var(--orange-dark);border:1px solid var(--orange-border)}
 
+
+    /* Bornes IRVE */
+    .borne-item{background:var(--white);border-radius:13px;border:1.5px solid var(--border);padding:10px 12px;display:flex;align-items:center;gap:8px;cursor:default}
+    .borne-icon{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px}
+    .borne-rapide{background:#E8F5E9;color:#2E7D32}
+    .borne-acceleree{background:#E3F2FD;color:#1565C0}
+    .borne-normale{background:#FFF3E0;color:#E65C00}
+    .borne-badge{font-size:8px;font-weight:800;padding:2px 7px;border-radius:4px;display:inline-block}
+    .br{background:#E8F5E9;color:#2E7D32}
+    .ba{background:#E3F2FD;color:#1565C0}
+    .bn{background:#FFF3E0;color:#E65C00}
+    /* Bloc bornes dans fiche parking */
+    .parking-bornes{background:#F0FBF3;border:1px solid #A8DFB2;border-radius:9px;padding:9px 11px;margin-bottom:12px}
+    .parking-bornes-title{font-size:8px;color:var(--muted);font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+    .parking-bornes-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    /* Bloc Citiz dans fiche parking */
+    .parking-citiz{background:#EAF8ED;border:1px solid #A8DFB2;border-radius:9px;padding:9px 11px;margin-bottom:12px}
+    .parking-citiz-title{font-size:8px;color:var(--muted);font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+    .parking-citiz-row{display:flex;align-items:center;gap:8px}
     @keyframes spin{to{transform:rotate(360deg)}}
     @keyframes lpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
   </style>
@@ -224,6 +244,7 @@
   <div class="tabs" id="tabs-stat">
     <div class="tab active" id="tab-pr" onclick="switchSub('pr')">🚇 P+R TCL</div>
     <div class="tab" id="tab-pk" onclick="switchSub('pk')">🅿 LPA · Indigo · Q-Park</div>
+    <div class="tab" id="tab-ve" onclick="switchSub('ve')">⚡ Recharge VE</div>
   </div>
   <div class="tabs" id="tabs-dep" style="display:none">
     <div class="tab active" id="tab-vv" onclick="switchSub('vv')">🚲 Vélo'v</div>
@@ -259,6 +280,7 @@
       <div class="map-toggle" id="mt-pr" onclick="toggleMapLayer('pr')">🚇 P+R</div>
       <div class="map-toggle" id="mt-pk" onclick="toggleMapLayer('pk')">🅿 Parkings</div>
       <div class="map-toggle" id="mt-vv" onclick="toggleMapLayer('vv')">🚲 Vélo'v</div>
+      <div class="map-toggle" id="mt-ve" onclick="toggleMapLayer('ve')">⚡ Bornes</div>
     </div>
     <button class="locate-btn" onclick="locateUser()">📍</button>
   </div>
@@ -332,6 +354,16 @@
           <div class="info-cell"><div class="info-lbl">Capacité</div><div class="info-val" id="det-cap">—</div></div>
           <div class="info-cell"><div class="info-lbl">PMR</div><div class="info-val" id="det-pmr">—</div></div>
         </div>
+        <!-- Bloc Citiz dans fiche parking -->
+        <div class="parking-citiz" id="sec-parking-citiz" style="display:none">
+          <div class="parking-citiz-title">🚗 Autopartage Citiz disponible</div>
+          <div id="parking-citiz-content"></div>
+        </div>
+        <!-- Bloc Bornes dans fiche parking -->
+        <div class="parking-bornes" id="sec-parking-bornes" style="display:none">
+          <div class="parking-bornes-title">⚡ Bornes de recharge électrique</div>
+          <div id="parking-bornes-content"></div>
+        </div>
         <!-- Bloc Vélo'v compact -->
         <div class="vv-near" id="sec-vv-near" style="display:none">
           <div class="vv-near-row">
@@ -401,7 +433,7 @@ let favOnly = false;
 let favorites = JSON.parse(localStorage.getItem('mral_fav')||'[]');
 let selected = null, refTimer = null;
 let map = null, markers = [];
-let mapLayers = {pr:true,pk:false,vv:false};
+let mapLayers = {pr:true,pk:false,vv:false,ve:false};
 
 // ── UTILITAIRES ──
 const isFav = id => favorites.includes(String(id));
@@ -468,7 +500,7 @@ function switchSub(s){
   sub=s;
   document.getElementById('search').value='';
   // Onglets stationnement
-  ['pr','pk'].forEach(k=>{
+  ['pr','pk','ve'].forEach(k=>{
     const el=document.getElementById('tab-'+k);
     if(el) el.className='tab'+(k===s?' active':'');
   });
@@ -478,7 +510,7 @@ function switchSub(s){
     if(el) el.className='tab'+(k===s?' active':'');
   });
   // Layers carte
-  mapLayers={pr:s==='pr',pk:s==='pk',vv:s==='vv'};
+  mapLayers={pr:s==='pr',pk:s==='pk',vv:s==='vv',ve:s==='ve'};
   updateMapToggleUI();
   renderList(); if(map) renderMap();
 }
@@ -510,6 +542,8 @@ function updateMapToggleUI(){
   document.getElementById('mt-pr').className='map-toggle'+(mapLayers.pr?' on-pr':'');
   document.getElementById('mt-pk').className='map-toggle'+(mapLayers.pk?' on-pk':'');
   document.getElementById('mt-vv').className='map-toggle'+(mapLayers.vv?' on-vv':'');
+  const ve=document.getElementById('mt-ve');
+  if(ve) ve.className='map-toggle'+(mapLayers.ve?' on-ve':'');
 }
 
 // ── RENDU LISTE ──
@@ -569,15 +603,30 @@ function renderList(){
     rest.forEach(v=>html+=vvHTML(v)); html+=`</div>`;
   }else if(sub==='ap'){
     const citiz=(data.autopartage?.citiz||[]).filter(v=>v.vehicules_dispo>0);
-    const leo=data.autopartage?.leoandgo||[];
     if(citiz.length){
       html+=`<div class="sec-lbl">🚗 Citiz · ${citiz.length} stations disponibles</div><div class="parking-list">`;
       citiz.forEach(v=>html+=apHTML(v,'citiz')); html+=`</div>`;
+    } else {
+      html+='<div class="empty-msg">Aucun véhicule Citiz disponible</div>';
     }
-    if(leo.length){
-      html+=`<div class="sec-lbl">🚗 Leo&Go · ${leo.length} véhicules disponibles</div><div class="parking-list">`;
-      leo.slice(0,40).forEach(v=>html+=apHTML(v,'leo')); html+=`</div>`;
+  }else if(sub==='ve'){
+    const bornes=data.bornes||[];
+    const rapides=bornes.filter(b=>b.categorie==='rapide');
+    const accelerees=bornes.filter(b=>b.categorie==='acceleree');
+    const normales=bornes.filter(b=>b.categorie==='normale');
+    if(rapides.length){
+      html+=`<div class="sec-lbl">⚡ Charge rapide (≥ 50 kW) · ${rapides.length} stations</div><div class="parking-list">`;
+      rapides.forEach(b=>html+=borneHTML(b)); html+=`</div>`;
     }
+    if(accelerees.length){
+      html+=`<div class="sec-lbl">⚡ Charge accélérée (22–50 kW) · ${accelerees.length} stations</div><div class="parking-list">`;
+      accelerees.forEach(b=>html+=borneHTML(b)); html+=`</div>`;
+    }
+    if(normales.length){
+      html+=`<div class="sec-lbl">⚡ Charge normale (< 22 kW) · ${normales.length} stations</div><div class="parking-list">`;
+      normales.slice(0,60).forEach(b=>html+=borneHTML(b)); html+=`</div>`;
+    }
+    html+=`<div style="text-align:center;font-size:10px;color:var(--muted);padding:8px 0">Source : Base nationale IRVE · transport.data.gouv.fr · Données statiques</div>`;
   }
   html+=`<div class="legal"><a href="https://data.grandlyon.com" target="_blank">Grand Lyon Open Data</a> — <a href="https://transport.data.gouv.fr/resources/licence-mobilites" target="_blank">Licence Mobilités</a> · © Grand Lyon — SYTRAL</div>`;
   el.innerHTML=html;
@@ -598,6 +647,24 @@ function pHTML(p){
         ${old?`<div class="p-old">⚠ ${old}</div>`:''}
       </div>
       <div class="p-dot bg-${s.c}"></div>
+    </div>
+  </div>`;
+}
+
+function borneHTML(b){
+  const iconCls=b.categorie==='rapide'?'borne-rapide':b.categorie==='acceleree'?'borne-acceleree':'borne-normale';
+  const badgeCls=b.categorie==='rapide'?'br':b.categorie==='acceleree'?'ba':'bn';
+  const puissLabel=b.puissance_max_kw>=50?`${b.puissance_max_kw} kW ⚡`:b.puissance_max_kw>=22?`${b.puissance_max_kw} kW`:b.puissance_max_kw?`${b.puissance_max_kw} kW`:'—';
+  return `<div class="borne-item">
+    <div class="borne-icon ${iconCls}">⚡</div>
+    <div class="p-info">
+      <div class="p-name">${b.nom}</div>
+      <div class="p-meta">${b.operateur}${b.adresse?' · '+b.adresse:''}</div>
+    </div>
+    <div class="p-right" style="flex-direction:column;align-items:flex-end;gap:3px">
+      <span class="borne-badge ${badgeCls}">${puissLabel}</span>
+      <span style="font-size:8px;color:var(--muted)">${b.nb_points} point${b.nb_points>1?'s':''}</span>
+      ${b.types_prise?`<span style="font-size:8px;color:var(--muted)">${b.types_prise}</span>`:''}
     </div>
   </div>`;
 }
@@ -817,10 +884,38 @@ function updateDetail(p){
           (nearest.velos_meca?`<span class="badge bm">⚙ ${nearest.velos_meca}</span>`:'')+
           (nearest.velos_elec?`<span class="badge be">⚡ ${nearest.velos_elec}</span>`:'')+
           `<span class="badge" style="background:var(--surface);color:var(--muted)">${nearest.places_libres} places libres</span>`;
-        // Bouton Réserver : pointe vers la station la plus proche
         if(vvNearBtn) vvNearBtn.href=`https://velov.grandlyon.com/#/map?lat=${nearest.lat}&lng=${nearest.lng}&zoom=17`;
       }else vvn.style.display='none';
     }else vvn.style.display='none';
+    // Bloc Citiz dans fiche parking
+    const secCitiz=document.getElementById('sec-parking-citiz');
+    const citizContent=document.getElementById('parking-citiz-content');
+    if(secCitiz&&citizContent&&p.citiz?.length){
+      secCitiz.style.display='block';
+      citizContent.innerHTML=p.citiz.map(s=>`
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
+          <span style="font-size:13px">🚗</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:11px;font-weight:800;color:var(--text)">${s.nom}</div>
+            <div style="font-size:9px;color:var(--muted)">${s.vehicules_dispo} véhicule${s.vehicules_dispo>1?'s':''} · ${(s.vehicules_detail||[]).map(v=>`${v.count} ${v.nom}${v.electrique?' ⚡':''}`).join(', ')}</div>
+          </div>
+        </div>`).join('');
+    } else if(secCitiz) secCitiz.style.display='none';
+    // Bloc Bornes dans fiche parking
+    const secBornes=document.getElementById('sec-parking-bornes');
+    const bornesContent=document.getElementById('parking-bornes-content');
+    if(secBornes&&bornesContent&&p.bornes?.length){
+      secBornes.style.display='block';
+      bornesContent.innerHTML=p.bornes.map(b=>{
+        const badgeCls=b.categorie==='rapide'?'br':b.categorie==='acceleree'?'ba':'bn';
+        return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">
+          <span class="borne-badge ${badgeCls}">${b.puissance_max_kw} kW</span>
+          <span style="font-size:9px;color:var(--text);font-weight:700">${b.operateur}</span>
+          <span style="font-size:9px;color:var(--muted)">${b.nb_points} pt · ${b.types_prise}</span>
+          ${b.tarif?`<span style="font-size:9px;color:var(--muted);font-style:italic">${b.tarif}</span>`:'<span style="font-size:9px;color:var(--muted);font-style:italic">Tarif : voir opérateur</span>'}
+        </div>`;
+      }).join('');
+    } else if(secBornes) secBornes.style.display='none';
   }
   if(type==='velov'){
     document.getElementById('vv-dispo').textContent=p.velos_dispo||0;
@@ -861,6 +956,12 @@ function renderMap(){
   if(mapLayers.vv)(data.velov||[]).filter(v=>v.en_service&&v.nom&&v.nom.trim()!=='').forEach(v=>{
     if(!v.lat||!v.lng) return;
     addM(v.lat,v.lng,v.velos_dispo>0?colHex('green'):colHex('gray'),22,String(v.velos_dispo),'🚲 '+v.nom,v.velos_dispo+' vélos','velov','#1A6B30',v.velos_meca||0,v.velos_elec||0,v.id);
+  });
+  if(mapLayers.ve)(data.bornes||[]).forEach(b=>{
+    if(!b.lat||!b.lng) return;
+    const col=b.categorie==='rapide'?'#2E7D32':b.categorie==='acceleree'?'#1565C0':'#E65C00';
+    const lbl=b.puissance_max_kw>=1?b.puissance_max_kw+'k':'⚡';
+    addM(b.lat,b.lng,col,22,String(lbl),b.nom,b.operateur+' · '+b.nb_points+' pt','borne','#1A1A2E',0,0,null);
   });
 }
 
