@@ -354,16 +354,6 @@
           <div class="info-cell"><div class="info-lbl">Capacité</div><div class="info-val" id="det-cap">—</div></div>
           <div class="info-cell"><div class="info-lbl">PMR</div><div class="info-val" id="det-pmr">—</div></div>
         </div>
-        <!-- Bloc Citiz dans fiche parking -->
-        <div class="parking-citiz" id="sec-parking-citiz" style="display:none">
-          <div class="parking-citiz-title">🚗 Autopartage Citiz disponible</div>
-          <div id="parking-citiz-content"></div>
-        </div>
-        <!-- Bloc Bornes dans fiche parking -->
-        <div class="parking-bornes" id="sec-parking-bornes" style="display:none">
-          <div class="parking-bornes-title">⚡ Bornes de recharge électrique</div>
-          <div id="parking-bornes-content"></div>
-        </div>
         <!-- Bloc Vélo'v compact -->
         <div class="vv-near" id="sec-vv-near" style="display:none">
           <div class="vv-near-row">
@@ -377,6 +367,16 @@
               Réserver
             </a>
           </div>
+        </div>
+        <!-- Bloc Bornes dans fiche parking -->
+        <div class="parking-bornes" id="sec-parking-bornes" style="display:none">
+          <div class="parking-bornes-title">⚡ Bornes de recharge électrique</div>
+          <div id="parking-bornes-content"></div>
+        </div>
+        <!-- Bloc Citiz dans fiche parking -->
+        <div class="parking-citiz" id="sec-parking-citiz" style="display:none">
+          <div class="parking-citiz-title">🚗 Autopartage Citiz disponible</div>
+          <div id="parking-citiz-content"></div>
         </div>
       </div>
 
@@ -577,7 +577,7 @@ function renderList(){
 
   if(q) list=list.filter(p=>(p.nom||'').toLowerCase().includes(q)||(p.adresse||'').toLowerCase().includes(q));
   if(favOnly&&(sub==='pr'||sub==='pk')) list=list.filter(p=>isFav(p.id));
-  if(!list.length){el.innerHTML='<div class="empty-msg">Aucun résultat</div>';return;}
+  if(!list.length&&sub!=='ve'){el.innerHTML='<div class="empty-msg">Aucun résultat</div>';return;}
 
   let html='';
   if(sub==='pr'||sub==='pk'){
