@@ -448,22 +448,19 @@
           <div class="fp-title" id="vv-title">—</div>
           <button class="fp-star" id="vv-star">☆</button>
         </div>
-        <!-- L2 : nb vélos disponibles -->
-        <div class="fp-statut-row" style="align-items:baseline;margin-bottom:4px">
+        <!-- L2 : nb vélos disponibles + badge statut sur même ligne -->
+        <div class="fp-statut-row" style="align-items:center;margin-bottom:4px;gap:10px">
           <span class="fp-num c-green" id="vv-dispo">—</span>
           <span class="fp-label">vélos disponibles</span>
+          <span class="fp-badge c-green" id="vv-badge" style="margin-left:auto">En service</span>
         </div>
-        <!-- L3 : badge statut + ↻ -->
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <span class="fp-badge c-green" id="vv-badge">En service</span>
-          <button class="ref-btn" id="ref-btn-vv" onclick="refreshDetail()" style="padding:4px 7px;border-radius:8px;display:flex;align-items:center" title="Actualiser">
-            <svg id="ref-icon-vv" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-          </button>
-        </div>
-        <!-- L4 : méca · élec -->
-        <div class="fp-meta" style="align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:4px">
+        <!-- L3 : méca · élec + ↻ en dessous du badge -->
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
           <span id="vv-badge-meca" style="font-size:10px;padding:2px 7px;border-radius:4px;background:#FFF3E0;color:#E65C00;font-weight:800;display:none">⚙ — méca</span>
           <span id="vv-badge-elec" style="font-size:10px;padding:2px 7px;border-radius:4px;background:#E3F2FD;color:#1565C0;font-weight:800;display:none">⚡ — élec</span>
+          <button class="ref-btn" id="ref-btn-vv" onclick="refreshDetail()" style="margin-left:auto;padding:4px 7px;border-radius:8px;display:flex;align-items:center" title="Actualiser">
+            <svg id="ref-icon-vv" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+          </button>
         </div>
         <!-- L5 : capacité · places libres · màj -->
         <div class="fp-meta" style="margin-bottom:7px;align-items:center;flex-wrap:wrap">
@@ -1161,11 +1158,35 @@ function updateDetail(p){
     document.getElementById('vv-dispo').textContent=p.velos_dispo||0;
     document.getElementById('vv-docks').textContent=p.places_libres||0;
     document.getElementById('vv-cap').textContent=p.capacite||'—';
-    document.getElementById('vv-stat').textContent=p.en_service?'En service':'Hors service';
-    document.getElementById('vv-stat').style.color=p.en_service?'var(--green)':'var(--red)';
-    document.getElementById('vv-badges-det').innerHTML=
-      (p.velos_meca?`<span class="badge bm">⚙ ${p.velos_meca} mécanique${p.velos_meca>1?'s':''}</span>`:'')+
-      (p.velos_elec?`<span class="badge be">⚡ ${p.velos_elec} électrique${p.velos_elec>1?'s':''}</span>`:'');
+    // Badge statut
+    const badgeEl=document.getElementById('vv-badge');
+    if(badgeEl){
+      badgeEl.textContent=p.en_service?'En service':'Hors service';
+      badgeEl.className='fp-badge '+(p.en_service?'c-green':'c-red');
+    }
+    // Badges méca / élec
+    const mecaEl=document.getElementById('vv-badge-meca');
+    const elecEl=document.getElementById('vv-badge-elec');
+    if(mecaEl){
+      if(p.velos_meca>0){mecaEl.style.display='inline-block';mecaEl.textContent=`⚙ ${p.velos_meca} mécanique${p.velos_meca>1?'s':''}`;}
+      else mecaEl.style.display='none';
+    }
+    if(elecEl){
+      if(p.velos_elec>0){elecEl.style.display='inline-block';elecEl.textContent=`⚡ ${p.velos_elec} électrique${p.velos_elec>1?'s':''}`;}
+      else elecEl.style.display='none';
+    }
+    // Double barre : velos_dispo (vert, gauche) + places_libres (gris, droite)
+    const cap=p.capacite||1;
+    const pctVelos=Math.round(((p.velos_dispo||0)/cap)*100);
+    const pctPlaces=Math.round(((p.places_libres||0)/cap)*100);
+    const barreVelos=document.getElementById('vv-barre-velos');
+    const barrePlaces=document.getElementById('vv-barre-places');
+    const nbVelos=document.getElementById('vv-barre-nb-velos');
+    const nbPlaces=document.getElementById('vv-barre-nb-places');
+    if(barreVelos) barreVelos.style.width=pctVelos+'%';
+    if(barrePlaces) barrePlaces.style.width=pctPlaces+'%';
+    if(nbVelos) nbVelos.textContent=p.velos_dispo||0;
+    if(nbPlaces) nbPlaces.textContent=p.places_libres||0;
     // Bouton Réserver avec position
     const reserveBtn=document.getElementById('vv-reserve-btn');
     if(reserveBtn&&p.lat&&p.lng) reserveBtn.href=`https://velov.grandlyon.com/#/map?lat=${p.lat}&lng=${p.lng}&zoom=17`;
