@@ -22,6 +22,8 @@
       --green:#2ECC71; --amber:#FF9500; --red:#FF3B30;
       --white:#FFFFFF; --surface:#FAFAFA;
       --blue:#1565C0; --purple:#5E35B1;
+      --tcl-bg:#E8F5E9; --tcl-txt:#2E7D32;
+      --vv-bg:#E3F2FD;  --vv-txt:#1565C0;
     }
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{height:100%;overflow:hidden}
@@ -159,12 +161,8 @@
     .acc-act-copy{background:var(--orange-light);color:var(--orange-dark);border:1px solid var(--orange-border)}
     .acc-act-copy.copied{background:var(--green);color:white;border-color:var(--green)}
 
-    /* ── VÉLO'V liste ── */
-    .parking-item{background:var(--white);border-radius:13px;border:1.5px solid var(--border);padding:11px 11px 11px 8px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:border-color .15s}
-    .parking-item:active{transform:scale(.98)}
-    .parking-item.favori{border-color:var(--orange-border);background:#FFFAF5}
+    /* ── VÉLO'V accordion (même logique parking) ── */
     .p-icon{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900}
-    .g-vv{background:var(--orange-light);color:var(--orange-dark)}
     .p-info{flex:1;min-width:0}
     .p-name{font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .p-meta{font-size:9px;color:var(--muted);font-weight:600;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -175,13 +173,38 @@
     .p-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
     .vv-badges{display:flex;gap:3px;margin-top:2px;flex-wrap:wrap}
 
-    /* Bornes liste (onglet VE) */
-    .borne-item{background:var(--white);border-radius:13px;border:1.5px solid var(--border);padding:10px 12px;display:flex;align-items:center;gap:8px;cursor:default}
-    .borne-icon{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px}
-    .borne-rapide{background:#E8F5E9;color:#2E7D32}
-    .borne-acceleree{background:#E3F2FD;color:#1565C0}
-    .borne-normale{background:#FFF3E0;color:#E65C00}
-    .borne-badge{font-size:8px;font-weight:800;padding:2px 7px;border-radius:4px;display:inline-block}
+    /* Vélo'v accordion — contenu déplié */
+    .vv-exp-bar{position:relative;height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-bottom:3px}
+    .vv-exp-bar-v{position:absolute;left:0;top:0;height:100%;border-radius:3px;background:var(--green);transition:width .6s}
+    .vv-exp-bar-p{position:absolute;right:0;top:0;height:100%;border-radius:3px;background:#AAA;opacity:.5;transition:width .6s}
+    .vv-exp-meta{display:flex;justify-content:space-between;font-size:9px;font-weight:600;margin-bottom:10px}
+    .vv-exp-reserve{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:10px;background:var(--orange);color:white;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;border:none;cursor:pointer;width:100%;margin-bottom:6px}
+    .vv-exp-adr{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 10px;font-size:10px;color:var(--muted);font-weight:600}
+
+    /* ── BORNES VE accordion ── */
+    .ve-card{background:var(--white);border-radius:13px;border:1.5px solid var(--border);overflow:hidden}
+    .ve-row{display:flex;align-items:center;gap:8px;padding:10px 10px 10px 10px;cursor:pointer;user-select:none}
+    .ve-icon{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px}
+    .ve-rapide{background:#E8F5E9;color:#2E7D32}
+    .ve-acceleree{background:#E3F2FD;color:#1565C0}
+    .ve-normale{background:#FFF3E0;color:#E65C00}
+    .ve-info{flex:1;min-width:0}
+    .ve-nom{font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ve-meta{font-size:9px;color:var(--muted);font-weight:600;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ve-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .ve-kw{font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px}
+    .kw-r{background:#E8F5E9;color:#2E7D32}
+    .kw-a{background:#E3F2FD;color:#1565C0}
+    .kw-n{background:#FFF3E0;color:#E65C00}
+    /* contenu déplié borne */
+    .ve-expanded{display:none;border-top:1.5px solid var(--border);padding:12px}
+    .ve-expanded.open{display:block}
+    .ve-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+    .ve-detail-cell{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 10px}
+    .ve-detail-lbl{font-size:8px;color:var(--muted);font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+    .ve-detail-val{font-size:12px;font-weight:800;color:var(--text)}
+    .ve-chargemap{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;background:#E8F5E9;color:#2E7D32;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;text-decoration:none;margin-bottom:6px;border:1px solid #A8DFB2}
+    .ve-nav{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;background:var(--orange);color:white;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;text-decoration:none}
     .br{background:#E8F5E9;color:#2E7D32}
     .ba{background:#E3F2FD;color:#1565C0}
     .bn{background:#FFF3E0;color:#E65C00}
@@ -190,14 +213,14 @@
     .c-green{color:var(--green)} .c-amber{color:var(--amber)} .c-red{color:var(--red)} .c-gray{color:var(--muted)}
     .bg-green{background:var(--green)} .bg-amber{background:var(--amber)} .bg-red{background:var(--red)} .bg-gray{background:var(--muted)}
 
-    /* ── DETAIL VÉLO'V ── */
+    /* ── DETAIL VÉLO'V (conservé pour carte → fiche depuis popup) ── */
     .detail-view{position:absolute;inset:0;background:var(--cream);overflow-y:auto;display:none;z-index:100;padding:12px 16px 32px;-webkit-overflow-scrolling:touch}
     .det-action-bar{position:sticky;top:0;z-index:10;background:var(--white);border-bottom:1px solid var(--orange-border);padding:8px 12px;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
     .det-actions{display:flex;gap:5px;width:100%;justify-content:center}
     .det-act-btn{display:flex;align-items:center;gap:4px;padding:7px 11px;border-radius:100px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;text-decoration:none;border:1.5px solid transparent}
     .det-act-nav{background:var(--orange);color:white}
     .det-act-copy{background:var(--orange-light);color:var(--orange-dark);border-color:var(--orange-border)}
-    .det-act-vv{background:var(--orange-light);color:var(--orange-dark);border-color:var(--orange-border)}
+    .det-act-vv{background:var(--vv-bg);color:var(--vv-txt);border-color:#B5D4F4}
     .det-act-btn.copied{background:var(--green);color:white;border-color:var(--green)}
     .det-card{background:var(--white);border-radius:18px;border:1.5px solid var(--border);padding:16px;margin-bottom:10px}
 
@@ -670,8 +693,10 @@ function renderList() {
 function pkHTML(p) {
   const nb = p.places_disponibles, cap = p.nb_places, s = getStatus(nb, cap);
   const fav = isFav(p.id);
-  const logoColors = {TCL:'#005ba9', LPA:'#e8a000', INDIGO:'#5E35B1', 'Q PARK':'#2E7D32'};
+  const logoColors = {TCL:'var(--tcl-bg)', LPA:'#e8a000', INDIGO:'#5E35B1', 'Q PARK':'#2E7D32'};
+  const logoTxt   = {TCL:'var(--tcl-txt)', LPA:'white',   INDIGO:'white',    'Q PARK':'white'};
   const logoBg = logoColors[p.gestionnaire] || '#888';
+  const logoFg = logoTxt[p.gestionnaire] || 'white';
   const logoLbl = p.gestionnaire === 'Q PARK' ? 'QPK' : (p.gestionnaire || 'P');
   const distBadge = nearActive && p._dist != null ? `<span class="pk-mini-gray">· ${fmtDist(p._dist)}</span>` : '';
 
@@ -702,7 +727,7 @@ function pkHTML(p) {
   return `<div class="pk-card ${fav ? 'favori' : ''} ${(nb === null || nb < 0) ? 'dim' : ''}">
     <div class="pk-row" onclick="toggleAccordion(this)">
       <button class="star-btn ${fav ? 'on' : ''}" onclick="toggleFav('${p.id}',event)" ontouchend="toggleFav('${p.id}',event)">${fav ? '★' : '☆'}</button>
-      <div class="pk-logo" style="background:${logoBg}">${logoLbl}</div>
+      <div class="pk-logo" style="background:${logoBg};color:${logoFg}">${logoLbl}</div>
       <div class="pk-name">
         <div class="pk-name-txt">${p.nom}</div>
         <div class="pk-mini-icons">${vvMini}${veMini}${distBadge}</div>
@@ -831,52 +856,167 @@ function copyParkingAddress(id, btn) {
   });
 }
 
-// ── HTML VÉLO'V liste ──
+// ── HTML VÉLO'V accordion ──
 function vvHTML(v) {
   const ok = v.en_service && v.velos_dispo > 0;
   const fav = isFav(v.id);
-  const distBadge = nearActive && v._dist != null ? `<div style="font-size:9px;color:var(--muted);font-weight:700;text-align:right">${fmtDist(v._dist)}</div>` : '';
-  return `<div class="parking-item ${fav ? 'favori' : ''}" onclick="showDetail('${v.id}','velov')">
-    <button class="star-btn ${fav ? 'on' : ''}" onclick="toggleFav('${v.id}',event)" ontouchend="toggleFav('${v.id}',event)">${fav ? '★' : '☆'}</button>
-    <div class="p-icon g-vv">🚲</div>
-    <div class="p-info">
-      <div class="p-name">${v.nom}</div>
-      <div class="vv-badges">
-        ${v.velos_meca ? `<span class="badge bm">⚙ ${v.velos_meca}</span>` : ''}
-        ${v.velos_elec ? `<span class="badge be">⚡ ${v.velos_elec}</span>` : ''}
-        ${!ok ? `<span class="badge" style="background:rgba(255,59,48,.1);color:var(--red)">Indispo</span>` : ''}
+  const sc = ok ? 'green' : 'gray';
+  const distBadge = nearActive && v._dist != null
+    ? `<span class="pk-mini-gray">· ${fmtDist(v._dist)}</span>` : '';
+  const mecaMini = v.velos_meca > 0 ? ` ⚙${v.velos_meca}` : '';
+  const elecMini = v.velos_elec > 0 ? ` ⚡${v.velos_elec}` : '';
+
+  // Contenu déplié
+  const cap = v.capacite || 1;
+  const pctV = Math.round(((v.velos_dispo||0)/cap)*100);
+  const pctP = Math.round(((v.places_libres||0)/cap)*100);
+  const vvUrl = v.lat && v.lng
+    ? `https://velov.grandlyon.com/#/map?lat=${v.lat}&lng=${v.lng}&zoom=17` : 'https://velov.grandlyon.com';
+  const mecaBadge = v.velos_meca > 0 ? `<span class="badge bm">⚙ ${v.velos_meca} méca</span>` : '';
+  const elecBadge = v.velos_elec > 0 ? `<span class="badge be">⚡ ${v.velos_elec} élec</span>` : '';
+  const adrBloc = v.adresse
+    ? `<div class="vv-exp-adr">📍 ${v.adresse}</div>` : '';
+
+  const expanded = `
+    <div class="exp-lbl" style="margin-bottom:4px">Disponibilité</div>
+    <div class="vv-exp-bar">
+      <div class="vv-exp-bar-v" style="width:${pctV}%"></div>
+      <div class="vv-exp-bar-p" style="width:${pctP}%"></div>
+    </div>
+    <div class="vv-exp-meta">
+      <span style="color:var(--green)">🚲 ${v.velos_dispo||0} vélo${(v.velos_dispo||0)!==1?'s':''}</span>
+      <span style="color:var(--muted)">${v.places_libres||0} places libres · ${cap} total</span>
+    </div>
+    <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">${mecaBadge}${elecBadge}${!ok?'<span class="badge" style="background:rgba(255,59,48,.1);color:var(--red)">Indisponible</span>':''}</div>
+    <button class="vv-exp-reserve" data-lat="${v.lat}" data-lng="${v.lng}" data-nom="${(v.nom||'').replace(/"/g,'&quot;')}" data-adr="${(v.adresse||'').replace(/"/g,'&quot;')}" onclick="copyAndReserveVelovInline(this)">
+      🚲 Copier l'adresse et Réserver sur Vélo'v
+    </button>
+    ${adrBloc}`;
+
+  return `<div class="pk-card ${fav ? 'favori' : ''}">
+    <div class="pk-row" onclick="toggleAccordion(this)">
+      <button class="star-btn ${fav ? 'on' : ''}" onclick="toggleFav('${v.id}',event)" ontouchend="toggleFav('${v.id}',event)">${fav ? '★' : '☆'}</button>
+      <div class="pk-logo" style="background:var(--vv-bg);color:var(--vv-txt)">V'</div>
+      <div class="pk-name">
+        <div class="pk-name-txt">${v.nom}</div>
+        <div class="pk-mini-icons">
+          <span class="${ok ? 'pk-mini-vv' : 'pk-mini-gray'}">🚲${mecaMini}${elecMini}</span>
+          ${distBadge}
+        </div>
+      </div>
+      <div class="pk-right">
+        <div>
+          <div class="pk-places c-${sc}">${v.velos_dispo}</div>
+          <div class="pk-cap">/ ${v.capacite}</div>
+        </div>
+        <div class="pk-dot bg-${sc}"></div>
+        <i class="ti ti-chevron-down pk-chevron" aria-hidden="true"></i>
       </div>
     </div>
-    <div class="p-right">
-      <div class="p-right-col">
-        <div class="p-places ${ok ? 'c-green' : 'c-gray'}">${v.velos_dispo}</div>
-        <div class="p-cap">/ ${v.capacite}</div>
-        ${distBadge}
-      </div>
-      <div class="p-dot ${ok ? 'bg-green' : 'bg-gray'}"></div>
-    </div>
+    <div class="pk-expanded">${expanded}</div>
   </div>`;
 }
 
-// ── HTML BORNE liste (onglet VE) ──
+// ── HTML BORNE accordion (onglet VE) ──
 function borneHTML(b) {
-  const iconCls = b.categorie === 'rapide' ? 'borne-rapide' : b.categorie === 'acceleree' ? 'borne-acceleree' : 'borne-normale';
-  const badgeCls = b.categorie === 'rapide' ? 'br' : b.categorie === 'acceleree' ? 'ba' : 'bn';
+  const cat = b.categorie || 'normale';
+  const iconCls = cat === 'rapide' ? 've-rapide' : cat === 'acceleree' ? 've-acceleree' : 've-normale';
+  const kwCls   = cat === 'rapide' ? 'kw-r'      : cat === 'acceleree' ? 'kw-a'        : 'kw-n';
   const kw = b.puissance_max_kw || 0;
-  return `<div class="borne-item">
-    <div class="borne-icon ${iconCls}">⚡</div>
-    <div class="p-info">
-      <div class="p-name">${b.nom}</div>
-      <div class="p-meta">${b.operateur}${b.adresse ? ' · ' + b.adresse : ''}</div>
+  const kwLbl = kw > 0 ? kw + ' kW' : '—';
+  const distBadge = nearActive && b._dist != null
+    ? `<span class="pk-mini-gray" style="margin-left:4px">· ${fmtDist(b._dist)}</span>` : '';
+
+  // Prises
+  const prises = (b.types_prise||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const priseTags = prises.length
+    ? prises.map(pr=>`<span class="prise-tag">${pr}</span>`).join('')
+    : '<span class="empty-txt">Type non renseigné</span>';
+
+  // Accès
+  const accesVal = b.acces_recharge || b.condition_acces || '—';
+  // Horaires
+  const horairesVal = b.horaires || '—';
+  // Tarification
+  const tarifVal = b.tarification || '—';
+
+  // URL ChargeMap centrée sur la borne
+  const chargemapUrl = b.lat && b.lng
+    ? `https://www.chargemaps.com/#/map?lat=${b.lat}&lng=${b.lng}&zoom=17`
+    : 'https://www.chargemaps.com';
+  const navUrl = b.lat && b.lng
+    ? `geo:${b.lat},${b.lng}?q=${encodeURIComponent(b.nom||'Borne recharge')}` : '#';
+
+  const expanded = `
+    <div class="exp-lbl">Types de prise</div>
+    <div class="prise-tags" style="margin-bottom:10px">${priseTags}</div>
+    <div class="ve-detail-grid">
+      <div class="ve-detail-cell">
+        <div class="ve-detail-lbl">Points de charge</div>
+        <div class="ve-detail-val">${b.nb_points || '—'}</div>
+      </div>
+      <div class="ve-detail-cell">
+        <div class="ve-detail-lbl">Accès</div>
+        <div class="ve-detail-val" style="font-size:11px">${accesVal}</div>
+      </div>
+      <div class="ve-detail-cell" style="grid-column:1/-1">
+        <div class="ve-detail-lbl">Horaires</div>
+        <div class="ve-detail-val" style="font-size:11px">${horairesVal}</div>
+      </div>
+      ${tarifVal !== '—' ? `<div class="ve-detail-cell" style="grid-column:1/-1"><div class="ve-detail-lbl">Tarification</div><div class="ve-detail-val" style="font-size:11px">${tarifVal}</div></div>` : ''}
     </div>
-    <div class="p-right" style="flex-direction:column;align-items:flex-end;gap:3px">
-      <span class="borne-badge ${badgeCls}">${kw > 0 ? kw + ' kW' : '—'}</span>
-      <span style="font-size:8px;color:var(--muted)">${b.nb_points} point${b.nb_points > 1 ? 's' : ''}</span>
+    <a class="ve-chargemap" href="${chargemapUrl}" target="_blank" rel="noopener">⚡ Voir disponibilité sur ChargeMap ↗</a>
+    <a class="ve-nav" href="${navUrl}" target="_blank" rel="noopener">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      S'y rendre
+    </a>`;
+
+  return `<div class="ve-card">
+    <div class="ve-row" onclick="toggleVeAccordion(this)">
+      <div class="ve-icon ${iconCls}">⚡</div>
+      <div class="ve-info">
+        <div class="ve-nom">${b.nom}</div>
+        <div class="ve-meta">${b.operateur||''}${b.adresse?' · '+b.adresse:''}${distBadge}</div>
+      </div>
+      <div class="ve-right">
+        <span class="ve-kw ${kwCls}">${kwLbl}</span>
+        <i class="ti ti-chevron-down pk-chevron" aria-hidden="true"></i>
+      </div>
     </div>
+    <div class="ve-expanded">${expanded}</div>
   </div>`;
 }
 
-// ── DÉTAIL VÉLO'V ──
+function toggleVeAccordion(row) {
+  const card = row.closest('.ve-card');
+  const exp = card.querySelector('.ve-expanded');
+  const ch = card.querySelector('.pk-chevron');
+  const isOpen = exp.classList.contains('open');
+  exp.classList.toggle('open', !isOpen);
+  ch.classList.toggle('open', !isOpen);
+}
+
+function copyAndReserveVelovInline(btn) {
+  const lat = parseFloat(btn.dataset.lat);
+  const lng = parseFloat(btn.dataset.lng);
+  const nom = btn.dataset.nom || '';
+  const adresse = btn.dataset.adr || '';
+  let txt = nom;
+  if (adresse) txt += ', ' + adresse;
+  const url = lat && lng
+    ? `https://velov.grandlyon.com/#/map?lat=${lat}&lng=${lng}&zoom=17`
+    : 'https://velov.grandlyon.com';
+  const open = () => { showToast('📋 Adresse copiée !'); setTimeout(() => window.open(url, '_blank'), 300); };
+  navigator.clipboard.writeText(txt).then(open).catch(() => {
+    const el = document.createElement('textarea');
+    el.value = txt; el.style.position = 'fixed'; el.style.opacity = '0';
+    document.body.appendChild(el); el.select();
+    document.execCommand('copy'); document.body.removeChild(el);
+    open();
+  });
+}
+
+// ── DÉTAIL VÉLO'V (depuis popup carte uniquement) ──
 function showDetail(id, type) {
   id = String(id);
   let item;
