@@ -1175,7 +1175,7 @@ async function refreshDetail(){
 let selectedBorne = null;
 
 function showBorne(idx){
-  if(!selected||selected.type!=='parking'||!selected.bornes) return;
+  if(!selected||!selected.bornes) return;
   const b = selected.bornes[idx];
   if(!b) return;
   selectedBorne = b;
