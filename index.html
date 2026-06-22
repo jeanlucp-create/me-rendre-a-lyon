@@ -502,6 +502,44 @@
         </div>
       </div>
 
+      <!-- BORNE DE RECHARGE -->
+      <div id="sec-borne" style="display:none">
+        <div class="fp-header">
+          <button class="fp-back" onclick="closeDetail()">&#8592;</button>
+          <div class="fp-logo" id="borne-logo" style="background:#2E7D32;color:white;font-size:16px">⚡</div>
+          <div class="fp-title" id="borne-title">—</div>
+          <button class="fp-star" id="borne-star">☆</button>
+        </div>
+        <!-- Opérateur + adresse -->
+        <div class="fp-horaires" style="margin-bottom:8px">
+          <div class="fp-horaires-lbl">📍 Localisation</div>
+          <div class="fp-horaires-txt" id="borne-adresse">—</div>
+        </div>
+        <!-- Points de charge -->
+        <div class="fp-meta" style="margin-bottom:8px;align-items:center">
+          <span class="fp-meta-item"><span class="fp-meta-val" id="borne-nb-pts">—</span>&nbsp;point(s) de charge</span>
+          <span class="fp-sep">·</span>
+          <span id="borne-categorie-badge" class="fp-badge" style="font-size:10px;padding:3px 10px;border-radius:100px;border:1.5px solid currentColor">—</span>
+        </div>
+        <!-- Puissance + connecteurs -->
+        <div class="fp-grid" style="margin-bottom:8px">
+          <div class="fp-svc">
+            <div class="fp-svc-lbl">⚡ Puissance max</div>
+            <div class="fp-svc-num" id="borne-puissance">—</div>
+            <div class="fp-svc-sub">kW</div>
+          </div>
+          <div class="fp-svc">
+            <div class="fp-svc-lbl">🔌 Connecteurs</div>
+            <div class="fp-svc-detail" id="borne-connecteurs" style="font-size:11px;font-weight:700;color:var(--text);margin-top:4px;line-height:1.5">—</div>
+          </div>
+        </div>
+        <!-- Opérateur -->
+        <div class="fp-horaires" id="borne-op-bloc">
+          <div class="fp-horaires-lbl">🏢 Opérateur</div>
+          <div class="fp-horaires-txt" id="borne-operateur">—</div>
+        </div>
+      </div>
+
       <!-- Footer uniquement pour autopartage -->
       <div class="det-footer" id="det-footer-auto" style="display:none">
         <div class="upd-time" id="det-upd">—</div>
@@ -858,18 +896,25 @@ function pHTML(p){
   </div>`;
 }
 
-function borneId(b){return 'borne_'+(b.nom||'')+'_'+(b.lat||'')+'_'+(b.lng||'');}
+function fixKw(v){if(!v) return null; v=parseFloat(v); if(isNaN(v)) return null; return v>1000?Math.round(v/10)/100:v;}
+function borneId(b){
+  // Clé stable basée sur lat+lng arrondis, plus robuste que le nom qui peut être vide/identique
+  const lat=b.lat?b.lat.toFixed(5):'0';
+  const lng=b.lng?b.lng.toFixed(5):'0';
+  return 'borne_'+lat+'_'+lng+'_'+(b.operateur||'').replace(/\s/g,'');
+}
 function borneHTML(b){
-  const iconCls=b.categorie==='rapide'?'borne-rapide':b.categorie==='acceleree'?'borne-acceleree':'borne-normale';
-  const badgeCls=b.categorie==='rapide'?'br':b.categorie==='acceleree'?'ba':'bn';
-  const puissLabel=b.puissance_max_kw>=50?`${b.puissance_max_kw} kW ⚡`:b.puissance_max_kw>=22?`${b.puissance_max_kw} kW`:b.puissance_max_kw?`${b.puissance_max_kw} kW`:'—';
+  const kw=fixKw(b.puissance_max_kw);
+  const iconCls=kw>=50?'borne-rapide':kw>=22?'borne-acceleree':'borne-normale';
+  const badgeCls=kw>=50?'br':kw>=22?'ba':'bn';
+  const puissLabel=kw?`${kw} kW`:'—';
   const bid=borneId(b);
   const fav=isFav(bid);
-  return `<div class="borne-item ${fav?'favori':''}">
+  return `<div class="borne-item ${fav?'favori':''}" onclick="showBorneDetail('${bid}')" style="cursor:pointer">
     <button class="star-btn ${fav?'on':''}" onclick="toggleFav('${bid}',event)" ontouchend="toggleFav('${bid}',event)">${fav?'★':'☆'}</button>
     <div class="borne-icon ${iconCls}">⚡</div>
     <div class="p-info">
-      <div class="p-name">${b.nom}</div>
+      <div class="p-name">${b.nom||b.operateur||'Borne inconnue'}</div>
       <div class="p-meta">${b.operateur}${b.adresse?' · '+b.adresse:''}</div>
     </div>
     <div class="p-right" style="flex-direction:column;align-items:flex-end;gap:3px">
@@ -878,6 +923,19 @@ function borneHTML(b){
       ${b.types_prise?`<span style="font-size:8px;color:var(--muted)">${b.types_prise}</span>`:''}
     </div>
   </div>`;
+}
+
+function showBorneDetail(bid){
+  const bornes=data.bornes||[];
+  const b=bornes.find(x=>borneId(x)===bid);
+  if(!b) return;
+  selected={...b,type:'borne',_bid:bid};
+  document.getElementById('detail-view').style.display='block';
+  document.getElementById('det-action-bar').style.display='flex';
+  document.getElementById('list-view').style.display='none';
+  document.getElementById('map-view').style.display='none';
+  if(mapVisible){mapVisible=false;document.getElementById('map-btn').textContent='🗺 Carte';}
+  updateDetail(selected);
 }
 
 function vvHTML(v){
@@ -1075,9 +1133,13 @@ async function refreshDetail(){
 
 function updateDetail(p){
   const type=p.type;
+  // Reset boutons barre action (état borne peut les avoir masqués)
+  const copyBtn=document.getElementById('copy-btn');
+  if(copyBtn) copyBtn.style.display='flex';
   document.getElementById('sec-parking').style.display=type==='parking'?'block':'none';
   document.getElementById('sec-velov').style.display=type==='velov'?'block':'none';
   document.getElementById('sec-auto').style.display=(type==='citiz'||type==='leo')?'block':'none';
+  document.getElementById('sec-borne').style.display=type==='borne'?'block':'none';
   const autoFooter=document.getElementById('det-footer-auto');
   if(autoFooter) autoFooter.style.display=(type==='citiz'||type==='leo')?'flex':'none';
   let ic,cc;
@@ -1218,7 +1280,8 @@ function updateDetail(p){
       document.getElementById('fp-bornes-content').innerHTML=Object.entries(opMap).map(([op,bs])=>{
         const tags=bs.map(b=>{
           const cls=b.categorie==='rapide'?'fp-tag-r':b.categorie==='acceleree'?'fp-tag-a':'fp-tag-n';
-          return `<span class="fp-borne-tag ${cls}">${b.puissance_max_kw} kW · ${b.nb_points} pts</span>`;
+          const kwVal=fixKw(b.puissance_max_kw);
+          return `<span class="fp-borne-tag ${cls}">${kwVal||'?'} kW · ${b.nb_points} pts</span>`;
         }).join('');
         return `<div class="fp-borne-row"><span class="fp-borne-op">${op}</span>${tags}</div>`;
       }).join('');
@@ -1319,6 +1382,57 @@ function updateDetail(p){
     document.getElementById('ap-range').textContent=type==='leo'&&p.autonomie_km?p.autonomie_km+' km':'—';
     document.getElementById('ap-service').textContent=type==='citiz'?'Citiz':'Leo&Go';
   }
+  if(type==='borne'){
+    const kw=fixKw(p.puissance_max_kw);
+    const catCls=kw>=50?'c-green':kw>=22?'c-amber':'c-muted';
+    const catLbl=kw>=50?'Charge rapide':kw>=22?'Charge accélérée':'Charge normale';
+    // Logo couleur selon catégorie
+    const logo=document.getElementById('borne-logo');
+    if(logo) logo.style.background=kw>=50?'#2E7D32':kw>=22?'#1565C0':'#E65C00';
+    // Titre
+    const titleEl=document.getElementById('borne-title');
+    if(titleEl) titleEl.textContent=p.nom||p.operateur||'Borne de recharge';
+    // Étoile
+    const bid=p._bid||borneId(p);
+    const starEl=document.getElementById('borne-star');
+    if(starEl){
+      starEl.textContent=isFav(bid)?'★':'☆';
+      starEl.className='fp-star'+(isFav(bid)?' on':'');
+      starEl.onclick=()=>{
+        toggleFav(bid,{preventDefault:()=>{},stopPropagation:()=>{},stopImmediatePropagation:()=>{}});
+        starEl.textContent=isFav(bid)?'★':'☆';
+        starEl.className='fp-star'+(isFav(bid)?' on':'');
+      };
+    }
+    // Adresse
+    const adrEl=document.getElementById('borne-adresse');
+    if(adrEl) adrEl.textContent=p.adresse||'Adresse non disponible';
+    // Points + catégorie
+    const nbEl=document.getElementById('borne-nb-pts');
+    if(nbEl) nbEl.textContent=p.nb_points||'?';
+    const catEl=document.getElementById('borne-categorie-badge');
+    if(catEl){catEl.textContent=catLbl;catEl.className='fp-badge '+(kw>=50?'c-green':kw>=22?'c-amber':'c-gray');}
+    // Puissance
+    const puissEl=document.getElementById('borne-puissance');
+    if(puissEl) puissEl.textContent=kw||'—';
+    // Connecteurs
+    const connEl=document.getElementById('borne-connecteurs');
+    if(connEl) connEl.textContent=p.types_prise||'Non renseigné';
+    // Opérateur
+    const opEl=document.getElementById('borne-operateur');
+    if(opEl) opEl.textContent=p.operateur||'—';
+    // Bouton S'y rendre
+    const navBtn=document.getElementById('nav-btn');
+    if(navBtn&&p.lat&&p.lng){
+      navBtn.href=`geo:${p.lat},${p.lng}?q=${encodeURIComponent(p.nom||p.operateur||'Borne')}`;
+      navBtn.style.opacity='1';navBtn.style.pointerEvents='auto';
+    }
+    // Masquer boutons non pertinents
+    document.getElementById('tcl-det-btn').style.display='none';
+    document.getElementById('vv-det-btn').style.display='none';
+    document.getElementById('map-det-btn').style.display=p.lat&&p.lng?'flex':'none';
+    document.getElementById('copy-btn').style.display='none';
+  }
 }
 
 // ── CARTE ──
@@ -1347,7 +1461,8 @@ function renderMap(){
   if(mapLayers.ve)(data.bornes||[]).forEach(b=>{
     if(!b.lat||!b.lng) return;
     const col=b.categorie==='rapide'?'#2E7D32':b.categorie==='acceleree'?'#1565C0':'#E65C00';
-    const lbl=b.puissance_max_kw>=1?b.puissance_max_kw+'k':'⚡';
+    const kwM=fixKw(b.puissance_max_kw);
+    const lbl=kwM>=1?kwM+'k':'⚡';
     addM(b.lat,b.lng,col,22,String(lbl),b.nom,b.operateur+' · '+b.nb_points+' pt','borne','#1A1A2E',0,0,null);
   });
 }
