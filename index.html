@@ -9,33 +9,9 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-body { font-family: Arial; margin:0; }
+body { font-family:Arial; margin:0; }
 
-header {
-  padding:10px;
-  background:#0078A8;
-  color:white;
-}
-
-#container {
-  display:flex;
-  flex-direction:column;
-  height:100vh;
-}
-
-#list {
-  overflow:auto;
-  height:40vh;
-}
-
-#detail {
-  padding:10px;
-  background:#f9f9f9;
-}
-
-#map {
-  flex:1;
-}
+#map { height:50vh; }
 
 .item {
   padding:10px;
@@ -44,19 +20,13 @@ header {
 }
 
 .item:hover {
-  background:#f0f0f0;
+  background:#f5f5f5;
 }
 
 .borne {
   background:#eee;
-  margin:5px 0;
+  margin:4px 0;
   padding:6px;
-  cursor:pointer;
-}
-
-button {
-  padding:8px;
-  margin-top:10px;
   cursor:pointer;
 }
 </style>
@@ -65,17 +35,11 @@ button {
 
 <body>
 
-<div id="container">
-
-<header>
-  🚗 Parkings + ⚡ Bornes
-</header>
+<h2 style="padding:10px">🚗 Parkings + ⚡ Bornes</h2>
 
 <div id="list"></div>
-<div id="detail">👉 Sélectionne un parking</div>
+<div id="detail"></div>
 <div id="map"></div>
-
-</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -86,8 +50,8 @@ const API = "https://me-rendre-a-lyon.jean-luc-perrotto.workers.dev";
 let data = {};
 let selected = null;
 let map;
-let markers = [];
 
+// ✅ SAFE
 function safe(v){ return v ?? '—'; }
 
 // ── LOAD ──
@@ -97,8 +61,7 @@ async function load(){
     data = await r.json();
 
     initMap();
-    renderList();
-    renderMap();
+    render();
 
   }catch(e){
     document.getElementById("list").innerHTML="Erreur API";
@@ -110,13 +73,11 @@ async function load(){
 function initMap(){
   map = L.map('map').setView([45.75,4.85],12);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© OpenStreetMap'
-  }).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 }
 
 // ── LIST ──
-function renderList(){
+function render(){
 
   const list = document.getElementById("list");
   list.innerHTML = "";
@@ -124,17 +85,20 @@ function renderList(){
   data.parkings.tcl.forEach(p=>{
 
     const el = document.createElement("div");
-    el.className="item";
+    el.className = "item";
 
     el.innerHTML = `
-      <strong>${p.nom}</strong><br>
-      ${safe(p.places_disponibles)} / ${safe(p.nb_places)} places
+      🚇 ${p.nom}
+      <br>
+      ${safe(p.places_disponibles)} / ${safe(p.nb_places)}
     `;
 
     el.onclick = ()=>showDetail(p);
 
     list.appendChild(el);
   });
+
+  renderMap();
 }
 
 // ── DETAIL ──
@@ -142,11 +106,8 @@ function showDetail(p){
 
   selected = p;
 
-  let html = `
-    <h3>${p.nom}</h3>
-    <p><b>Places :</b> ${safe(p.places_disponibles)} / ${safe(p.nb_places)}</p>
-    <p>${safe(p.adresse)}</p>
-  `;
+  let html = `<h3>${p.nom}</h3>`;
+  html += `<p>${safe(p.places_disponibles)} / ${safe(p.nb_places)} places</p>`;
 
   if(p.bornes?.length){
 
@@ -155,20 +116,19 @@ function showDetail(p){
     p.bornes.forEach((b,i)=>{
       html += `
         <div class="borne" onclick="showBorne(${i})">
-          ⚡ ${safe(b.operateur)} - ${safe(b.puissance_max_kw)} kW
+          ${safe(b.operateur)} - ${safe(b.puissance_max_kw)} kW
         </div>
       `;
     });
 
   } else {
-    html += "<p>Aucune borne proche</p>";
+    html += "<p>Aucune borne</p>";
   }
 
   document.getElementById("detail").innerHTML = html;
 
-  // ✅ zoom map
   if(p.lat && p.lng){
-    map.setView([p.lat,p.lng],15);
+    map.setView([p.lat,p.lng],14);
   }
 }
 
@@ -193,4 +153,54 @@ function showBorne(i){
 
   document.getElementById("detail").innerHTML = `
     <h3>${safe(b.nom)}</h3>
-    <p><b>Opérateur :</b> ${safe(b.operateur)}</p>
+    <p>${safe(b.operateur)}</p>
+    <p>${safe(b.puissance_max_kw)} kW</p>
+    <p>${safe(b.nb_points)} points</p>
+    <p>${ptxt}</p>
+
+    <button onclick="navigate(${b.lat}, ${b.lng})">🧭 S'y rendre</button>
+    <br>
+    <button onclick="showDetail(selected)">← retour</button>
+  `;
+}
+
+// ── NAVIGATION ──
+function navigate(lat,lng){
+  if(lat && lng){
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`);
+  }
+}
+
+// ── MAP ──
+function renderMap(){
+
+  map.eachLayer(layer=>{
+    if(layer instanceof L.Marker || layer instanceof L.CircleMarker){
+      map.removeLayer(layer);
+    }
+  });
+
+  data.parkings.tcl.forEach(p=>{
+    if(!p.lat || !p.lng) return;
+
+    L.marker([p.lat,p.lng])
+      .addTo(map)
+      .bindPopup(p.nom);
+  });
+
+  (data.bornes || []).forEach(b=>{
+    if(!b.lat || !b.lng) return;
+
+    L.circleMarker([b.lat,b.lng],{
+      color:"green"
+    }).addTo(map);
+  });
+}
+
+load();
+
+</script>
+
+</body>
+</html>
+``
