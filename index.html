@@ -765,7 +765,7 @@ function renderList(){
   else if(sub==='ap') list=[...(data.autopartage?.citiz||[]),...(data.autopartage?.leoandgo||[])];
 
   if(q) list=list.filter(p=>(p.nom||'').toLowerCase().includes(q)||(p.adresse||'').toLowerCase().includes(q));
-  if(favOnly&&(sub==='pr'||sub==='pk')) list=list.filter(p=>isFav(p.id));
+  if(favOnly&&(sub==='pr'||sub==='pk'||sub==='vv')) list=list.filter(p=>isFav(p.id));
   // Tri par distance si "Près de moi" actif
   if(nearActive&&userLat!==null&&userLng!==null){
     list=list.map(p=>({...p,_dist:haversine(userLat,userLng,p.lat,p.lng)}));
@@ -804,21 +804,32 @@ function renderList(){
       html+='<div class="empty-msg">Aucun véhicule Citiz disponible</div>';
     }
   }else if(sub==='ve'){
-    const bornes=data.bornes||[];
-    const rapides=bornes.filter(b=>b.categorie==='rapide');
-    const accelerees=bornes.filter(b=>b.categorie==='acceleree');
-    const normales=bornes.filter(b=>b.categorie==='normale');
+    let bornes=data.bornes||[];
+    if(favOnly) bornes=bornes.filter(b=>isFav(borneId(b)));
+    const favs=bornes.filter(b=>isFav(borneId(b)));
+    if(favs.length&&!favOnly){
+      html+=`<div class="sec-lbl">★ Favoris</div><div class="parking-list">`;
+      favs.forEach(b=>html+=borneHTML(b)); html+=`</div>`;
+    }
+    const restBornes=favOnly?bornes:bornes.filter(b=>!isFav(borneId(b)));
+    const rapides=restBornes.filter(b=>b.categorie==='rapide');
+    const accelerees=restBornes.filter(b=>b.categorie==='acceleree');
+    const normales=restBornes.filter(b=>b.categorie==='normale');
+    const grayCls=favs.length&&!favOnly?' sec-lbl-gray':'';
     if(rapides.length){
-      html+=`<div class="sec-lbl">⚡ Charge rapide (≥ 50 kW) · ${rapides.length} stations</div><div class="parking-list">`;
+      html+=`<div class="sec-lbl${grayCls}">⚡ Charge rapide (≥ 50 kW) · ${rapides.length} stations</div><div class="parking-list">`;
       rapides.forEach(b=>html+=borneHTML(b)); html+=`</div>`;
     }
     if(accelerees.length){
-      html+=`<div class="sec-lbl">⚡ Charge accélérée (22–50 kW) · ${accelerees.length} stations</div><div class="parking-list">`;
+      html+=`<div class="sec-lbl${grayCls}">⚡ Charge accélérée (22–50 kW) · ${accelerees.length} stations</div><div class="parking-list">`;
       accelerees.forEach(b=>html+=borneHTML(b)); html+=`</div>`;
     }
     if(normales.length){
-      html+=`<div class="sec-lbl">⚡ Charge normale (< 22 kW) · ${normales.length} stations</div><div class="parking-list">`;
+      html+=`<div class="sec-lbl${grayCls}">⚡ Charge normale (< 22 kW) · ${normales.length} stations</div><div class="parking-list">`;
       normales.slice(0,60).forEach(b=>html+=borneHTML(b)); html+=`</div>`;
+    }
+    if(favOnly&&!bornes.length){
+      html+=`<div class="empty-msg">Aucune borne favorite</div>`;
     }
     html+=`<div style="text-align:center;font-size:10px;color:var(--muted);padding:8px 0">Source : Base nationale IRVE · transport.data.gouv.fr · Données statiques</div>`;
   }
@@ -847,11 +858,15 @@ function pHTML(p){
   </div>`;
 }
 
+function borneId(b){return 'borne_'+(b.nom||'')+'_'+(b.lat||'')+'_'+(b.lng||'');}
 function borneHTML(b){
   const iconCls=b.categorie==='rapide'?'borne-rapide':b.categorie==='acceleree'?'borne-acceleree':'borne-normale';
   const badgeCls=b.categorie==='rapide'?'br':b.categorie==='acceleree'?'ba':'bn';
   const puissLabel=b.puissance_max_kw>=50?`${b.puissance_max_kw} kW ⚡`:b.puissance_max_kw>=22?`${b.puissance_max_kw} kW`:b.puissance_max_kw?`${b.puissance_max_kw} kW`:'—';
-  return `<div class="borne-item">
+  const bid=borneId(b);
+  const fav=isFav(bid);
+  return `<div class="borne-item ${fav?'favori':''}">
+    <button class="star-btn ${fav?'on':''}" onclick="toggleFav('${bid}',event)" ontouchend="toggleFav('${bid}',event)">${fav?'★':'☆'}</button>
     <div class="borne-icon ${iconCls}">⚡</div>
     <div class="p-info">
       <div class="p-name">${b.nom}</div>
