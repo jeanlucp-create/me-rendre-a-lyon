@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mobilité Lyon</title>
 
+<!-- ✅ Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-body { font-family:Arial; margin:0; }
+body { font-family: Arial; margin:0; }
 #map { height:50vh; }
 .item { padding:10px; border-bottom:1px solid #ddd; cursor:pointer; }
 .borne { background:#f5f5f5; margin:4px 0; padding:6px; }
 </style>
+
 </head>
 
 <body>
@@ -23,33 +26,48 @@ body { font-family:Arial; margin:0; }
 <div id="detail"></div>
 <div id="map"></div>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<!-- ✅ Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+
 const API = "https://me-rendre-a-lyon.jean-luc-perrotto.workers.dev";
 
 let data = {};
 let selected = null;
-let map = L.map('map').setView([45.75,4.85],12);
+let map = null;
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-// ✅ SAFE HELPER
+// ✅ SAFE
 function safe(v){ return v ?? '—'; }
 
-// ── LOAD DATA ──
+// ── LOAD ──
 async function load(){
   try{
     const r = await fetch(API);
     data = await r.json();
+
+    initMap();
     render();
+
   }catch(e){
     document.getElementById("list").innerHTML="Erreur API";
+    console.error(e);
   }
+}
+
+// ── MAP INIT ──
+function initMap(){
+  map = L.map('map').setView([45.75,4.85],12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:18,
+    attribution:'© OpenStreetMap'
+  }).addTo(map);
 }
 
 // ── LIST ──
 function render(){
+
   const list = document.getElementById("list");
   list.innerHTML = "";
 
@@ -66,21 +84,23 @@ function render(){
 
 // ── DETAIL ──
 function showDetail(p){
+
   selected = p;
   const el = document.getElementById("detail");
 
   let html = `<h3>${p.nom}</h3>`;
   html += `<p>${p.places_disponibles} places</p>`;
 
-  // ✅ bornes
   if(p.bornes?.length){
+
     html += "<h4>⚡ Bornes</h4>";
 
     p.bornes.forEach((b,i)=>{
       html += `
-      <div class="borne" onclick="showBorne(${i})">
-        ${safe(b.operateur)} - ${safe(b.puissance_max_kw)} kW
-      </div>`;
+        <div class="borne" onclick="showBorne(${i})">
+          ${safe(b.operateur)} - ${safe(b.puissance_max_kw)} kW
+        </div>
+      `;
     });
 
   } else {
@@ -90,11 +110,11 @@ function showDetail(p){
   el.innerHTML = html;
 }
 
-// ── FICHE BORNE ──
+// ── BORNE ──
 function showBorne(i){
 
   if(!selected?.bornes || !selected.bornes[i]){
-    console.warn("Borne introuvable", selected);
+    console.warn("Borne introuvable");
     return;
   }
 
@@ -122,17 +142,24 @@ function showBorne(i){
 // ── MAP ──
 function renderMap(){
 
-  if(!data.parkings) return;
+  if(!map) return;
+
+  // clear layer
+  map.eachLayer(layer=>{
+    if(layer instanceof L.Marker || layer instanceof L.CircleMarker){
+      map.removeLayer(layer);
+    }
+  });
 
   data.parkings.tcl.forEach(p=>{
     if(!p.lat || !p.lng) return;
 
     L.marker([p.lat,p.lng])
       .addTo(map)
-      .bindPopup(`${p.nom}`);
+      .bindPopup(p.nom);
   });
 
-  (data.bornes||[]).forEach(b=>{
+  (data.bornes || []).forEach(b=>{
     if(!b.lat || !b.lng) return;
 
     L.circleMarker([b.lat,b.lng],{
@@ -142,6 +169,7 @@ function renderMap(){
 }
 
 load();
+
 </script>
 
 </body>
