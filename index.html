@@ -158,7 +158,7 @@
     .acc-act-btn{flex:1;padding:8px 6px;border-radius:9px;font-size:10px;font-weight:800;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;font-family:'Nunito',sans-serif;text-decoration:none;white-space:nowrap}
     .acc-act-nav{background:var(--orange);color:white}
     .acc-act-tcl{background:#E3F2FD;color:var(--blue);border:1px solid #B5D4F4}
-    .acc-act-copy{background:var(--orange-light);color:var(--orange-dark);border:1px solid var(--orange-border)}
+    .acc-act-map{background:var(--orange-light);color:var(--orange-dark);border:1px solid var(--orange-border)}
     .acc-act-copy.copied{background:var(--green);color:white;border-color:var(--green)}
 
     /* ── VÉLO'V accordion (même logique parking) ── */
@@ -344,9 +344,9 @@
 
   <div class="map-view" id="map-view">
     <div id="map"></div>
-    <button class="map-back-btn" id="map-back-btn" onclick="returnToDetail()">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-      Retour fiche
+    <button class="map-back-btn" id="map-back-btn" onclick="returnToList()">
+      <i class="ti ti-arrow-back-up" aria-hidden="true"></i>
+      Retour
     </button>
     <div class="map-overlay-btns" id="map-toggles">
       <div class="map-toggle" id="mt-pr" onclick="toggleMapLayer('pr')">🚇 P+R</div>
@@ -378,7 +378,7 @@
     <div class="det-card">
       <div id="sec-velov">
         <div class="fp-header">
-          <button class="fp-back" onclick="closeDetail()">&#8592;</button>
+          <button class="fp-back" onclick="closeDetail()"><i class="ti ti-arrow-back-up" aria-hidden="true"></i></button>
           <div class="fp-title" id="vv-title">—</div>
           <button class="fp-star" id="vv-star">☆</button>
         </div>
@@ -821,10 +821,14 @@ function pkExpandedHTML(p, s, cap, nb) {
 
   // Boutons actions
   const navUrl = p.lat && p.lng ? `geo:${p.lat},${p.lng}?q=${encodeURIComponent(p.nom)}` : '#';
+  const mapBtn = p.lat && p.lng
+    ? `<button class="acc-act-btn acc-act-map" onclick="showParkingOnMap('${p.id}')">🗺 Carte</button>`
+    : '';
   html += `<div class="acc-act-row">
     <a class="acc-act-btn acc-act-nav" href="${navUrl}" target="_blank" rel="noopener">📍 S'y rendre</a>
     <button class="acc-act-btn acc-act-tcl" onclick="openTCL(event)">🚇 TCL</button>
     <button class="acc-act-btn acc-act-copy" onclick="copyParkingAddress('${p.id}', this)">📋 Copier</button>
+    ${mapBtn}
   </div>`;
 
   return html;
@@ -1188,54 +1192,44 @@ function renderMap() {
   });
 }
 
-function pinSVG(emoji, bg, border, nb, nbColor) {
-  // Goutte SVG : emoji catégorie + optionnellement un nombre en surimpression
-  const w = 36, h = 44;
-  const inner = nb !== null
-    ? `<circle cx="18" cy="18" r="12" fill="${nbColor||'rgba(0,0,0,0.55)'}"/>
-       <text x="18" y="23" text-anchor="middle" font-size="${String(nb).length>2?9:11}" font-family="monospace" font-weight="700" fill="white">${nb}</text>`
-    : `<text x="18" y="23" text-anchor="middle" font-size="15" font-family="system-ui">${emoji}</text>`;
+function pinSVG(label, bg, border, nb, nbColor) {
+  // label = texte court dans la goutte (ex: 'P+R', 'P', "V'")
+  // nb = nombre à afficher dans un disque coloré (null = pas de disque)
+  const w = 38, h = 46;
+  const labelEl = label
+    ? `<text x="18" y="16" text-anchor="middle" font-size="8" font-family="system-ui,sans-serif" font-weight="800" fill="${border}">${label}</text>`
+    : '';
+  const discEl = nb !== null
+    ? `<circle cx="18" cy="26" r="10" fill="${nbColor||'#888'}"/>
+       <text x="18" y="30" text-anchor="middle" font-size="${String(nb).length > 2 ? 8 : 10}" font-family="monospace" font-weight="700" fill="white">${nb}</text>`
+    : '';
   return `<svg width="${w}" height="${h}" viewBox="0 0 36 44" overflow="visible" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.22));display:block">
     <path d="M18 2C9.2 2 2 9.2 2 18c0 10 16 24 16 24s16-14 16-24C34 9.2 26.8 2 18 2z" fill="${bg}" stroke="${border}" stroke-width="2"/>
-    ${inner}
+    ${labelEl}${discEl}
   </svg>`;
 }
 
 function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vvElec, itemId) {
-  // Choix icône emoji selon type
-  const emojiMap = {parking:'🅿', velov:'🚲', borne:'⚡'};
-  const emoji = emojiMap[type] || '📍';
-
-  // Couleurs fond/bordure selon type
-  const bgMap = {
-    parking: borderColor==='#1565C0' ? '#E8F5E9' : '#F9EEF4',
-    velov:   '#E3F2FD',
-    borne:   '#E8F5E9',
+  // Paramètres visuels selon type
+  const configs = {
+    parking_tcl: { bg:'#E8F5E9', border:'#2E7D32', label:'P+R' },
+    parking_op:  { bg:'#F9EEF4', border:'#9C2A5A', label:'P'   },
+    velov:       { bg:'#E3F2FD', border:'#1565C0', label:"V'"  },
   };
-  const bdMap = {
-    parking: borderColor==='#1565C0' ? '#2E7D32' : '#9C2A5A',
-    velov:   '#1565C0',
-    borne:   '#1B5E20',
-  };
+  const isTCL = type === 'parking' && borderColor === '#1565C0';
+  const isVV  = type === 'velov';
+  const cfg = isTCL ? configs.parking_tcl : isVV ? configs.velov : configs.parking_op;
 
-  // Pour parking et velo'v : afficher le nombre dans un disque coloré
-  const showNb = (type === 'parking' || type === 'velov') && lbl !== '?';
-  const nbVal = showNb ? lbl : null;
-  const nbColor = color; // couleur dispo (vert/orange/rouge)
-
-  const bg = bgMap[type] || '#FFF';
-  const bd = bdMap[type] || '#888';
-
-  // Pour borne : disque vert foncé avec ⚡ blanc au centre (pas de nb)
   let html;
   if (type === 'borne') {
     html = `<svg width="36" height="44" viewBox="0 0 36 44" overflow="visible" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.22));display:block">
-      <path d="M18 2C9.2 2 2 9.2 2 18c0 10 16 24 16 24s16-14 16-24C34 9.2 26.8 2 18 2z" fill="${bg}" stroke="${bd}" stroke-width="2"/>
+      <path d="M18 2C9.2 2 2 9.2 2 18c0 10 16 24 16 24s16-14 16-24C34 9.2 26.8 2 18 2z" fill="#E8F5E9" stroke="#1B5E20" stroke-width="2"/>
       <circle cx="18" cy="18" r="10" fill="#1B5E20"/>
       <text x="18" y="23" text-anchor="middle" font-size="12" font-family="system-ui" fill="white">⚡</text>
     </svg>`;
   } else {
-    html = pinSVG(emoji, bg, bd, nbVal, nbColor);
+    const showNb = (type === 'parking' || type === 'velov') && lbl !== '?';
+    html = pinSVG(cfg.label, cfg.bg, cfg.border, showNb ? lbl : null, color);
   }
 
   const icon = L.divIcon({className:'',
@@ -1273,6 +1267,47 @@ function returnToDetail() {
   document.getElementById('detail-view').style.display = 'block';
   mapVisible = false;
   document.getElementById('map-btn').textContent = '🗺 Carte';
+}
+
+// Ouvrir la carte centrée sur un parking depuis l'accordion
+function showParkingOnMap(id) {
+  const p = [...(data.parkings?.tcl||[]),...(data.parkings?.operateurs||[])].find(x => x.id === id);
+  if (!p || !p.lat || !p.lng) return;
+  const isTCL = p.gestionnaire === 'TCL';
+  mapLayers = {pr: isTCL, pk: !isTCL, vv: false, ve: false};
+  updateMapToggleUI();
+  document.getElementById('list-view').style.display = 'none';
+  document.getElementById('detail-view').style.display = 'none';
+  document.getElementById('map-view').style.display = 'block';
+  document.getElementById('map-back-btn').style.display = 'flex';
+  mapVisible = true;
+  document.getElementById('map-btn').textContent = '☰ Liste';
+  if (!map) initMap(); else map.invalidateSize();
+  setTimeout(() => {
+    renderMap();
+    map.setView([p.lat, p.lng], 16);
+    setTimeout(() => {
+      markers.forEach(m => {
+        const ll = m.getLatLng();
+        if (Math.abs(ll.lat - p.lat) < 0.0001 && Math.abs(ll.lng - p.lng) < 0.0001) m.openPopup();
+      });
+    }, 300);
+  }, 250);
+}
+
+// Retour depuis la carte → liste ou fiche Vélo'v
+function returnToList() {
+  document.getElementById('map-view').style.display = 'none';
+  document.getElementById('map-back-btn').style.display = 'none';
+  if (selected && fromMap) {
+    document.getElementById('detail-view').style.display = 'block';
+    fromMap = false;
+  } else {
+    document.getElementById('list-view').style.display = 'block';
+  }
+  mapVisible = false;
+  document.getElementById('map-btn').textContent = '🗺 Carte';
+  if (map) setTimeout(() => map.invalidateSize(), 100);
 }
 
 // ── ACTIONS ──
