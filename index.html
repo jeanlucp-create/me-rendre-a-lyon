@@ -1203,25 +1203,14 @@ function showBorne(idx){
   // Points
   document.getElementById('borne-pts').textContent=b.nb_points||'—';
 
- // Types de prise
-const prisesEl = document.getElementById('borne-prises');
-
-if (b.types_prise && b.types_prise.trim()) {
-
-  const prises = b.types_prise
-    .split(/[,;]+/)
-    .map(s => s.trim())
-    .filter(Boolean);
-
-  prisesEl.innerHTML = prises
-    .map(p => `<span class="borne-prise-tag">${p}</span>`)
-    .join('');
-
-} else {
-
-  prisesEl.innerHTML = '<span style="font-size:11px;color:var(--muted)">Non renseigné</span>';
-
-}
+  // Types de prise
+  const prisesEl=document.getElementById('borne-prises');
+  if(b.types_prise&&b.types_prise.trim()){
+    const prises=b.types_prise.split(/[,;]+/).map(s=>s.trim()).filter(Boolean);
+    prisesEl.innerHTML=prises.map(p=>`<span class="borne-prise-tag">${p}</span>`).join('');
+  } else {
+    prisesEl.innerHTML='<span style="font-size:11px;color:var(--muted)">Non renseigné</span>';
+  }
 
   // Label bouton dispo
   document.getElementById('borne-dispo-btn').textContent='🗺 Voir les bornes proches sur Google Maps ↗';
@@ -1657,4 +1646,3 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch
 </script>
 </body>
 </html>
-
