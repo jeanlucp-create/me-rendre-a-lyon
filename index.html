@@ -1173,16 +1173,16 @@ function renderMap() {
   if (mapLayers.pr) (data.parkings?.tcl||[]).forEach(p => {
     if (!p.lat || !p.lng) return;
     const nb = p.places_disponibles, cap = p.nb_places, s = getStatus(nb, cap), fav = isFav(p.id);
-    addM(p.lat, p.lng, colHex(s.c), fav?34:26, (nb===null||nb<0)?'?':String(nb), p.nom, s.lbl, 'parking', '#1565C0', 0, 0, p.id);
+    addM(p.lat, p.lng, colHex(s.c), fav?34:26, (nb===null||nb<0)?'?':String(nb), p.nom, s.lbl, 'parking_tcl', '#2E7D32', 0, 0, p.id);
   });
   if (mapLayers.pk) (data.parkings?.operateurs||[]).forEach(p => {
     if (!p.lat || !p.lng) return;
     const nb = p.places_disponibles, cap = p.nb_places, s = getStatus(nb, cap);
-    addM(p.lat, p.lng, colHex(s.c), 24, String(nb===null||nb<0?'?':nb), p.nom, s.lbl, 'parking', '#9C2A5A', 0, 0, p.id);
+    addM(p.lat, p.lng, colHex(s.c), 24, String(nb===null||nb<0?'?':nb), p.nom, s.lbl, 'parking_op', '#9C2A5A', 0, 0, p.id);
   });
   if (mapLayers.vv) (data.velov||[]).filter(v => v.en_service && v.nom && v.nom.trim() !== '').forEach(v => {
     if (!v.lat || !v.lng) return;
-    addM(v.lat, v.lng, v.velos_dispo>0?colHex('green'):colHex('gray'), 22, String(v.velos_dispo), '🚲 '+v.nom, v.velos_dispo+' vélos', 'velov', '#1A6B30', v.velos_meca||0, v.velos_elec||0, v.id);
+    addM(v.lat, v.lng, v.velos_dispo>0?colHex('green'):colHex('gray'), 22, String(v.velos_dispo), '🚲 '+v.nom, v.velos_dispo+' vélos', 'velov', '#1565C0', v.velos_meca||0, v.velos_elec||0, v.id);
   });
   if (mapLayers.ve) (data.bornes||[]).forEach(b => {
     if (!b.lat || !b.lng) return;
@@ -1210,15 +1210,13 @@ function pinSVG(label, bg, border, nb, nbColor) {
 }
 
 function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vvElec, itemId) {
-  // Paramètres visuels selon type
+  // Config visuelle selon type explicite
   const configs = {
     parking_tcl: { bg:'#E8F5E9', border:'#2E7D32', label:'P+R' },
     parking_op:  { bg:'#F9EEF4', border:'#9C2A5A', label:'P'   },
     velov:       { bg:'#E3F2FD', border:'#1565C0', label:"V'"  },
   };
-  const isTCL = type === 'parking' && borderColor === '#1565C0';
-  const isVV  = type === 'velov';
-  const cfg = isTCL ? configs.parking_tcl : isVV ? configs.velov : configs.parking_op;
+  const cfg = configs[type];
 
   let html;
   if (type === 'borne') {
@@ -1227,16 +1225,28 @@ function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vv
       <circle cx="18" cy="18" r="10" fill="#1B5E20"/>
       <text x="18" y="23" text-anchor="middle" font-size="12" font-family="system-ui" fill="white">⚡</text>
     </svg>`;
+  } else if (cfg) {
+    const showNb = lbl !== '?';
+    const labelEl = `<text x="18" y="16" text-anchor="middle" font-size="8" font-family="system-ui,sans-serif" font-weight="800" fill="${cfg.border}">${cfg.label}</text>`;
+    const discEl  = showNb
+      ? `<circle cx="18" cy="26" r="10" fill="${color}"/>
+         <text x="18" y="30" text-anchor="middle" font-size="${String(lbl).length>2?8:10}" font-family="monospace" font-weight="700" fill="white">${lbl}</text>`
+      : '';
+    html = `<svg width="38" height="46" viewBox="0 0 36 44" overflow="visible" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.22));display:block">
+      <path d="M18 2C9.2 2 2 9.2 2 18c0 10 16 24 16 24s16-14 16-24C34 9.2 26.8 2 18 2z" fill="${cfg.bg}" stroke="${cfg.border}" stroke-width="2"/>
+      ${labelEl}${discEl}
+    </svg>`;
   } else {
-    const showNb = (type === 'parking' || type === 'velov') && lbl !== '?';
-    html = pinSVG(cfg.label, cfg.bg, cfg.border, showNb ? lbl : null, color);
+    // Fallback cercle générique
+    html = `<div style="background:${color};color:white;border-radius:50%;width:${sz}px;height:${sz}px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border:3px solid ${borderColor};box-shadow:0 2px 6px rgba(0,0,0,.25)">${lbl}</div>`;
   }
 
-  const icon = L.divIcon({className:'',
-    html,
-    iconSize:[36,44], iconAnchor:[18,44]});
+  const iconSz  = (type === 'borne') ? [36,44] : [38,46];
+  const iconAnc = (type === 'borne') ? [18,44] : [19,46];
+  const icon = L.divIcon({ className:'', html, iconSize: iconSz, iconAnchor: iconAnc });
+
   const navUrl = `geo:${lat},${lng}?q=${encodeURIComponent(name)}`;
-  const tclBtn = type === 'parking' ? `<a href="#" onclick="openTCL(event)" class="lp-btn lp-btn-tcl">🚇 Itinéraire TCL</a>` : '';
+  const tclBtn = (type === 'parking_tcl' || type === 'parking_op') ? `<a href="#" onclick="openTCL(event)" class="lp-btn lp-btn-tcl">🚇 Itinéraire TCL</a>` : '';
   const vvBtn = type === 'velov' ? `<a href="https://velov.grandlyon.com/#/map?lat=${lat}&lng=${lng}&zoom=17" target="_blank" class="lp-btn lp-btn-tcl">📋 Réserver sur Vélo'v</a>` : '';
   const vvDetail = type === 'velov' ? `<div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
     ${vvMeca ? `<span style="background:#FFF3EE;color:#CC5500;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #FFD9C8">⚙ ${vvMeca}</span>` : ''}
