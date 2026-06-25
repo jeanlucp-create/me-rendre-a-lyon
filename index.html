@@ -299,6 +299,38 @@
     .op-prise-row:last-child { margin-bottom:0; }
     .borne-disc{width:22px;height:22px;border-radius:50%;background:#1B5E20;display:flex;align-items:center;justify-content:center;font-size:12px;color:white;flex-shrink:0}
     .borne-disc-lg{width:28px;height:28px;border-radius:50%;background:#1B5E20;display:flex;align-items:center;justify-content:center;font-size:15px;color:white;flex-shrink:0}
+
+    /* ── AUTOPARTAGE ── */
+    .ap-section-lbl{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 2px 5px;display:flex;align-items:center;gap:5px}
+    .ap-card{background:var(--white);border-radius:13px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:6px}
+    .ap-card.has-dispo{border-color:var(--orange-border)}
+    /* Station Citiz */
+    .ap-station-row{display:flex;align-items:center;gap:8px;padding:10px 10px 10px 12px}
+    .ap-logo{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:white}
+    .ap-logo-citiz{background:#00A88E}
+    .ap-logo-leo{background:#E8461A}
+    .ap-info{flex:1;min-width:0}
+    .ap-nom{font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ap-meta{font-size:9px;color:var(--muted);font-weight:600;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ap-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .ap-nb{font-size:20px;font-weight:900;font-family:'Space Mono',monospace;line-height:1.1;min-width:24px;text-align:right}
+    .ap-cap{font-size:8px;color:var(--muted);font-weight:600;text-align:right}
+    .ap-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    /* Véhicule ligne */
+    .ap-veh-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--border)}
+    .ap-veh-ico{width:28px;height:28px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px}
+    .ap-veh-ico-elec{background:#E3F2FD;color:#1565C0}
+    .ap-veh-ico-therm{background:#FFF3E0;color:#E65C00}
+    .ap-veh-ico-hybride{background:#E8F5E9;color:#2E7D32}
+    .ap-veh-info{flex:1;min-width:0}
+    .ap-veh-nom{font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ap-veh-range{font-size:9px;color:var(--muted);font-weight:600;margin-top:1px}
+    .ap-fuel-bar{height:4px;border-radius:2px;background:var(--border);overflow:hidden;width:48px;flex-shrink:0}
+    .ap-fuel-fill{height:100%;border-radius:2px}
+    .ap-fuel-pct{font-size:9px;font-weight:800;min-width:28px;text-align:right;flex-shrink:0}
+    .ap-btn-reserver{padding:5px 10px;border-radius:20px;background:var(--orange);color:white;font-size:9px;font-weight:800;border:none;cursor:pointer;white-space:nowrap;font-family:'Nunito',sans-serif;text-decoration:none;display:inline-flex;align-items:center}
+    /* Leo&Go véhicule card */
+    .ap-leo-card{background:var(--white);border-radius:13px;border:1.5px solid var(--border);margin-bottom:6px;padding:10px 12px;display:flex;align-items:center;gap:8px}
   </style>
 </head>
 <body>
@@ -343,6 +375,7 @@
       <div class="nav-tabs">
         <div class="ntab" id="tab-vv" onclick="switchSub('vv')">🚲 Vélo'v</div>
         <div class="ntab" id="tab-tcl" onclick="switchSub('tcl')">🚇 TCL</div>
+        <div class="ntab" id="tab-ap" onclick="switchSub('ap')">🚗 Autopartage</div>
       </div>
     </div>
   </div>
@@ -548,6 +581,129 @@ async function loadData() {
   }
 }
 
+// ── AUTOPARTAGE ──
+function propIcon(propulsion) {
+  if (!propulsion) return '🚗';
+  const p = propulsion.toLowerCase();
+  if (p.includes('electric')) return '🔋';
+  if (p.includes('hybrid')) return '⚡';
+  return '⛽';
+}
+
+function propClass(propulsion) {
+  if (!propulsion) return 'ap-veh-ico-therm';
+  const p = propulsion.toLowerCase();
+  if (p.includes('electric')) return 'ap-veh-ico-elec';
+  if (p.includes('hybrid')) return 'ap-veh-ico-hybride';
+  return 'ap-veh-ico-therm';
+}
+
+function fuelColor(pct) {
+  if (pct >= 60) return 'var(--green)';
+  if (pct >= 30) return 'var(--amber)';
+  return 'var(--red)';
+}
+
+function renderAutopartage(el, q) {
+  const ap = data.autopartage || {};
+  const citiz = ap.citiz || [];
+  const leoandgo = ap.leoandgo || [];
+  let html = '';
+
+  // ── CITIZ LPA ──
+  const citizFiltered = q
+    ? citiz.filter(s => (s.nom||'').toLowerCase().includes(q) || (s.adresse||'').toLowerCase().includes(q))
+    : citiz;
+
+  html += `<div class="ap-section-lbl">🚗 Citiz LPA · stations · ${citiz.filter(s=>s.nb_dispo>0).length} avec véhicules</div>`;
+
+  if (citizFiltered.length) {
+    citizFiltered.forEach(s => {
+      const hasDispo = s.nb_dispo > 0;
+      const dotC = hasDispo ? 'bg-green' : 'bg-gray';
+      const nbC = hasDispo ? 'c-green' : 'c-gray';
+      const navUrl = s.lat && s.lng
+        ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}` : '#';
+      const distBadge = nearActive && s._dist != null ? ` · ${fmtDist(s._dist)}` : '';
+
+      html += `<div class="ap-card ${hasDispo ? 'has-dispo' : ''}">
+        <div class="ap-station-row">
+          <div class="ap-logo ap-logo-citiz">Ctz</div>
+          <div class="ap-info">
+            <div class="ap-nom">${s.nom}</div>
+            <div class="ap-meta">${s.adresse || ''}${distBadge}</div>
+          </div>
+          <div class="ap-right">
+            <div>
+              <div class="ap-nb ${nbC}">${s.nb_dispo}</div>
+              <div class="ap-cap">/ ${s.capacite || '?'}</div>
+            </div>
+            <div class="ap-dot ${dotC}"></div>
+          </div>
+        </div>`;
+
+      if (s.vehicules && s.vehicules.length) {
+        s.vehicules.forEach(v => {
+          const pct = v.carburant || 0;
+          const rangeStr = v.autonomie_km ? `${v.autonomie_km} km` : `${pct}%`;
+          html += `<div class="ap-veh-row">
+            <div class="ap-veh-ico ${propClass(v.propulsion)}">${propIcon(v.propulsion)}</div>
+            <div class="ap-veh-info">
+              <div class="ap-veh-nom">${v.nom}</div>
+              <div class="ap-veh-range">${rangeStr}</div>
+            </div>
+            <div class="ap-fuel-bar"><div class="ap-fuel-fill" style="width:${pct}%;background:${fuelColor(pct)}"></div></div>
+            <div class="ap-fuel-pct" style="color:${fuelColor(pct)}">${pct}%</div>
+            <a href="${navUrl}" target="_blank" rel="noopener" class="ap-btn-reserver">🗺 Y aller</a>
+            <a href="https://www.citiz.coop/nos-agences/citiz-lyon" target="_blank" rel="noopener" class="ap-btn-reserver" style="background:var(--orange-light);color:var(--orange-dark);border:1px solid var(--orange-border)">Réserver</a>
+          </div>`;
+        });
+      } else if (!hasDispo) {
+        html += `<div style="padding:8px 12px 10px;font-size:10px;color:var(--muted);font-style:italic">Aucun véhicule disponible</div>`;
+      }
+      html += `</div>`;
+    });
+  } else {
+    html += `<div class="empty-msg">Aucune station Citiz trouvée</div>`;
+  }
+
+  // ── LEO&GO ──
+  const leoFiltered = q
+    ? leoandgo.filter(v => (v.nom||'').toLowerCase().includes(q))
+    : leoandgo;
+
+  const leoWithDist = nearActive && userLat !== null
+    ? leoFiltered.map(v => ({...v, _dist: haversine(userLat, userLng, v.lat, v.lng)})).sort((a,b) => a._dist - b._dist)
+    : leoFiltered;
+
+  html += `<div class="ap-section-lbl" style="margin-top:4px">🚗 Leo&Go · free-floating · ${leoandgo.length} véhicules disponibles</div>`;
+
+  if (leoWithDist.length) {
+    leoWithDist.slice(0, 30).forEach(v => {
+      const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${v.lat},${v.lng}`;
+      const distBadge = v._dist != null ? `· ${fmtDist(v._dist)}` : '';
+      const rangeStr = v.autonomie_km ? `${v.autonomie_km} km` : '—';
+      html += `<div class="ap-leo-card">
+        <div class="ap-logo ap-logo-leo">L&G</div>
+        <div class="ap-veh-ico ${propClass(v.propulsion)}" style="flex-shrink:0">${propIcon(v.propulsion)}</div>
+        <div class="ap-info">
+          <div class="ap-nom">${v.nom}</div>
+          <div class="ap-meta">Autonomie ${rangeStr} ${distBadge}</div>
+        </div>
+        <a href="${navUrl}" target="_blank" rel="noopener" class="ap-btn-reserver">🗺 Y aller</a>
+        <a href="https://app.leoandgo.com" target="_blank" rel="noopener" class="ap-btn-reserver" style="background:var(--orange-light);color:var(--orange-dark);border:1px solid var(--orange-border)">Réserver</a>
+      </div>`;
+    });
+    if (leoWithDist.length > 30) {
+      html += `<div style="text-align:center;font-size:10px;color:var(--muted);padding:6px 0">… et ${leoWithDist.length - 30} autres véhicules disponibles</div>`;
+    }
+  } else {
+    html += `<div class="empty-msg">Aucun véhicule Leo&Go disponible</div>`;
+  }
+
+  el.innerHTML = html;
+}
+
 // ── NAVIGATION ──
 function switchSub(s) {
   if (selected) closeDetail();
@@ -556,7 +712,7 @@ function switchSub(s) {
   nearActive = false;
   const nearBtn = document.getElementById('near-btn');
   if (nearBtn) { nearBtn.classList.remove('on'); nearBtn.style.display = (s === 'tcl') ? 'none' : ''; }
-  const statTabs = ['pr','pk','ve'], depTabs = ['vv','tcl'];
+  const statTabs = ['pr','pk','ve'], depTabs = ['vv','tcl','ap'];
   const isStat = statTabs.includes(s);
   document.getElementById('lbl-stat').className = 'nav-lbl' + (isStat ? ' active' : '');
   document.getElementById('lbl-dep').className  = 'nav-lbl' + (!isStat ? ' active' : '');
@@ -667,6 +823,12 @@ function renderList() {
   else if (sub === 'pk') list = data.parkings?.operateurs || [];
   else if (sub === 'vv') list = (data.velov || []).filter(v => v.nom && v.nom.trim() !== '');
   else if (sub === 've') list = data.bornes || [];
+  else if (sub === 'ap') {
+    // Rendu autopartage géré séparément
+    renderAutopartage(el, q);
+    el.insertAdjacentHTML('beforeend', `<div class="legal"><a href="https://data.grandlyon.com" target="_blank">Grand Lyon Open Data</a> — <a href="https://transport.data.gouv.fr/resources/licence-mobilites" target="_blank">Licence Mobilités</a> · © Grand Lyon — SYTRAL</div>`);
+    return;
+  }
 
   if (q) list = list.filter(p => (p.nom||'').toLowerCase().includes(q) || (p.adresse||'').toLowerCase().includes(q));
 
@@ -682,8 +844,7 @@ function renderList() {
     list = list.map(p => ({...p, _dist: haversine(userLat, userLng, p.lat, p.lng)}));
     list.sort((a, b) => (a._dist||99999) - (b._dist||99999));
   }
-  if (!list.length && sub !== 've') {
-    // Afficher quand même le titre avec les boutons pour pouvoir désactiver le filtre
+  if (!list.length && sub !== 've' && sub !== 'ap') {
     const lbl = sub === 'pr' ? '🚇 P+R TCL' : sub === 'pk' ? '🅿 Autres parkings' : "🚲 Vélo'v";
     el.innerHTML = `<div class="sec-lbl">${lbl}${ctxBtns(sub)}</div><div class="empty-msg">Aucun résultat — désactive le filtre ci-dessus</div>`;
     return;
