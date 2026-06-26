@@ -49,22 +49,25 @@
     .ntab.active{background:var(--orange);color:white;border-color:var(--orange)}
     .ntab.line-on{background:var(--orange-light);color:var(--orange-dark);border-color:var(--orange-border)}
 
-    /* ── ZONES FILTRES ── */
-    .zone1-row{display:flex;gap:5px;padding:6px 12px;background:var(--white);border-bottom:1px solid var(--border)}
-    .zone1-search{display:flex;gap:5px;padding:5px 12px;background:var(--white);border-bottom:1px solid var(--border);align-items:center}
-    .zone2-row{display:flex;gap:5px;padding:5px 12px;background:var(--cream);border-bottom:1px solid var(--border);flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    /* ── BLOC FILTRE VOIR ── */
+    .filter-block{display:flex;align-items:stretch;background:var(--white);border:0.5px solid var(--border);border-radius:12px;margin:6px 10px;overflow:hidden}
+    .filter-voir{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 7px;background:var(--orange-light);border-right:0.5px solid var(--orange-border);gap:1px;flex-shrink:0}
+    .filter-voir span{font-size:9px;font-weight:900;color:var(--orange-dark);line-height:1.2}
+    .filter-zones{flex:1;display:flex;flex-direction:column;min-width:0}
+    .zone1-row{display:flex;gap:4px;padding:4px 8px;align-items:center;border-bottom:0.5px solid var(--border)}
+    .zone1-search{display:flex;gap:5px;padding:4px 8px;align-items:center;border-bottom:0.5px solid var(--border)}
+    .zone2-row{display:flex;gap:4px;padding:4px 8px;align-items:center;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
     .zone2-row::-webkit-scrollbar{display:none}
-    .zone2-sep{width:1px;height:16px;background:var(--border);flex-shrink:0;align-self:center}
-    .fbtn{padding:6px 11px;border-radius:20px;cursor:pointer;border:1.5px solid var(--orange-border);background:var(--white);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:4px;flex-shrink:0}
+    .zone2-sep{width:0.5px;height:14px;background:var(--border);flex-shrink:0;align-self:center}
+    .fbtn{padding:4px 10px;border-radius:20px;cursor:pointer;border:1.5px solid var(--border);background:var(--white);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:4px;flex-shrink:0;line-height:1}
     .fbtn.on{background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
-    .fbtn.map-fbtn{background:var(--white);border-color:#1565C0;color:#1565C0}
+    .fbtn.map-fbtn{border-color:#1565C0;color:#1565C0}
     .fbtn.map-fbtn.on{background:#E3F2FD;border-color:#1565C0;color:#1565C0}
-    .fbtn.search-fbtn{padding:6px 10px}
-    .search-input-inline{flex:1;background:var(--white);border:1.5px solid var(--orange-border);border-radius:10px;padding:7px 12px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;color:var(--text);outline:none}
+    .fbtn.search-fbtn{padding:4px 8px}
+    .search-input-inline{flex:1;background:var(--white);border:1.5px solid var(--orange-border);border-radius:10px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;color:var(--text);outline:none}
     .search-input-inline::placeholder{color:var(--muted)}
-    .search-close-btn{padding:6px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);cursor:pointer;flex-shrink:0}
-    /* compat ancien code */
-    .fav-btn{padding:9px 12px;border-radius:10px;cursor:pointer;border:1.5px solid var(--orange-border);background:var(--white);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);white-space:nowrap;transition:all .2s}
+    .search-close-btn{padding:4px 8px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);cursor:pointer;flex-shrink:0}
+    .fav-btn{padding:4px 10px;border-radius:20px;cursor:pointer;border:1.5px solid var(--border);background:var(--white);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);white-space:nowrap;transition:all .2s}
     .fav-btn.on{background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
 
     /* ── MAIN ── */
@@ -390,17 +393,22 @@
       </div>
     </div>
   </div>
-  <div class="zone1-row" id="zone1">
-    <button class="fbtn map-fbtn" id="map-btn" onclick="toggleMap()">🗺 Carte</button>
-    <button class="fbtn" id="near-btn" onclick="nearMe()">📍 Près de moi</button>
-    <button class="fbtn" id="dist-btn" onclick="toggleDist()">&lt;200m</button>
-    <button class="fbtn search-fbtn" id="search-btn" onclick="toggleSearch()" aria-label="Rechercher">🔍</button>
+  <div class="filter-block" id="filter-block">
+    <div class="filter-voir"><span>V</span><span>O</span><span>I</span><span>R</span></div>
+    <div class="filter-zones">
+      <div class="zone1-row" id="zone1">
+        <button class="fbtn map-fbtn" id="map-btn" onclick="toggleMap()">🗺 Carte</button>
+        <button class="fbtn" id="near-btn" onclick="nearMe()">📍 Près de moi</button>
+        <button class="fbtn" id="dist-btn" onclick="toggleDist()">&lt;200m</button>
+        <button class="fbtn search-fbtn" id="search-btn" onclick="toggleSearch()" aria-label="Rechercher">🔍</button>
+      </div>
+      <div class="zone1-search" id="zone1-search" style="display:none">
+        <input class="search-input-inline" id="search" type="text" placeholder="Rechercher..." oninput="renderList()" autocomplete="off"/>
+        <button class="search-close-btn" onclick="toggleSearch()">✕</button>
+      </div>
+      <div class="zone2-row" id="zone2"></div>
+    </div>
   </div>
-  <div class="zone1-search" id="zone1-search" style="display:none">
-    <input class="search-input-inline" id="search" type="text" placeholder="Rechercher..." oninput="renderList()" autocomplete="off"/>
-    <button class="search-close-btn" onclick="toggleSearch()">✕</button>
-  </div>
-  <div class="zone2-row" id="zone2"></div>
 </div>
 
 <!-- MAIN -->
@@ -808,18 +816,9 @@ function switchSub(s) {
   });
   mapLayers = {pr:s==='pr', pk:s==='pk', vv:s==='vv', ve:s==='ve', ap:s==='ap'};
   updateMapToggleUI();
-  // Masquer zone1 et zone2 pour TCL
-  const z1 = document.getElementById('zone1');
-  const z2 = document.getElementById('zone2');
-  const z1s = document.getElementById('zone1-search');
-  if (s === 'tcl') {
-    if (z1) z1.style.display = 'none';
-    if (z2) z2.style.display = 'none';
-    if (z1s) z1s.style.display = 'none';
-  } else {
-    if (z1) z1.style.display = 'flex';
-    if (z2) z2.style.display = 'flex';
-  }
+  // Masquer filter-block pour TCL
+  const fb = document.getElementById('filter-block');
+  if (fb) fb.style.display = s === 'tcl' ? 'none' : 'flex';
   renderZone2(s);
   renderList();
   if (map) renderMap();
@@ -1083,7 +1082,26 @@ function renderList() {
   }
 
   html += `<div class="legal"><a href="https://data.grandlyon.com" target="_blank">Grand Lyon Open Data</a> — <a href="https://transport.data.gouv.fr/resources/licence-mobilites" target="_blank">Licence Mobilités</a> · © Grand Lyon — SYTRAL</div>`;
+  // Restaurer les accordéons ouverts
+  const openIds = [];
+  el.querySelectorAll('.pk-expanded.open, .ve-expanded.open').forEach(exp => {
+    const card = exp.closest('[data-id]');
+    if (card) openIds.push(card.dataset.id);
+  });
+
   el.innerHTML = html;
+
+  // Réouvrir les accordéons qui étaient ouverts
+  if (openIds.length) {
+    openIds.forEach(id => {
+      const card = el.querySelector(`[data-id="${id}"]`);
+      if (!card) return;
+      const exp = card.querySelector('.pk-expanded, .ve-expanded');
+      const ch  = card.querySelector('.pk-chevron');
+      if (exp) { exp.classList.add('open'); }
+      if (ch)  { ch.classList.add('open'); }
+    });
+  }
 }
 
 // ── HTML PARKING ACCORDION ──
@@ -1121,7 +1139,7 @@ function pkHTML(p) {
   // Contenu déplié
   const expanded = pkExpandedHTML(p, s, cap, nb);
 
-  return `<div class="pk-card ${fav ? 'favori' : ''} ${(nb === null || nb < 0) ? 'dim' : ''}">
+  return `<div class="pk-card ${fav ? 'favori' : ''} ${(nb === null || nb < 0) ? 'dim' : ''}" data-id="${p.id}">
     <div class="pk-row" onclick="toggleAccordion(this)">
       <button class="star-btn ${fav ? 'on' : ''}" onclick="toggleFav('${p.id}',event)" ontouchend="toggleFav('${p.id}',event)">${fav ? '★' : '☆'}</button>
       <div class="pk-logo" style="background:${logoBg};color:${logoFg}">${logoLbl}</div>
@@ -1312,7 +1330,7 @@ function vvHTML(v) {
     </div>
     ${adrBloc}`;
 
-  return `<div class="pk-card ${fav ? 'favori' : ''}">
+  return `<div class="pk-card ${fav ? 'favori' : ''}" data-id="${p.id}">
     <div class="pk-row" onclick="toggleAccordion(this)">
       <button class="star-btn ${fav ? 'on' : ''}" onclick="toggleFav('${v.id}',event)" ontouchend="toggleFav('${v.id}',event)">${fav ? '★' : '☆'}</button>
       <div class="pk-logo" style="background:var(--vv-bg);color:var(--vv-txt)">V'</div>
@@ -1443,7 +1461,7 @@ function borneGroupHTML(g, showDist) {
 
   const expanded = renderGroups([g], showDist);
 
-  return `<div class="ve-card">
+  return `<div class="ve-card" data-id="${g.lieu}">
     <div class="ve-row" onclick="toggleVeAccordion(this)">
       <div class="ve-icon ${iconCls}"><div class="borne-disc">⚡</div></div>
       <div class="ve-info">
