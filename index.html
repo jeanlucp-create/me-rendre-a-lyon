@@ -1379,7 +1379,6 @@ function renderGroups(groups, showDist) {
   let h = '';
   groups.forEach(g => {
     const navUrl  = g.lat && g.lng ? `https://www.google.com/maps/dir/?api=1&destination=${g.lat},${g.lng}` : '#';
-    const dispoUrl = g.lat && g.lng ? `https://www.google.com/maps/search/borne+recharge/@${g.lat},${g.lng},17z` : '#';
     const accBadge  = g.acc && g.acc !== 'Accès libre'
       ? `<span style="font-size:8px;color:var(--muted);font-weight:700"> · ${g.acc}</span>` : '';
     const distBadge = showDist && g.dist != null
@@ -1400,10 +1399,7 @@ function renderGroups(groups, showDist) {
           <span class="op-group-name">${g.lieu}</span>
           <span style="font-size:9px;color:var(--muted);font-weight:600"> · ${g.op}</span>${accBadge}${distBadge}
         </div>
-        <div style="display:flex;gap:4px;flex-shrink:0;margin-left:6px">
-          <a href="${navUrl}" target="_blank" rel="noopener" style="padding:4px 10px;border-radius:20px;background:var(--orange);color:white;font-size:9px;font-weight:800;text-decoration:none;white-space:nowrap">🗺 Y aller</a>
-          <a href="${dispoUrl}" target="_blank" rel="noopener" style="padding:4px 10px;border-radius:20px;background:white;border:1.5px solid var(--orange-border);color:var(--orange-dark);font-size:9px;font-weight:800;text-decoration:none;white-space:nowrap">Dispo</a>
-        </div>
+        <a href="${navUrl}" target="_blank" rel="noopener" style="padding:4px 10px;border-radius:20px;background:var(--orange);color:white;font-size:9px;font-weight:800;text-decoration:none;white-space:nowrap;flex-shrink:0;margin-left:6px">🗺 Y aller</a>
       </div>`;
     g.stations.forEach(b => {
       const kw  = b.puissance_max_kw || 0;
