@@ -54,20 +54,22 @@
     .filter-voir{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 7px;background:var(--orange-light);border-right:0.5px solid var(--orange-border);gap:1px;flex-shrink:0}
     .filter-voir span{font-size:9px;font-weight:900;color:var(--orange-dark);line-height:1.2}
     .filter-zones{flex:1;display:flex;flex-direction:column;min-width:0}
+    /* ── ZONES FILTRES ── */
     .zone1-row{display:flex;gap:4px;padding:4px 8px;align-items:center;border-bottom:0.5px solid var(--border)}
-    .zone1-search{display:flex;gap:5px;padding:4px 8px;align-items:center;border-bottom:0.5px solid var(--border)}
+    .zone1-search{display:flex;gap:5px;padding:5px 12px;background:var(--white);border-bottom:1px solid var(--border);align-items:center}
     .zone2-row{display:flex;gap:4px;padding:4px 8px;align-items:center;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
     .zone2-row::-webkit-scrollbar{display:none}
-    .zone2-sep{width:0.5px;height:14px;background:var(--border);flex-shrink:0;align-self:center}
-    .fbtn{padding:4px 10px;border-radius:20px;cursor:pointer;border:1.5px solid var(--border);background:var(--white);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:4px;flex-shrink:0;line-height:1}
+    .zone2-sep{width:1px;height:16px;background:var(--border);flex-shrink:0;align-self:center}
+    .fbtn{padding:4px 10px;border-radius:20px;cursor:pointer;border:1.5px solid var(--orange-border);background:var(--white);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:4px;flex-shrink:0}
     .fbtn.on{background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
-    .fbtn.map-fbtn{border-color:#1565C0;color:#1565C0}
+    .fbtn.map-fbtn{background:var(--white);border-color:#1565C0;color:#1565C0}
     .fbtn.map-fbtn.on{background:#E3F2FD;border-color:#1565C0;color:#1565C0}
-    .fbtn.search-fbtn{padding:4px 8px}
-    .search-input-inline{flex:1;background:var(--white);border:1.5px solid var(--orange-border);border-radius:10px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;color:var(--text);outline:none}
+    .fbtn.search-fbtn{padding:6px 10px}
+    .search-input-inline{flex:1;background:var(--white);border:1.5px solid var(--orange-border);border-radius:10px;padding:7px 12px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;color:var(--text);outline:none}
     .search-input-inline::placeholder{color:var(--muted)}
-    .search-close-btn{padding:4px 8px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);cursor:pointer;flex-shrink:0}
-    .fav-btn{padding:4px 10px;border-radius:20px;cursor:pointer;border:1.5px solid var(--border);background:var(--white);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);white-space:nowrap;transition:all .2s}
+    .search-close-btn{padding:6px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);cursor:pointer;flex-shrink:0}
+    /* compat ancien code */
+    .fav-btn{padding:9px 12px;border-radius:10px;cursor:pointer;border:1.5px solid var(--orange-border);background:var(--white);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;color:var(--muted);white-space:nowrap;transition:all .2s}
     .fav-btn.on{background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
 
     /* ── MAIN ── */
@@ -512,7 +514,6 @@
 <script>
 const WORKER = 'https://me-rendre-a-lyon.jean-luc-perrotto.workers.dev';
 let data = {parkings:{tcl:[],operateurs:[]},velov:[],bornes:[]};
-let lastRenderedSub = null;
 let sub = 'pr';
 let mapVisible = false, fromMap = false;
 let ctxFilters = {
@@ -599,17 +600,22 @@ async function loadData() {
   document.getElementById('err-zone').innerHTML = '';
   try {
     let r, lastErr;
+    // Chargement prioritaire : on affiche dès que les données arrivent
     for (let attempt = 0; attempt < 3; attempt++) {
       try { r = await fetch(WORKER); if (r.ok) break; lastErr = new Error('Erreur HTTP ' + r.status); }
       catch(e) { lastErr = e; if (attempt < 2) await new Promise(res => setTimeout(res, 1200*(attempt+1))); }
     }
     if (!r || !r.ok) throw lastErr || new Error('Impossible de joindre le serveur');
+    // Stream JSON : afficher P+R dès que possible
     const raw = await r.json();
+    // Afficher P+R en premier
     data.parkings = raw.parkings || {tcl:[], operateurs:[]};
     data.velov = raw.velov || [];
+    renderList();
+    // Puis injecter bornes et autopartage
     data.bornes = raw.bornes || [];
     data.autopartage = raw.autopartage || {citiz:[], leoandgo:[]};
-    renderList();
+    if (sub === 've' || sub === 'ap') renderList();
     if (map) renderMap();
   } catch(e) {
     document.getElementById('err-zone').innerHTML =
@@ -823,6 +829,18 @@ function switchSub(s) {
   });
   mapLayers = {pr:s==='pr', pk:s==='pk', vv:s==='vv', ve:s==='ve', ap:s==='ap'};
   updateMapToggleUI();
+  // Masquer zone1 et zone2 pour TCL
+  const z1 = document.getElementById('zone1');
+  const z2 = document.getElementById('zone2');
+  const z1s = document.getElementById('zone1-search');
+  if (s === 'tcl') {
+    if (z1) z1.style.display = 'none';
+    if (z2) z2.style.display = 'none';
+    if (z1s) z1s.style.display = 'none';
+  } else {
+    if (z1) z1.style.display = 'flex';
+    if (z2) z2.style.display = 'flex';
+  }
   // Masquer filter-block pour TCL
   const fb = document.getElementById('filter-block');
   if (fb) fb.style.display = s === 'tcl' ? 'none' : 'flex';
@@ -957,42 +975,41 @@ function toggleSearch() {
   else { inp.value = ''; renderList(); }
 }
 
+// ── PRÉSERVATION ACCORDÉONS ──
+function setHtmlPreservingAccordions(el, html) {
+  // Sauvegarder les IDs des accordéons ouverts
+  const openIds = new Set();
+  el.querySelectorAll('[data-id]').forEach(card => {
+    const exp = card.querySelector('.pk-expanded, .ve-expanded, .ap-expanded');
+    if (exp && (exp.classList.contains('open') || exp.style.display === 'block')) {
+      openIds.add(card.dataset.id);
+    }
+  });
+  // Remplacer le HTML
+  el.innerHTML = html;
+  // Restaurer les accordéons ouverts
+  if (openIds.size > 0) {
+    el.querySelectorAll('[data-id]').forEach(card => {
+      if (!openIds.has(card.dataset.id)) return;
+      const exp = card.querySelector('.pk-expanded, .ve-expanded, .ap-expanded');
+      const ch  = card.querySelector('.pk-chevron');
+      if (exp) {
+        if (exp.classList.contains('ap-expanded')) exp.style.display = 'block';
+        else exp.classList.add('open');
+      }
+      if (ch) ch.classList.add('open');
+    });
+  }
+}
+
 // ── RENDU LISTE ──
 function ctxBtns(ctx, totalLabel) {
   return '';
 }
 
-function setHtmlPreservingAccordions(el, html) {
-  // Ne préserver les accordéons QUE si on reste sur le même onglet
-  const openIds = [];
-  if (lastRenderedSub === sub) {
-    el.querySelectorAll('[data-id]').forEach(card => {
-      const exp = card.querySelector('.pk-expanded, .ve-expanded, .ap-expanded');
-      if (exp && (exp.classList.contains('open') || exp.style.display === 'block')) {
-        openIds.push(card.dataset.id);
-      }
-    });
-  }
-  el.innerHTML = html;
-  lastRenderedSub = sub;
-  // Restaurer les accordéons si même onglet
-  openIds.forEach(id => {
-    const card = el.querySelector(`[data-id="${id}"]`);
-    if (!card) return;
-    const exp = card.querySelector('.pk-expanded, .ve-expanded, .ap-expanded');
-    const ch  = card.querySelector('.pk-chevron');
-    if (exp) {
-      if (exp.classList.contains('ap-expanded')) exp.style.display = 'block';
-      else exp.classList.add('open');
-    }
-    if (ch) ch.classList.add('open');
-  });
-}
-
 function renderList() {
   const q = document.getElementById('search').value.toLowerCase().trim();
   const el = document.getElementById('item-list');
-
 
   if (sub === 'tcl') {
     el.innerHTML = `
@@ -1032,9 +1049,9 @@ function renderList() {
     if (sub === 'pr' || sub === 'pk') list = list.filter(p => (p.places_disponibles||0) > 0);
     else if (sub === 'vv') list = list.filter(v => (v.velos_dispo||0) > 0);
   }
-  // Filtres Vélo'v
-  if (sub === 'vv' && !cf.meca && cf.elec) list = list.filter(v => (v.velos_elec||0) > 0);
+  // Filtres Vélo'v meca/elec
   if (sub === 'vv' && cf.meca && !cf.elec) list = list.filter(v => (v.velos_meca||0) > 0);
+  if (sub === 'vv' && !cf.meca && cf.elec) list = list.filter(v => (v.velos_elec||0) > 0);
   // Filtre Bornes accès libre
   if (sub === 've' && cf.libre) list = list.filter(b => (b.condition_acces||'').toLowerCase().includes('libre'));
   // Filtre Bornes charge rapide (>50 kW)
@@ -1088,21 +1105,32 @@ function renderList() {
     rest.forEach(v => html += vvHTML(v));
     html += `</div>`;
   } else if (sub === 've') {
-    // Regrouper par adresse — pas de séparation par puissance
+    // Regrouper par lieu/opérateur/accès, puis trier par catégorie
     const listWithDist = nearActive && userLat !== null
       ? list.map(b => ({...b, _dist: b._dist !== undefined ? b._dist : haversine(userLat, userLng, b.lat, b.lng)}))
       : list;
     const groups = buildGroups(listWithDist);
-    // Trier par distance si "Près de moi", sinon alphabétique
-    if (nearActive && userLat !== null) {
-      groups.sort((a, b) => (a.dist||99999) - (b.dist||99999));
-    }
-    const total = groups.length;
-    if (total) {
-      html += `<div class="sec-lbl">⚡ Bornes de recharge · ${total} stations</div><div class="parking-list">`;
-      groups.slice(0, 80).forEach(g => html += borneGroupHTML(g, nearActive));
+    // Trier les groupes par catégorie dominante de leur première borne
+    const catOrder = {rapide:0, acceleree:1, normale:2};
+    const getGroupCat = g => g.stations[0]?.categorie || 'normale';
+    groups.sort((a, b) => (catOrder[getGroupCat(a)]||2) - (catOrder[getGroupCat(b)]||2));
+    const rapideGrp   = groups.filter(g => getGroupCat(g) === 'rapide');
+    const accelereeGrp = groups.filter(g => getGroupCat(g) === 'acceleree');
+    const normaleGrp  = groups.filter(g => getGroupCat(g) === 'normale');
+    if (rapideGrp.length) {
+      html += `<div class="sec-lbl">⚡ Charge rapide (≥ 50 kW) · ${rapideGrp.length}</div><div class="parking-list">`;
+      rapideGrp.forEach(g => html += borneGroupHTML(g, nearActive));
       html += `</div>`;
-      if (total > 80) html += `<div style="text-align:center;font-size:10px;color:var(--muted);padding:6px 0">… et ${total - 80} autres stations — affinez avec les filtres ou "Près de moi"</div>`;
+    }
+    if (accelereeGrp.length) {
+      html += `<div class="sec-lbl">⚡ Charge accélérée (22–50 kW) · ${accelereeGrp.length}</div><div class="parking-list">`;
+      accelereeGrp.forEach(g => html += borneGroupHTML(g, nearActive));
+      html += `</div>`;
+    }
+    if (normaleGrp.length) {
+      html += `<div class="sec-lbl">⚡ Charge normale (< 22 kW) · ${normaleGrp.length}</div><div class="parking-list">`;
+      normaleGrp.slice(0, 60).forEach(g => html += borneGroupHTML(g, nearActive));
+      html += `</div>`;
     }
     html += `<div style="text-align:center;font-size:10px;color:var(--muted);padding:8px 0">Source : Base nationale IRVE · transport.data.gouv.fr · Données statiques</div>`;
   }
@@ -1337,7 +1365,7 @@ function vvHTML(v) {
     </div>
     ${adrBloc}`;
 
-  return `<div class="pk-card ${fav ? 'favori' : ''}" data-id="${p.id}">
+  return `<div class="pk-card ${fav ? 'favori' : ''}" data-id="${v.id}">
     <div class="pk-row" onclick="toggleAccordion(this)">
       <button class="star-btn ${fav ? 'on' : ''}" onclick="toggleFav('${v.id}',event)" ontouchend="toggleFav('${v.id}',event)">${fav ? '★' : '☆'}</button>
       <div class="pk-logo" style="background:var(--vv-bg);color:var(--vv-txt)">V'</div>
@@ -1468,7 +1496,7 @@ function borneGroupHTML(g, showDist) {
 
   const expanded = renderGroups([g], showDist);
 
-  return `<div class="ve-card" data-id="${g.lieu}">
+  return `<div class="ve-card" data-id="${g.lieu.replace(/[^a-z0-9]/gi,'_')}">
     <div class="ve-row" onclick="toggleVeAccordion(this)">
       <div class="ve-icon ${iconCls}"><div class="borne-disc">⚡</div></div>
       <div class="ve-info">
@@ -1549,7 +1577,6 @@ function closeDetail() {
   if (refTimer) clearInterval(refTimer);
   document.getElementById('detail-view').style.display = 'none';
   selected = null;
-  lastRenderedSub = null; // forcer re-render complet
   if (fromMap) {
     document.getElementById('map-view').style.display = 'block';
     mapVisible = true;
@@ -1692,8 +1719,8 @@ function renderMap() {
     if (!inDist(v.lat, v.lng)) return;
     if (cf.fav && !isFav(v.id)) return;
     if (cf.dispo && (v.velos_dispo||0) <= 0) return;
-    if (!cf.meca && cf.elec && (v.velos_elec||0) <= 0) return;
     if (cf.meca && !cf.elec && (v.velos_meca||0) <= 0) return;
+    if (!cf.meca && cf.elec && (v.velos_elec||0) <= 0) return;
     addM(v.lat, v.lng, v.velos_dispo>0?colHex('green'):colHex('gray'), 22, String(v.velos_dispo), '🚲 '+v.nom, v.velos_dispo+' vélos', 'velov', '#1565C0', v.velos_meca||0, v.velos_elec||0, v.id);
   });
   if (mapLayers.ve) (data.bornes||[]).forEach(b => {
@@ -1920,7 +1947,7 @@ function copyAndReserveVelov() {
 renderZone2('pr');
 switchSub('pr');
 loadData();
-setInterval(() => { if (!selected && !mapVisible) loadData(); }, 120000); // refresh toutes les 2min
+setInterval(() => { if (!selected && !mapVisible) loadData(); }, 120000);
 (function(){ const nb = document.getElementById('near-btn'); if (nb && sub === 'tcl') nb.style.display = 'none'; })();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
