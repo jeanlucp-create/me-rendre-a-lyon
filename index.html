@@ -513,6 +513,7 @@
 const WORKER = 'https://me-rendre-a-lyon.jean-luc-perrotto.workers.dev';
 let data = {parkings:{tcl:[],operateurs:[]},velov:[],bornes:[]};
 let dataLoaded = false;
+let lastRenderedSub = null;
 let sub = 'pr';
 let mapVisible = false, fromMap = false;
 let ctxFilters = {
@@ -963,16 +964,19 @@ function ctxBtns(ctx, totalLabel) {
 }
 
 function setHtmlPreservingAccordions(el, html) {
-  // Sauvegarder les accordéons ouverts
+  // Ne préserver les accordéons QUE si on reste sur le même onglet
   const openIds = [];
-  el.querySelectorAll('[data-id]').forEach(card => {
-    const exp = card.querySelector('.pk-expanded, .ve-expanded, .ap-expanded');
-    if (exp && (exp.classList.contains('open') || exp.style.display === 'block')) {
-      openIds.push(card.dataset.id);
-    }
-  });
+  if (lastRenderedSub === sub) {
+    el.querySelectorAll('[data-id]').forEach(card => {
+      const exp = card.querySelector('.pk-expanded, .ve-expanded, .ap-expanded');
+      if (exp && (exp.classList.contains('open') || exp.style.display === 'block')) {
+        openIds.push(card.dataset.id);
+      }
+    });
+  }
   el.innerHTML = html;
-  // Restaurer les accordéons ouverts
+  lastRenderedSub = sub;
+  // Restaurer les accordéons si même onglet
   openIds.forEach(id => {
     const card = el.querySelector(`[data-id="${id}"]`);
     if (!card) return;
