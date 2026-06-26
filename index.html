@@ -1003,12 +1003,33 @@ function renderList() {
     rest.forEach(v => html += vvHTML(v));
     html += `</div>`;
   } else if (sub === 've') {
-    const rapides = list.filter(b => b.categorie === 'rapide');
-    const accelerees = list.filter(b => b.categorie === 'acceleree');
-    const normales = list.filter(b => b.categorie === 'normale');
-    if (rapides.length) { html += `<div class="sec-lbl">⚡ Charge rapide (≥ 50 kW) · ${rapides.length}</div><div class="parking-list">`; rapides.forEach(b => html += borneHTML(b)); html += `</div>`; }
-    if (accelerees.length) { html += `<div class="sec-lbl">⚡ Charge accélérée (22–50 kW) · ${accelerees.length}</div><div class="parking-list">`; accelerees.forEach(b => html += borneHTML(b)); html += `</div>`; }
-    if (normales.length) { html += `<div class="sec-lbl">⚡ Charge normale (< 22 kW) · ${normales.length}</div><div class="parking-list">`; normales.slice(0,60).forEach(b => html += borneHTML(b)); html += `</div>`; }
+    // Regrouper par lieu/opérateur/accès, puis trier par catégorie
+    const listWithDist = nearActive && userLat !== null
+      ? list.map(b => ({...b, _dist: b._dist !== undefined ? b._dist : haversine(userLat, userLng, b.lat, b.lng)}))
+      : list;
+    const groups = buildGroups(listWithDist);
+    // Trier les groupes par catégorie dominante de leur première borne
+    const catOrder = {rapide:0, acceleree:1, normale:2};
+    const getGroupCat = g => g.stations[0]?.categorie || 'normale';
+    groups.sort((a, b) => (catOrder[getGroupCat(a)]||2) - (catOrder[getGroupCat(b)]||2));
+    const rapideGrp   = groups.filter(g => getGroupCat(g) === 'rapide');
+    const accelereeGrp = groups.filter(g => getGroupCat(g) === 'acceleree');
+    const normaleGrp  = groups.filter(g => getGroupCat(g) === 'normale');
+    if (rapideGrp.length) {
+      html += `<div class="sec-lbl">⚡ Charge rapide (≥ 50 kW) · ${rapideGrp.length}</div><div class="parking-list">`;
+      rapideGrp.forEach(g => html += borneGroupHTML(g, nearActive));
+      html += `</div>`;
+    }
+    if (accelereeGrp.length) {
+      html += `<div class="sec-lbl">⚡ Charge accélérée (22–50 kW) · ${accelereeGrp.length}</div><div class="parking-list">`;
+      accelereeGrp.forEach(g => html += borneGroupHTML(g, nearActive));
+      html += `</div>`;
+    }
+    if (normaleGrp.length) {
+      html += `<div class="sec-lbl">⚡ Charge normale (< 22 kW) · ${normaleGrp.length}</div><div class="parking-list">`;
+      normaleGrp.slice(0, 60).forEach(g => html += borneGroupHTML(g, nearActive));
+      html += `</div>`;
+    }
     html += `<div style="text-align:center;font-size:10px;color:var(--muted);padding:8px 0">Source : Base nationale IRVE · transport.data.gouv.fr · Données statiques</div>`;
   }
 
@@ -1142,93 +1163,7 @@ function pkExpandedHTML(p, s, cap, nb) {
   html += `<div class="exp-section-lbl"><div class="borne-disc" style="width:16px;height:16px;font-size:9px">⚡</div> Bornes de recharge</div>`;
   if (bornes.length) {
 
-    // Nettoyer le nom : supprimer codes internes (BRN06, LY316, WAAT/s617830, ChargeGuru/uuid...)
-    function cleanLieu(nom) {
-      return (nom || '')
-        .replace(/^[A-Z]{2,5}\d{2,4}\s*-\s*/i, '')   // codes IZIVIA: BRN06, LY316...
-        .replace(/^[A-Z]+\/[a-z0-9\-]+$/i, '')        // codes slash: WAAT/s617830, ChargeGuru/uuid
-        .replace(/^[A-Z]+\/[a-z0-9\-]+\s+-\s+/i, '')  // WAAT/s617830 - NomStation
-        .trim();
-    }
-
-    // Normaliser le nom du parking pour la comparaison
-    function normStr(s) {
-      return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,' ').replace(/\s+/g,' ').trim();
-    }
-
-    // Déterminer si une borne est "dans" le parking (nom ou distance < 100m)
-    const pkNormWords = normStr(p.nom).split(' ').filter(w => w.length > 3);
-    function isInParking(b) {
-      // Critère 1 : distance < 100m
-      if (p.lat && p.lng && b.lat && b.lng) {
-        const dist = haversine(p.lat, p.lng, b.lat, b.lng);
-        if (dist < 100) return true;
-      }
-      // Critère 2 : nom de la borne contient des mots clés du parking
-      const bNorm = normStr(b.nom);
-      return pkNormWords.some(w => bNorm.includes(w));
-    }
-
-    // Regrouper par lieu+opérateur+accès
-    function buildGroups(bList) {
-      const groups = [];
-      const groupMap = {};
-      bList.forEach(b => {
-        let cleaned = cleanLieu(b.nom);
-        // Si cleanLieu a tout effacé (nom était un code pur), utiliser l'enseigne ou l'opérateur
-        if (!cleaned) cleaned = b.enseigne || b.operateur || b.nom || '—';
-        const lieu = cleaned.split(' - ')[0].trim();
-        const op   = (b.operateur || '—').trim();
-        const acc  = (b.condition_acces || '').trim();
-        const key  = `${lieu}||${op}||${acc}`;
-        if (!groupMap[key]) {
-          const g = { lieu, op, acc, lat: b.lat, lng: b.lng, dist: b._dist, stations: [] };
-          groupMap[key] = g;
-          groups.push(g);
-        }
-        groupMap[key].stations.push(b);
-      });
-      return groups;
-    }
-
-    function renderGroups(groups, showDist) {
-      let h = '';
-      groups.forEach(g => {
-        const navUrl = g.lat && g.lng
-          ? `https://www.google.com/maps/dir/?api=1&destination=${g.lat},${g.lng}` : '#';
-        const accBadge = g.acc && g.acc !== 'Accès libre'
-          ? `<span style="font-size:8px;color:var(--muted);font-weight:700"> · ${g.acc}</span>` : '';
-        const distBadge = showDist && g.dist != null
-          ? `<span style="font-size:8px;color:var(--muted);font-weight:600"> · ${fmtDist(g.dist)}</span>` : '';
-        h += `<div class="op-group">
-          <div class="op-group-header" style="justify-content:space-between">
-            <div style="flex:1;min-width:0;overflow:hidden">
-              <span class="op-group-name">${g.lieu}</span>
-              <span style="font-size:9px;color:var(--muted);font-weight:600"> · ${g.op}</span>${accBadge}${distBadge}
-            </div>
-            <div style="display:flex;gap:4px;flex-shrink:0;margin-left:6px">
-              <a href="${navUrl}" target="_blank" rel="noopener" style="padding:4px 10px;border-radius:20px;background:var(--orange);color:white;font-size:9px;font-weight:800;text-decoration:none;white-space:nowrap">🗺 Y aller</a>
-              <a href="https://www.google.com/maps/search/borne+recharge/@${g.lat},${g.lng},17z" target="_blank" rel="noopener" style="padding:4px 10px;border-radius:20px;background:white;border:1.5px solid var(--orange-border);color:var(--orange-dark);font-size:9px;font-weight:800;text-decoration:none;white-space:nowrap">Dispo</a>
-            </div>
-          </div>`;
-        g.stations.forEach(b => {
-          const kw  = b.puissance_max_kw || 0;
-          const kwLbl = kw > 0 ? kw + ' kW' : '—';
-          const cat = b.categorie || 'normale';
-          const prises = (b.types_prise || '').split(',').map(ss => ss.trim()).filter(Boolean);
-          const priseTags = prises.map(pr => `<span class="prise-tag">${pr}</span>`).join('');
-          const catColor = cat==='rapide'?'#2E7D32':cat==='acceleree'?'#1565C0':'#E65C00';
-          h += `<div class="op-prise-row">
-            <span class="ec" style="color:${catColor}">⚡</span>
-            <span class="op-kw ${kwClass(cat)}">${kwLbl}</span>
-            <span class="op-pts">${b.nb_points} pt${b.nb_points > 1 ? 's' : ''}</span>
-            ${priseTags}
-          </div>`;
-        });
-        h += `</div>`;
-      });
-      return h;
-    }
+    // (cleanLieu, normStr, buildGroups, renderGroups sont des fonctions globales)
 
     // Calculer la distance de chaque borne par rapport au parking
     const bornesWithDist = bornes.map(b => ({
@@ -1352,71 +1287,108 @@ function vvHTML(v) {
   </div>`;
 }
 
-// ── HTML BORNE accordion (onglet VE) ──
-function borneHTML(b) {
-  const cat = b.categorie || 'normale';
+// ── FONCTIONS GROUPES BORNES (globales, partagées) ──
+function cleanLieu(nom) {
+  return (nom || '')
+    .replace(/^[A-Z]{2,5}\d{2,4}\s*-\s*/i, '')
+    .replace(/^[A-Z]+\/[a-z0-9\-]+$/i, '')
+    .replace(/^[A-Z]+\/[a-z0-9\-]+\s+-\s+/i, '')
+    .trim();
+}
+
+function normStr(s) {
+  return (s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+}
+
+function buildGroups(bList) {
+  const groups = [], groupMap = {};
+  bList.forEach(b => {
+    let cleaned = cleanLieu(b.nom);
+    if (!cleaned) cleaned = b.enseigne || b.operateur || b.nom || '—';
+    const lieu = cleaned.split(' - ')[0].trim();
+    const op   = (b.operateur || '—').trim();
+    const acc  = (b.condition_acces || '').trim();
+    const key  = `${lieu}||${op}||${acc}`;
+    if (!groupMap[key]) {
+      const g = { lieu, op, acc, lat: b.lat, lng: b.lng, dist: b._dist,
+                  horaires: b.horaires, tarif: b.tarification, stations: [] };
+      groupMap[key] = g; groups.push(g);
+    }
+    groupMap[key].stations.push(b);
+  });
+  return groups;
+}
+
+function renderGroups(groups, showDist) {
+  let h = '';
+  groups.forEach(g => {
+    const navUrl  = g.lat && g.lng ? `https://www.google.com/maps/dir/?api=1&destination=${g.lat},${g.lng}` : '#';
+    const dispoUrl = g.lat && g.lng ? `https://www.google.com/maps/search/borne+recharge/@${g.lat},${g.lng},17z` : '#';
+    const accBadge  = g.acc && g.acc !== 'Accès libre'
+      ? `<span style="font-size:8px;color:var(--muted);font-weight:700"> · ${g.acc}</span>` : '';
+    const distBadge = showDist && g.dist != null
+      ? `<span style="font-size:8px;color:var(--muted);font-weight:600"> · ${fmtDist(g.dist)}</span>` : '';
+    const horairesRow = g.horaires && g.horaires !== '—'
+      ? `<div class="ve-detail-cell" style="grid-column:1/-1"><div class="ve-detail-lbl">Horaires</div><div class="ve-detail-val" style="font-size:11px">${g.horaires}</div></div>` : '';
+    const tarifRow = g.tarif && g.tarif !== '—'
+      ? `<div class="ve-detail-cell" style="grid-column:1/-1"><div class="ve-detail-lbl">Tarification</div><div class="ve-detail-val" style="font-size:11px">${g.tarif}</div></div>` : '';
+    const accRow = g.acc
+      ? `<div class="ve-detail-cell"><div class="ve-detail-lbl">Accès</div><div class="ve-detail-val" style="font-size:11px">${g.acc}</div></div>` : '';
+    const detailGrid = (accRow || horairesRow || tarifRow)
+      ? `<div class="ve-detail-grid" style="margin-top:8px">${accRow}${horairesRow}${tarifRow}</div>` : '';
+
+    h += `<div class="op-group">
+      <div class="op-group-header" style="justify-content:space-between">
+        <div style="flex:1;min-width:0;overflow:hidden">
+          <span class="op-group-name">${g.lieu}</span>
+          <span style="font-size:9px;color:var(--muted);font-weight:600"> · ${g.op}</span>${accBadge}${distBadge}
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0;margin-left:6px">
+          <a href="${navUrl}" target="_blank" rel="noopener" style="padding:4px 10px;border-radius:20px;background:var(--orange);color:white;font-size:9px;font-weight:800;text-decoration:none;white-space:nowrap">🗺 Y aller</a>
+          <a href="${dispoUrl}" target="_blank" rel="noopener" style="padding:4px 10px;border-radius:20px;background:white;border:1.5px solid var(--orange-border);color:var(--orange-dark);font-size:9px;font-weight:800;text-decoration:none;white-space:nowrap">Dispo</a>
+        </div>
+      </div>`;
+    g.stations.forEach(b => {
+      const kw  = b.puissance_max_kw || 0;
+      const kwLbl = kw > 0 ? kw + ' kW' : '—';
+      const cat = b.categorie || 'normale';
+      const catColor = cat==='rapide'?'#2E7D32':cat==='acceleree'?'#1565C0':'#E65C00';
+      const prises = (b.types_prise || '').split(',').map(ss => ss.trim()).filter(Boolean);
+      const priseTags = prises.map(pr => `<span class="prise-tag">${pr}</span>`).join('');
+      h += `<div class="op-prise-row">
+        <span class="ec" style="color:${catColor}">⚡</span>
+        <span class="op-kw ${kwClass(cat)}">${kwLbl}</span>
+        <span class="op-pts">${b.nb_points} pt${b.nb_points > 1 ? 's' : ''}</span>
+        ${priseTags}
+      </div>`;
+    });
+    h += detailGrid;
+    h += `</div>`;
+  });
+  return h;
+}
+
+// ── HTML BORNE accordion (onglet VE) — rendu par groupe d'adresse ──
+// borneHTML reçoit maintenant un groupe (résultat de buildGroups) pas une borne individuelle
+function borneGroupHTML(g, showDist) {
+  const cat = g.stations[0]?.categorie || 'normale';
   const iconCls = cat === 'rapide' ? 've-rapide' : cat === 'acceleree' ? 've-acceleree' : 've-normale';
-  const kwCls   = cat === 'rapide' ? 'kw-r'      : cat === 'acceleree' ? 'kw-a'        : 'kw-n';
-  const kw = b.puissance_max_kw || 0;
-  const kwLbl = kw > 0 ? kw + ' kW' : '—';
-  const distBadge = nearActive && b._dist != null
-    ? `<span class="pk-mini-gray" style="margin-left:4px">· ${fmtDist(b._dist)}</span>` : '';
+  const distBadge = showDist && nearActive && g.dist != null
+    ? `<span class="pk-mini-gray" style="margin-left:4px">· ${fmtDist(g.dist)}</span>` : '';
 
-  // Prises
-  const prises = (b.types_prise||'').split(',').map(s=>s.trim()).filter(Boolean);
-  const priseTags = prises.length
-    ? prises.map(pr=>`<span class="prise-tag">${pr}</span>`).join('')
-    : '<span class="empty-txt">Type non renseigné</span>';
-
-  // Accès
-  const accesVal = b.acces_recharge || b.condition_acces || '—';
-  // Horaires
-  const horairesVal = b.horaires || '—';
-  // Tarification
-  const tarifVal = b.tarification || '—';
-
-  // URL ChargeMap centrée sur la borne
-  const chargemapUrl = b.lat && b.lng
-    ? `https://www.chargemaps.com/#/map?lat=${b.lat}&lng=${b.lng}&zoom=17`
-    : 'https://www.chargemaps.com';
-  const navUrl = b.lat && b.lng
-    ? `geo:${b.lat},${b.lng}?q=${encodeURIComponent(b.nom||'Borne recharge')}` : '#';
-
-  const dispoUrl = b.lat && b.lng
-    ? `https://www.google.com/maps/search/borne+recharge/@${b.lat},${b.lng},17z` : '#';
-
-  const expanded = `
-    <div class="acc-act-row" style="margin-bottom:10px">
-      <a class="acc-act-btn acc-act-nav" href="${navUrl}" target="_blank" rel="noopener">📍 S'y rendre</a>
-      <a class="acc-act-btn acc-act-map" href="${dispoUrl}" target="_blank" rel="noopener">⚡ Voir dispo</a>
-    </div>
-    <div class="exp-lbl">Types de prise</div>
-    <div class="prise-tags" style="margin-bottom:10px">${priseTags}</div>
-    <div class="ve-detail-grid">
-      <div class="ve-detail-cell">
-        <div class="ve-detail-lbl">Points de charge</div>
-        <div class="ve-detail-val">${b.nb_points || '—'}</div>
-      </div>
-      <div class="ve-detail-cell">
-        <div class="ve-detail-lbl">Accès</div>
-        <div class="ve-detail-val" style="font-size:11px">${accesVal}</div>
-      </div>
-      <div class="ve-detail-cell" style="grid-column:1/-1">
-        <div class="ve-detail-lbl">Horaires</div>
-        <div class="ve-detail-val" style="font-size:11px">${horairesVal}</div>
-      </div>
-      ${tarifVal !== '—' ? `<div class="ve-detail-cell" style="grid-column:1/-1"><div class="ve-detail-lbl">Tarification</div><div class="ve-detail-val" style="font-size:11px">${tarifVal}</div></div>` : ''}
-    </div>`;
+  const expanded = renderGroups([g], showDist);
 
   return `<div class="ve-card">
     <div class="ve-row" onclick="toggleVeAccordion(this)">
       <div class="ve-icon ${iconCls}"><div class="borne-disc">⚡</div></div>
       <div class="ve-info">
-        <div class="ve-nom">${b.nom}</div>
-        <div class="ve-meta">${b.operateur||''}${b.adresse?' · '+b.adresse:''}${distBadge}</div>
+        <div class="ve-nom">${g.lieu}</div>
+        <div class="ve-meta">${g.op}${g.acc && g.acc !== 'Accès libre' ? ' · ' + g.acc : ''}${distBadge}</div>
       </div>
       <div class="ve-right">
-        <span class="ve-kw ${kwCls}">${kwLbl}</span>
+        <span class="ve-kw ${kwClass(cat)}">${g.stations[0]?.puissance_max_kw || '—'} kW</span>
         <i class="ti ti-chevron-down pk-chevron" aria-hidden="true"></i>
       </div>
     </div>
@@ -1844,3 +1816,4 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
 </script>
 </body>
 </html>
+
