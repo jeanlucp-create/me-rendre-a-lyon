@@ -1206,7 +1206,10 @@ function pkExpandedHTML(p, s, cap, nb) {
               <span class="op-group-name">${g.lieu}</span>
               <span style="font-size:9px;color:var(--muted);font-weight:600"> · ${g.op}</span>${accBadge}${distBadge}
             </div>
-            <a href="${navUrl}" target="_blank" rel="noopener" style="flex-shrink:0;padding:4px 10px;border-radius:20px;background:var(--orange);color:white;font-size:9px;font-weight:800;text-decoration:none;white-space:nowrap;margin-left:6px">🗺 Y aller</a>
+            <div style="display:flex;gap:4px;flex-shrink:0;margin-left:6px">
+              <a href="${navUrl}" target="_blank" rel="noopener" style="padding:4px 10px;border-radius:20px;background:var(--orange);color:white;font-size:9px;font-weight:800;text-decoration:none;white-space:nowrap">🗺 Y aller</a>
+              <a href="https://www.google.com/maps/search/borne+recharge/@${g.lat},${g.lng},17z" target="_blank" rel="noopener" style="padding:4px 10px;border-radius:20px;background:white;border:1.5px solid var(--orange-border);color:var(--orange-dark);font-size:9px;font-weight:800;text-decoration:none;white-space:nowrap">Dispo</a>
+            </div>
           </div>`;
         g.stations.forEach(b => {
           const kw  = b.puissance_max_kw || 0;
@@ -1214,8 +1217,9 @@ function pkExpandedHTML(p, s, cap, nb) {
           const cat = b.categorie || 'normale';
           const prises = (b.types_prise || '').split(',').map(ss => ss.trim()).filter(Boolean);
           const priseTags = prises.map(pr => `<span class="prise-tag">${pr}</span>`).join('');
+          const catColor = cat==='rapide'?'#2E7D32':cat==='acceleree'?'#1565C0':'#E65C00';
           h += `<div class="op-prise-row">
-            ${eclairs(cat)}
+            <span class="ec" style="color:${catColor}">⚡</span>
             <span class="op-kw ${kwClass(cat)}">${kwLbl}</span>
             <span class="op-pts">${b.nb_points} pt${b.nb_points > 1 ? 's' : ''}</span>
             ${priseTags}
@@ -1701,7 +1705,7 @@ function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vv
   </div>` : '';
   const cleanName = name.replace('🚲 ', '');
   const nameHtml = itemId
-    ? `<div class="lp-name" onclick="showDetailFromMap('${itemId}','${type}')">${cleanName} <span style="color:var(--orange);font-size:11px">→</span></div>`
+    ? `<div class="lp-name" onclick="showDetailFromMap('${itemId}','${type}')">${cleanName}</div>`
     : `<div class="lp-name">${cleanName}</div>`;
   const popup = L.popup({maxWidth:200, minWidth:160}).setContent(
     `<div class="lp-popup">${nameHtml}<div class="lp-num" style="color:${color}">${lbl}</div><div class="lp-sub">${sub}</div>${vvDetail}
