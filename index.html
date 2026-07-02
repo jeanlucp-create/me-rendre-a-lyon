@@ -88,6 +88,9 @@
 
     /* ── LISTE ── */
     .sec-lbl{font-size:9px;color:var(--amber);font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:8px 2px 4px;display:flex;align-items:center;gap:5px}
+    .last-update{margin-left:auto;font-size:9px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:4px;letter-spacing:0;text-transform:none}
+    .refresh-btn{background:none;border:none;cursor:pointer;font-size:10px;color:var(--muted);padding:0 2px;font-family:'Nunito',sans-serif;font-weight:800;transition:color .2s}
+    .refresh-btn:hover{color:var(--orange)}
     .sec-lbl-gray{color:var(--muted)}
     .sec-lbl-actions{margin-left:auto;display:flex;gap:4px}
     .ctx-btn{padding:3px 8px;border-radius:20px;border:1.5px solid var(--orange-border);background:var(--white);font-family:'Nunito',sans-serif;font-size:9px;font-weight:800;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .2s}
@@ -512,6 +515,20 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+// ─────────────────────────────────────────────────────────────
+// Me rendre à Lyon — v13h
+// Historique :
+//   v12a  : Autopartage (Citiz LPA + Leo&Go)
+//   v13a  : Refonte filtres — zones contextuelles VOIR
+//   v13b  : Fix isInParking global, vérification régressions
+//   v13c  : Encadré VOIR, accordéons préservés, hauteur boutons
+//   v13d  : Chargement simplifié, bornes par adresse, fix mapVisible
+//   v13e  : (instable — abandonné)
+//   v13f  : Base v13a, filtres Vélo'v Méca+Élec, setHtmlPreservingAccordions
+//   v13g  : Vélo'v/Bornes décochés par défaut en P+R/Parking,
+//           filtre recherche appliqué sur vue carte
+//   v13h  : Horodatage dernière actualisation + bouton ↻ par vue
+// ─────────────────────────────────────────────────────────────
 const WORKER = 'https://me-rendre-a-lyon.jean-luc-perrotto.workers.dev';
 let data = {parkings:{tcl:[],operateurs:[]},velov:[],bornes:[]};
 let sub = 'pr';
@@ -534,6 +551,25 @@ let mapLayers = {pr:true,pk:false,vv:false,ve:false};
 
 // ── UTILITAIRES ──
 const isFav = id => favorites.includes(String(id));
+
+// ── HORODATAGE ──
+let lastLoadTime = null;
+
+function fmtTime(d) {
+  return d ? d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '—';
+}
+
+function refreshTimestamp() {
+  lastLoadTime = new Date();
+  // Mettre à jour tous les éléments .last-update visibles
+  document.querySelectorAll('.last-update-time').forEach(el => {
+    el.textContent = fmtTime(lastLoadTime);
+  });
+}
+
+function manualRefresh() {
+  loadData();
+}
 
 function toggleFav(id, e) {
   e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
@@ -615,7 +651,9 @@ async function loadData() {
     // Puis injecter bornes et autopartage
     data.bornes = raw.bornes || [];
     data.autopartage = raw.autopartage || {citiz:[], leoandgo:[]};
+    refreshTimestamp();
     if (sub === 've' || sub === 'ap') renderList();
+    else renderList(); // re-render pour afficher l'horodatage
     if (map) renderMap();
   } catch(e) {
     document.getElementById('err-zone').innerHTML =
@@ -680,7 +718,8 @@ function renderAutopartage(el, q) {
       citiz = citiz.filter(s => haversine(userLat, userLng, s.lat, s.lng) <= distVal);
     }
 
-    html += `<div class="ap-section-lbl">🚗 Citiz LPA · ${citiz.filter(s=>s.nb_dispo>0).length} stations avec véhicules</div>`;
+    const updBadgeAp = `<span class="last-update" style="margin-left:auto">Actualisé <span class="last-update-time">${fmtTime(lastLoadTime)}</span><button class="refresh-btn" onclick="manualRefresh()" title="Actualiser">↻</button></span>`;
+    html += `<div class="ap-section-lbl">🚗 Citiz LPA · ${citiz.filter(s=>s.nb_dispo>0).length} stations avec véhicules${updBadgeAp}</div>`;
     if (citiz.length) {
       citiz.forEach(s => {
         const hasDispo = s.nb_dispo > 0;
@@ -1087,7 +1126,8 @@ function renderList() {
       favs.forEach(p => html += pkHTML(p));
       html += `</div>`;
     }
-    html += `<div class="sec-lbl${favs.length ? ' sec-lbl-gray' : ''}">${lbl} · ${open} ouverts${favs.length ? '' : ctxBtns(sub)}</div><div class="parking-list">`;
+    const updBadge = `<span class="last-update">Actualisé <span class="last-update-time">${fmtTime(lastLoadTime)}</span><button class="refresh-btn" onclick="manualRefresh()" title="Actualiser">↻</button></span>`;
+    html += `<div class="sec-lbl${favs.length ? ' sec-lbl-gray' : ''}">${lbl} · ${open} ouverts${favs.length ? '' : ctxBtns(sub)}${updBadge}</div><div class="parking-list">`;
     rest.forEach(p => html += pkHTML(p));
     html += `</div>`;
   } else if (sub === 'vv') {
@@ -1101,7 +1141,8 @@ function renderList() {
       favs.forEach(v => html += vvHTML(v));
       html += `</div>`;
     }
-    html += `<div class="sec-lbl${favs.length ? ' sec-lbl-gray' : ''}">🚲 Vélo'v · ${open} stations avec vélos${favs.length ? '' : ctxBtns('vv')}</div><div class="parking-list">`;
+    const updBadgeVv = `<span class="last-update">Actualisé <span class="last-update-time">${fmtTime(lastLoadTime)}</span><button class="refresh-btn" onclick="manualRefresh()" title="Actualiser">↻</button></span>`;
+    html += `<div class="sec-lbl${favs.length ? ' sec-lbl-gray' : ''}">🚲 Vélo'v · ${open} stations avec vélos${favs.length ? '' : ctxBtns('vv')}${updBadgeVv}</div><div class="parking-list">`;
     rest.forEach(v => html += vvHTML(v));
     html += `</div>`;
   } else if (sub === 've') {
@@ -1117,6 +1158,8 @@ function renderList() {
     const rapideGrp   = groups.filter(g => getGroupCat(g) === 'rapide');
     const accelereeGrp = groups.filter(g => getGroupCat(g) === 'acceleree');
     const normaleGrp  = groups.filter(g => getGroupCat(g) === 'normale');
+    const updBadgeVe = `<span class="last-update">Actualisé <span class="last-update-time">${fmtTime(lastLoadTime)}</span><button class="refresh-btn" onclick="manualRefresh()" title="Actualiser">↻</button></span>`;
+    html += `<div class="sec-lbl sec-lbl-gray" style="padding-bottom:2px">⚡ ${total} stations${updBadgeVe}</div>`;
     if (rapideGrp.length) {
       html += `<div class="sec-lbl">⚡ Charge rapide (≥ 50 kW) · ${rapideGrp.length}</div><div class="parking-list">`;
       rapideGrp.forEach(g => html += borneGroupHTML(g, nearActive));
