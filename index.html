@@ -517,8 +517,8 @@ let data = {parkings:{tcl:[],operateurs:[]},velov:[],bornes:[]};
 let sub = 'pr';
 let mapVisible = false, fromMap = false;
 let ctxFilters = {
-  pr: {fav:false, dispo:false, velov:true, bornes:true},
-  pk: {fav:false, dispo:false, velov:true, bornes:true},
+  pr: {fav:false, dispo:false, velov:false, bornes:false},
+  pk: {fav:false, dispo:false, velov:false, bornes:false},
   vv: {fav:false, dispo:false, elec:true, meca:true},
   ve: {fav:false, libre:false, rapide:false},
   ap: {fav:false, dispo:false, elec:true, therm:true, citiz:true, leo:true}
@@ -1695,12 +1695,19 @@ function renderMap() {
     if (!distActive || userLat === null) return true;
     return haversine(userLat, userLng, lat, lng) <= distVal;
   };
+  // Filtre recherche commun
+  const q = (document.getElementById('search')?.value || '').toLowerCase().trim();
+  const inSearch = (nom, adresse) => {
+    if (!q) return true;
+    return (nom||'').toLowerCase().includes(q) || (adresse||'').toLowerCase().includes(q);
+  };
   // Filtre dispo et favoris communs
   const cf = ctxFilters[sub] || {};
 
   if (mapLayers.pr) (data.parkings?.tcl||[]).forEach(p => {
     if (!p.lat || !p.lng) return;
     if (!inDist(p.lat, p.lng)) return;
+    if (!inSearch(p.nom, p.adresse)) return;
     if (cf.fav && !isFav(p.id)) return;
     if (cf.dispo && (p.places_disponibles||0) <= 0) return;
     const nb = p.places_disponibles, cap = p.nb_places, s = getStatus(nb, cap), fav = isFav(p.id);
@@ -1709,6 +1716,7 @@ function renderMap() {
   if (mapLayers.pk) (data.parkings?.operateurs||[]).forEach(p => {
     if (!p.lat || !p.lng) return;
     if (!inDist(p.lat, p.lng)) return;
+    if (!inSearch(p.nom, p.adresse)) return;
     if (cf.fav && !isFav(p.id)) return;
     if (cf.dispo && (p.places_disponibles||0) <= 0) return;
     const nb = p.places_disponibles, cap = p.nb_places, s = getStatus(nb, cap);
@@ -1717,6 +1725,7 @@ function renderMap() {
   if (mapLayers.vv) (data.velov||[]).filter(v => v.en_service && v.nom && v.nom.trim() !== '').forEach(v => {
     if (!v.lat || !v.lng) return;
     if (!inDist(v.lat, v.lng)) return;
+    if (!inSearch(v.nom, v.adresse)) return;
     if (cf.fav && !isFav(v.id)) return;
     if (cf.dispo && (v.velos_dispo||0) <= 0) return;
     if (cf.meca && !cf.elec && (v.velos_meca||0) <= 0) return;
@@ -1726,6 +1735,7 @@ function renderMap() {
   if (mapLayers.ve) (data.bornes||[]).forEach(b => {
     if (!b.lat || !b.lng) return;
     if (!inDist(b.lat, b.lng)) return;
+    if (!inSearch(b.nom, b.adresse)) return;
     if (cf.libre && !(b.condition_acces||'').toLowerCase().includes('libre')) return;
     if (cf.rapide && (b.puissance_max_kw||0) <= 50) return;
     const col = b.categorie==='rapide'?'#2E7D32':b.categorie==='acceleree'?'#1565C0':'#E65C00';
@@ -1740,6 +1750,7 @@ function renderMap() {
     if (cf.citiz !== false) (ap.citiz||[]).forEach(s => {
       if (!s.lat || !s.lng) return;
       if (!inDist(s.lat, s.lng)) return;
+      if (!inSearch(citizNomG(s.nom), s.adresse)) return;
       if (cf.dispo && s.nb_dispo <= 0) return;
       if (cf.elec === false && cf.therm !== false) return; // filtre type véhicule
       const col = s.nb_dispo > 0 ? colHex('green') : colHex('gray');
@@ -1749,6 +1760,7 @@ function renderMap() {
     if (cf.leo !== false) (ap.leoandgo||[]).forEach(v => {
       if (!v.lat || !v.lng) return;
       if (!inDist(v.lat, v.lng)) return;
+      if (!inSearch(v.nom, null)) return;
       addM(v.lat, v.lng, colHex('green'), 22, '🚗', v.nom, v.autonomie_km ? v.autonomie_km+'km' : '', 'leoandgo', '#E65C00', 0, 0, v.id);
     });
   }
