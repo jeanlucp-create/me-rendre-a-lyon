@@ -843,6 +843,10 @@ function switchSub(s) {
   distActive = false;
   // Toujours revenir en vue liste au changement d'onglet
   mapVisible = false;
+  // Autopartage : activer "Près de moi" automatiquement si géoloc disponible
+  if (s === 'ap' && navigator.geolocation) {
+    setTimeout(() => { if (sub === 'ap' && !nearActive) nearMe(); }, 100);
+  }
   const lv = document.getElementById('list-view');
   const mv = document.getElementById('map-view');
   const mapBtn = document.getElementById('map-btn');
@@ -1792,14 +1796,17 @@ function renderMap() {
       if (cf.dispo && s.nb_dispo <= 0) return;
       if (cf.elec === false && cf.therm !== false) return; // filtre type véhicule
       const col = s.nb_dispo > 0 ? colHex('green') : colHex('gray');
-      addM(s.lat, s.lng, col, 26, String(s.nb_dispo), citizNomG(s.nom), s.nb_dispo+' véh. dispo', 'citiz', '#00A88E', 0, 0, s.id);
+      const nbElecC = (s.vehicules||[]).filter(v => (v.propulsion||'').toLowerCase().includes('electric')).length;
+      const nbThermC = s.nb_dispo - nbElecC;
+      addM(s.lat, s.lng, col, 26, String(s.nb_dispo), citizNomG(s.nom), s.nb_dispo+' véh. dispo', 'citiz', '#00A88E', nbThermC, nbElecC, s.id);
     });
     // Leo&Go — marqueurs véhicules individuels
     if (cf.leo !== false) (ap.leoandgo||[]).forEach(v => {
       if (!v.lat || !v.lng) return;
       if (!inDist(v.lat, v.lng)) return;
       if (!inSearch(v.nom, null)) return;
-      addM(v.lat, v.lng, colHex('green'), 22, '🚗', v.nom, v.autonomie_km ? v.autonomie_km+'km' : '', 'leoandgo', '#E65C00', 0, 0, v.id);
+      const isElecL = (v.propulsion||'').toLowerCase().includes('electric');
+      addM(v.lat, v.lng, colHex('green'), 22, isElecL ? '⚡' : '⛽', v.nom, v.autonomie_km ? v.autonomie_km+'km' : 'Dispo', 'leoandgo', '#E65C00', 0, 0, v.id);
     });
   }
 }
@@ -1859,9 +1866,16 @@ function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vv
 
   const navUrl = `geo:${lat},${lng}?q=${encodeURIComponent(name)}`;
   const tclBtn = (type === 'parking_tcl' || type === 'parking_op') ? `<a href="#" onclick="openTCL(event)" class="lp-btn lp-btn-tcl">🚇 Itinéraire TCL</a>` : '';
-  const vvBtn = type === 'velov' ? `<a href="https://velov.grandlyon.com/#/map?lat=${lat}&lng=${lng}&zoom=17" target="_blank" class="lp-btn lp-btn-tcl">📋 Réserver sur Vélo'v</a>` : '';
-  const vvDetail = type === 'velov' ? `<div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
-    ${vvMeca ? `<span style="background:#FFF3EE;color:#CC5500;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #FFD9C8">⚙ ${vvMeca}</span>` : ''}
+  const vvBtn = type === 'velov'
+    ? `<a href="https://velov.grandlyon.com/#/map?lat=${lat}&lng=${lng}&zoom=17" target="_blank" class="lp-btn lp-btn-tcl">📋 Réserver sur Vélo'v</a>`
+    : type === 'citiz'
+    ? `<a href="https://www.citiz.coop" target="_blank" class="lp-btn lp-btn-tcl">🔑 Réserver Citiz</a>`
+    : type === 'leoandgo'
+    ? `<a href="https://www.leoandgo.com" target="_blank" class="lp-btn lp-btn-tcl">🔑 Réserver Leo&Go</a>`
+    : '';
+  const vvDetail = (type === 'velov' || type === 'citiz') && (vvMeca || vvElec)
+    ? `<div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
+    ${vvMeca ? `<span style="background:#FFF3EE;color:#CC5500;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #FFD9C8">${type==='velov'?'⚙':'⛽'} ${vvMeca}</span>` : ''}
     ${vvElec ? `<span style="background:#EBF4FF;color:#1565C0;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #B5D4F4">⚡ ${vvElec}</span>` : ''}
   </div>` : '';
   const cleanName = name.replace('🚲 ', '');
