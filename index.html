@@ -1,3 +1,4 @@
+<!-- Me rendre à Lyon — v13i -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -88,6 +89,9 @@
 
     /* ── LISTE ── */
     .sec-lbl{font-size:9px;color:var(--amber);font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:8px 2px 4px;display:flex;align-items:center;gap:5px}
+    .last-update{margin-left:auto;font-size:9px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:4px;letter-spacing:0;text-transform:none}
+    .refresh-btn{background:none;border:none;cursor:pointer;font-size:10px;color:var(--muted);padding:0 2px;font-family:'Nunito',sans-serif;font-weight:800;transition:color .2s}
+    .refresh-btn:hover{color:var(--orange)}
     .sec-lbl-gray{color:var(--muted)}
     .sec-lbl-actions{margin-left:auto;display:flex;gap:4px}
     .ctx-btn{padding:3px 8px;border-radius:20px;border:1.5px solid var(--orange-border);background:var(--white);font-family:'Nunito',sans-serif;font-size:9px;font-weight:800;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .2s}
@@ -512,6 +516,20 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+// ─────────────────────────────────────────────────────────────
+// Me rendre à Lyon — v13i
+// Historique :
+//   v12a  : Autopartage (Citiz LPA + Leo&Go)
+//   v13a  : Refonte filtres — zones contextuelles VOIR
+//   v13b  : Fix isInParking global, vérification régressions
+//   v13c  : Encadré VOIR, accordéons préservés, hauteur boutons
+//   v13d  : Chargement simplifié, bornes par adresse, fix mapVisible
+//   v13e  : (instable — abandonné)
+//   v13f  : Base v13a, filtres Vélo'v Méca+Élec, setHtmlPreservingAccordions
+//   v13g  : Vélo'v/Bornes décochés par défaut en P+R/Parking,
+//           filtre recherche appliqué sur vue carte
+//   v13h  : Horodatage dernière actualisation + bouton ↻ par vue
+// ─────────────────────────────────────────────────────────────
 const WORKER = 'https://me-rendre-a-lyon.jean-luc-perrotto.workers.dev';
 let data = {parkings:{tcl:[],operateurs:[]},velov:[],bornes:[]};
 let sub = 'pr';
@@ -534,6 +552,25 @@ let mapLayers = {pr:true,pk:false,vv:false,ve:false};
 
 // ── UTILITAIRES ──
 const isFav = id => favorites.includes(String(id));
+
+// ── HORODATAGE ──
+let lastLoadTime = null;
+
+function fmtTime(d) {
+  return d ? d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '—';
+}
+
+function refreshTimestamp() {
+  lastLoadTime = new Date();
+  // Mettre à jour tous les éléments .last-update visibles
+  document.querySelectorAll('.last-update-time').forEach(el => {
+    el.textContent = fmtTime(lastLoadTime);
+  });
+}
+
+function manualRefresh() {
+  loadData();
+}
 
 function toggleFav(id, e) {
   e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
@@ -615,7 +652,9 @@ async function loadData() {
     // Puis injecter bornes et autopartage
     data.bornes = raw.bornes || [];
     data.autopartage = raw.autopartage || {citiz:[], leoandgo:[]};
+    refreshTimestamp();
     if (sub === 've' || sub === 'ap') renderList();
+    else renderList(); // re-render pour afficher l'horodatage
     if (map) renderMap();
   } catch(e) {
     document.getElementById('err-zone').innerHTML =
@@ -680,7 +719,8 @@ function renderAutopartage(el, q) {
       citiz = citiz.filter(s => haversine(userLat, userLng, s.lat, s.lng) <= distVal);
     }
 
-    html += `<div class="ap-section-lbl">🚗 Citiz LPA · ${citiz.filter(s=>s.nb_dispo>0).length} stations avec véhicules</div>`;
+    const updBadgeAp = `<span class="last-update" style="margin-left:auto">Actualisé <span class="last-update-time">${fmtTime(lastLoadTime)}</span><button class="refresh-btn" onclick="manualRefresh()" title="Actualiser">↻</button></span>`;
+    html += `<div class="ap-section-lbl">🚗 Citiz LPA · ${citiz.filter(s=>s.nb_dispo>0).length} stations avec véhicules${updBadgeAp}</div>`;
     if (citiz.length) {
       citiz.forEach(s => {
         const hasDispo = s.nb_dispo > 0;
@@ -771,7 +811,7 @@ function renderAutopartage(el, q) {
             <div class="ap-meta">Autonomie ${rangeStr} ${distBadge}</div>
           </div>
           <a href="${navUrl}" target="_blank" rel="noopener" class="ap-btn-reserver">🗺 Y aller</a>
-          <a href="https://app.leoandgo.com" target="_blank" rel="noopener" class="ap-btn-reserver ap-btn-reserve">Réserver</a>
+          <a href="https://www.leoandgo.com" target="_blank" rel="noopener" class="ap-btn-reserver ap-btn-reserve">Réserver</a>
         </div>`;
       });
       if (leoandgo.length > 30) {
@@ -803,6 +843,10 @@ function switchSub(s) {
   distActive = false;
   // Toujours revenir en vue liste au changement d'onglet
   mapVisible = false;
+  // Autopartage : activer "Près de moi" automatiquement si géoloc disponible
+  if (s === 'ap' && navigator.geolocation) {
+    setTimeout(() => { if (sub === 'ap' && !nearActive) nearMe(); }, 100);
+  }
   const lv = document.getElementById('list-view');
   const mv = document.getElementById('map-view');
   const mapBtn = document.getElementById('map-btn');
@@ -932,11 +976,11 @@ function renderZone2(s) {
     html += btn('libre','Accès libre', s);
     html += btn('rapide','Rapide ⚡', s);
   } else if (s === 'ap') {
-    html += btn('fav','★ Favoris', s);
+    html += btn('fav','★ Fav.', s);
     html += btn('dispo','Dispo', s);
     html += '<div class="zone2-sep"></div>';
-    html += btn('elec','⚡ Élec', s);
-    html += btn('therm','Therm', s);
+    html += btn('elec','⚡', s);
+    html += btn('therm','⛽', s);
     html += '<div class="zone2-sep"></div>';
     html += btn('citiz','Citiz', s);
     html += btn('leo','Leo&amp;Go', s);
@@ -1087,7 +1131,8 @@ function renderList() {
       favs.forEach(p => html += pkHTML(p));
       html += `</div>`;
     }
-    html += `<div class="sec-lbl${favs.length ? ' sec-lbl-gray' : ''}">${lbl} · ${open} ouverts${favs.length ? '' : ctxBtns(sub)}</div><div class="parking-list">`;
+    const updBadge = `<span class="last-update">Actualisé <span class="last-update-time">${fmtTime(lastLoadTime)}</span><button class="refresh-btn" onclick="manualRefresh()" title="Actualiser">↻</button></span>`;
+    html += `<div class="sec-lbl${favs.length ? ' sec-lbl-gray' : ''}">${lbl} · ${open} ouverts${favs.length ? '' : ctxBtns(sub)}${updBadge}</div><div class="parking-list">`;
     rest.forEach(p => html += pkHTML(p));
     html += `</div>`;
   } else if (sub === 'vv') {
@@ -1101,36 +1146,33 @@ function renderList() {
       favs.forEach(v => html += vvHTML(v));
       html += `</div>`;
     }
-    html += `<div class="sec-lbl${favs.length ? ' sec-lbl-gray' : ''}">🚲 Vélo'v · ${open} stations avec vélos${favs.length ? '' : ctxBtns('vv')}</div><div class="parking-list">`;
+    const updBadgeVv = `<span class="last-update">Actualisé <span class="last-update-time">${fmtTime(lastLoadTime)}</span><button class="refresh-btn" onclick="manualRefresh()" title="Actualiser">↻</button></span>`;
+    html += `<div class="sec-lbl${favs.length ? ' sec-lbl-gray' : ''}">🚲 Vélo'v · ${open} stations avec vélos${favs.length ? '' : ctxBtns('vv')}${updBadgeVv}</div><div class="parking-list">`;
     rest.forEach(v => html += vvHTML(v));
     html += `</div>`;
   } else if (sub === 've') {
-    // Regrouper par lieu/opérateur/accès, puis trier par catégorie
+    // Regrouper par adresse — toutes puissances confondues dans le même groupe
     const listWithDist = nearActive && userLat !== null
       ? list.map(b => ({...b, _dist: b._dist !== undefined ? b._dist : haversine(userLat, userLng, b.lat, b.lng)}))
       : list;
     const groups = buildGroups(listWithDist);
-    // Trier les groupes par catégorie dominante de leur première borne
-    const catOrder = {rapide:0, acceleree:1, normale:2};
-    const getGroupCat = g => g.stations[0]?.categorie || 'normale';
-    groups.sort((a, b) => (catOrder[getGroupCat(a)]||2) - (catOrder[getGroupCat(b)]||2));
-    const rapideGrp   = groups.filter(g => getGroupCat(g) === 'rapide');
-    const accelereeGrp = groups.filter(g => getGroupCat(g) === 'acceleree');
-    const normaleGrp  = groups.filter(g => getGroupCat(g) === 'normale');
-    if (rapideGrp.length) {
-      html += `<div class="sec-lbl">⚡ Charge rapide (≥ 50 kW) · ${rapideGrp.length}</div><div class="parking-list">`;
-      rapideGrp.forEach(g => html += borneGroupHTML(g, nearActive));
-      html += `</div>`;
+    // Trier par distance si Près de moi, sinon par puissance max décroissante
+    if (nearActive && userLat !== null) {
+      groups.sort((a, b) => (a.dist||99999) - (b.dist||99999));
+    } else {
+      groups.sort((a, b) => {
+        const maxA = Math.max(...a.stations.map(s => s.puissance_max_kw||0));
+        const maxB = Math.max(...b.stations.map(s => s.puissance_max_kw||0));
+        return maxB - maxA;
+      });
     }
-    if (accelereeGrp.length) {
-      html += `<div class="sec-lbl">⚡ Charge accélérée (22–50 kW) · ${accelereeGrp.length}</div><div class="parking-list">`;
-      accelereeGrp.forEach(g => html += borneGroupHTML(g, nearActive));
+    const total = groups.length;
+    const updBadgeVe = `<span class="last-update">Actualisé <span class="last-update-time">${fmtTime(lastLoadTime)}</span><button class="refresh-btn" onclick="manualRefresh()" title="Actualiser">↻</button></span>`;
+    if (total) {
+      html += `<div class="sec-lbl">⚡ Bornes de recharge · ${total} stations${updBadgeVe}</div><div class="parking-list">`;
+      groups.slice(0, 80).forEach(g => html += borneGroupHTML(g, nearActive));
       html += `</div>`;
-    }
-    if (normaleGrp.length) {
-      html += `<div class="sec-lbl">⚡ Charge normale (< 22 kW) · ${normaleGrp.length}</div><div class="parking-list">`;
-      normaleGrp.slice(0, 60).forEach(g => html += borneGroupHTML(g, nearActive));
-      html += `</div>`;
+      if (total > 80) html += `<div style="text-align:center;font-size:10px;color:var(--muted);padding:6px 0">… et ${total - 80} autres — affinez avec les filtres</div>`;
     }
     html += `<div style="text-align:center;font-size:10px;color:var(--muted);padding:8px 0">Source : Base nationale IRVE · transport.data.gouv.fr · Données statiques</div>`;
   }
@@ -1722,6 +1764,7 @@ function renderMap() {
     const nb = p.places_disponibles, cap = p.nb_places, s = getStatus(nb, cap);
     addM(p.lat, p.lng, colHex(s.c), 24, String(nb===null||nb<0?'?':nb), p.nom, s.lbl, 'parking_op', '#9C2A5A', 0, 0, p.id);
   });
+  // Vélo'v : onglet vv seul
   if (mapLayers.vv) (data.velov||[]).filter(v => v.en_service && v.nom && v.nom.trim() !== '').forEach(v => {
     if (!v.lat || !v.lng) return;
     if (!inDist(v.lat, v.lng)) return;
@@ -1732,6 +1775,21 @@ function renderMap() {
     if (!cf.meca && cf.elec && (v.velos_elec||0) <= 0) return;
     addM(v.lat, v.lng, v.velos_dispo>0?colHex('green'):colHex('gray'), 22, String(v.velos_dispo), '🚲 '+v.nom, v.velos_dispo+' vélos', 'velov', '#1565C0', v.velos_meca||0, v.velos_elec||0, v.id);
   });
+
+  // Vélo'v depuis P+R/Parking : uniquement les velov_proches des parkings filtrés
+  if ((mapLayers.pr || mapLayers.pk) && ctxFilters[sub]?.velov) {
+    const pkList = mapLayers.pr
+      ? (data.parkings?.tcl||[]).filter(p => (!cf.fav || isFav(p.id)) && (!cf.dispo || (p.places_disponibles||0) > 0))
+      : (data.parkings?.operateurs||[]).filter(p => (!cf.fav || isFav(p.id)) && (!cf.dispo || (p.places_disponibles||0) > 0));
+    const vvIds = new Set();
+    pkList.forEach(p => (p.velov_proches||[]).forEach(v => vvIds.add(v.id)));
+    (data.velov||[]).filter(v => vvIds.has(v.id) && v.en_service).forEach(v => {
+      if (!v.lat || !v.lng) return;
+      addM(v.lat, v.lng, v.velos_dispo>0?colHex('green'):colHex('gray'), 22, String(v.velos_dispo), '🚲 '+v.nom, v.velos_dispo+' vélos', 'velov', '#1565C0', v.velos_meca||0, v.velos_elec||0, v.id);
+    });
+  }
+
+  // Bornes : onglet ve seul
   if (mapLayers.ve) (data.bornes||[]).forEach(b => {
     if (!b.lat || !b.lng) return;
     if (!inDist(b.lat, b.lng)) return;
@@ -1742,6 +1800,21 @@ function renderMap() {
     const kw = b.puissance_max_kw || 0;
     addM(b.lat, b.lng, col, 22, kw > 0 ? kw+'k' : '⚡', b.nom, (b.operateur||'')+ ' · '+(b.nb_points||1)+' pt', 'borne', '#1A1A2E', 0, 0, null);
   });
+
+  // Bornes depuis P+R/Parking : uniquement les bornes des parkings filtrés
+  if ((mapLayers.pr || mapLayers.pk) && ctxFilters[sub]?.bornes) {
+    const pkList2 = mapLayers.pr
+      ? (data.parkings?.tcl||[]).filter(p => (!cf.fav || isFav(p.id)) && (!cf.dispo || (p.places_disponibles||0) > 0))
+      : (data.parkings?.operateurs||[]).filter(p => (!cf.fav || isFav(p.id)) && (!cf.dispo || (p.places_disponibles||0) > 0));
+    const borneIds = new Set();
+    pkList2.forEach(p => (p.bornes||[]).forEach(b => borneIds.add(b.id)));
+    (data.bornes||[]).filter(b => borneIds.has(b.id_station_itinerance || b.id)).forEach(b => {
+      if (!b.lat || !b.lng) return;
+      const col = b.categorie==='rapide'?'#2E7D32':b.categorie==='acceleree'?'#1565C0':'#E65C00';
+      const kw = b.puissance_max_kw || 0;
+      addM(b.lat, b.lng, col, 22, kw > 0 ? kw+'k' : '⚡', b.nom, (b.operateur||'')+ ' · '+(b.nb_points||1)+' pt', 'borne', '#1A1A2E', 0, 0, null);
+    });
+  }
 
   if (mapLayers.ap) {
     const ap = data.autopartage || {};
@@ -1754,14 +1827,19 @@ function renderMap() {
       if (cf.dispo && s.nb_dispo <= 0) return;
       if (cf.elec === false && cf.therm !== false) return; // filtre type véhicule
       const col = s.nb_dispo > 0 ? colHex('green') : colHex('gray');
-      addM(s.lat, s.lng, col, 26, String(s.nb_dispo), citizNomG(s.nom), s.nb_dispo+' véh. dispo', 'citiz', '#00A88E', 0, 0, s.id);
+      const nbElecC = (s.vehicules||[]).filter(v => (v.propulsion||'').toLowerCase().includes('electric') || (v.propulsion||'').toLowerCase().includes('hybrid')).length;
+      const nbThermC = (s.vehicules||[]).filter(v => !(v.propulsion||'').toLowerCase().includes('electric') && !(v.propulsion||'').toLowerCase().includes('hybrid')).length;
+      addM(s.lat, s.lng, col, 26, String(s.nb_dispo), citizNomG(s.nom), s.nb_dispo+' véh. dispo', 'citiz', '#00A88E', nbThermC, nbElecC, s.id);
     });
     // Leo&Go — marqueurs véhicules individuels
     if (cf.leo !== false) (ap.leoandgo||[]).forEach(v => {
       if (!v.lat || !v.lng) return;
       if (!inDist(v.lat, v.lng)) return;
       if (!inSearch(v.nom, null)) return;
-      addM(v.lat, v.lng, colHex('green'), 22, '🚗', v.nom, v.autonomie_km ? v.autonomie_km+'km' : '', 'leoandgo', '#E65C00', 0, 0, v.id);
+      const isElecL = (v.propulsion||'').toLowerCase().includes('electric') || (v.propulsion||'').toLowerCase().includes('hybrid');
+      const leoLbl = isElecL ? '⚡' : '⛽';
+      const leoSub = v.autonomie_km ? v.autonomie_km+'km' : 'Dispo';
+      addM(v.lat, v.lng, isElecL ? '#1565C0' : '#E65C00', 26, leoLbl, v.nom, leoSub, 'leoandgo', isElecL ? '#1565C0' : '#E65C00', 0, isElecL ? 1 : 0, v.id);
     });
   }
 }
@@ -1789,6 +1867,8 @@ function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vv
     parking_tcl: { bg:'#E8F5E9', border:'#2E7D32', label:'P+R' },
     parking_op:  { bg:'#F9EEF4', border:'#9C2A5A', label:'P'   },
     velov:       { bg:'#E3F2FD', border:'#1565C0', label:"V'"  },
+    citiz:       { bg:'#E0F5F1', border:'#00A88E', label:'Ctz' },
+    leoandgo:    { bg:'#FFF3E0', border:'#E65C00', label:'L&G' },
   };
   const cfg = configs[type];
 
@@ -1801,10 +1881,11 @@ function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vv
     </svg>`;
   } else if (cfg) {
     const showNb = lbl !== '?';
+    const isAp = type === 'citiz' || type === 'leoandgo';
     const labelEl = `<text x="18" y="16" text-anchor="middle" font-size="8" font-family="system-ui,sans-serif" font-weight="800" fill="${cfg.border}">${cfg.label}</text>`;
     const discEl  = showNb
       ? `<circle cx="18" cy="26" r="10" fill="${color}"/>
-         <text x="18" y="30" text-anchor="middle" font-size="${String(lbl).length>2?8:10}" font-family="monospace" font-weight="700" fill="white">${lbl}</text>`
+         <text x="18" y="30" text-anchor="middle" font-size="${isAp?11:(String(lbl).length>2?8:10)}" font-family="system-ui,sans-serif" font-weight="700" fill="white">${lbl}</text>`
       : '';
     html = `<svg width="38" height="46" viewBox="0 0 36 44" overflow="visible" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.22));display:block">
       <path d="M18 2C9.2 2 2 9.2 2 18c0 10 16 24 16 24s16-14 16-24C34 9.2 26.8 2 18 2z" fill="${cfg.bg}" stroke="${cfg.border}" stroke-width="2"/>
@@ -1821,9 +1902,16 @@ function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vv
 
   const navUrl = `geo:${lat},${lng}?q=${encodeURIComponent(name)}`;
   const tclBtn = (type === 'parking_tcl' || type === 'parking_op') ? `<a href="#" onclick="openTCL(event)" class="lp-btn lp-btn-tcl">🚇 Itinéraire TCL</a>` : '';
-  const vvBtn = type === 'velov' ? `<a href="https://velov.grandlyon.com/#/map?lat=${lat}&lng=${lng}&zoom=17" target="_blank" class="lp-btn lp-btn-tcl">📋 Réserver sur Vélo'v</a>` : '';
-  const vvDetail = type === 'velov' ? `<div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
-    ${vvMeca ? `<span style="background:#FFF3EE;color:#CC5500;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #FFD9C8">⚙ ${vvMeca}</span>` : ''}
+  const vvBtn = type === 'velov'
+    ? `<a href="https://velov.grandlyon.com/#/map?lat=${lat}&lng=${lng}&zoom=17" target="_blank" class="lp-btn lp-btn-tcl">📋 Réserver sur Vélo'v</a>`
+    : type === 'citiz'
+    ? `<a href="https://www.citiz.coop" target="_blank" class="lp-btn lp-btn-tcl">🔑 Réserver Citiz</a>`
+    : type === 'leoandgo'
+    ? `<a href="https://www.leoandgo.com" target="_blank" class="lp-btn lp-btn-tcl">🔑 Réserver Leo&Go</a>`
+    : '';
+  const vvDetail = (type === 'velov' || type === 'citiz') && (vvMeca || vvElec)
+    ? `<div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
+    ${vvMeca ? `<span style="background:#FFF3EE;color:#CC5500;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #FFD9C8">${type==='velov'?'⚙':'⛽'} ${vvMeca}</span>` : ''}
     ${vvElec ? `<span style="background:#EBF4FF;color:#1565C0;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #B5D4F4">⚡ ${vvElec}</span>` : ''}
   </div>` : '';
   const cleanName = name.replace('🚲 ', '');
