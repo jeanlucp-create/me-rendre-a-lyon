@@ -811,7 +811,7 @@ function renderAutopartage(el, q) {
             <div class="ap-meta">Autonomie ${rangeStr} ${distBadge}</div>
           </div>
           <a href="${navUrl}" target="_blank" rel="noopener" class="ap-btn-reserver">🗺 Y aller</a>
-          <a href="https://app.leoandgo.com" target="_blank" rel="noopener" class="ap-btn-reserver ap-btn-reserve">Réserver</a>
+          <a href="https://www.leoandgo.com" target="_blank" rel="noopener" class="ap-btn-reserver ap-btn-reserve">Réserver</a>
         </div>`;
       });
       if (leoandgo.length > 30) {
@@ -972,10 +972,10 @@ function renderZone2(s) {
     html += btn('libre','Accès libre', s);
     html += btn('rapide','Rapide ⚡', s);
   } else if (s === 'ap') {
-    html += btn('fav','★ Favoris', s);
+    html += btn('fav','★ Fav.', s);
     html += btn('dispo','Dispo', s);
     html += '<div class="zone2-sep"></div>';
-    html += btn('elec','⚡ Élec', s);
+    html += btn('elec','Élec', s);
     html += btn('therm','Therm', s);
     html += '<div class="zone2-sep"></div>';
     html += btn('citiz','Citiz', s);
