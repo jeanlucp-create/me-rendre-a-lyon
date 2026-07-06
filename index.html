@@ -1,4 +1,4 @@
-<!-- Me rendre à Lyon — v13h -->
+<!-- Me rendre à Lyon — v13i -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -517,7 +517,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ─────────────────────────────────────────────────────────────
-// Me rendre à Lyon — v13h
+// Me rendre à Lyon — v13i
 // Historique :
 //   v12a  : Autopartage (Citiz LPA + Leo&Go)
 //   v13a  : Refonte filtres — zones contextuelles VOIR
@@ -1764,17 +1764,21 @@ function renderMap() {
     const nb = p.places_disponibles, cap = p.nb_places, s = getStatus(nb, cap);
     addM(p.lat, p.lng, colHex(s.c), 24, String(nb===null||nb<0?'?':nb), p.nom, s.lbl, 'parking_op', '#9C2A5A', 0, 0, p.id);
   });
-  if (mapLayers.vv) (data.velov||[]).filter(v => v.en_service && v.nom && v.nom.trim() !== '').forEach(v => {
+  // Vélo'v : onglet vv OU filtre velov coché sur P+R/Parking
+  const showVvOnMap = mapLayers.vv || ((mapLayers.pr || mapLayers.pk) && ctxFilters[sub]?.velov);
+  const showBoOnMap = mapLayers.ve || ((mapLayers.pr || mapLayers.pk) && ctxFilters[sub]?.bornes);
+
+  if (showVvOnMap) (data.velov||[]).filter(v => v.en_service && v.nom && v.nom.trim() !== '').forEach(v => {
     if (!v.lat || !v.lng) return;
     if (!inDist(v.lat, v.lng)) return;
     if (!inSearch(v.nom, v.adresse)) return;
-    if (cf.fav && !isFav(v.id)) return;
-    if (cf.dispo && (v.velos_dispo||0) <= 0) return;
-    if (cf.meca && !cf.elec && (v.velos_meca||0) <= 0) return;
-    if (!cf.meca && cf.elec && (v.velos_elec||0) <= 0) return;
+    if (mapLayers.vv && cf.fav && !isFav(v.id)) return;
+    if (mapLayers.vv && cf.dispo && (v.velos_dispo||0) <= 0) return;
+    if (mapLayers.vv && cf.meca && !cf.elec && (v.velos_meca||0) <= 0) return;
+    if (mapLayers.vv && !cf.meca && cf.elec && (v.velos_elec||0) <= 0) return;
     addM(v.lat, v.lng, v.velos_dispo>0?colHex('green'):colHex('gray'), 22, String(v.velos_dispo), '🚲 '+v.nom, v.velos_dispo+' vélos', 'velov', '#1565C0', v.velos_meca||0, v.velos_elec||0, v.id);
   });
-  if (mapLayers.ve) (data.bornes||[]).forEach(b => {
+  if (showBoOnMap) (data.bornes||[]).forEach(b => {
     if (!b.lat || !b.lng) return;
     if (!inDist(b.lat, b.lng)) return;
     if (!inSearch(b.nom, b.adresse)) return;
