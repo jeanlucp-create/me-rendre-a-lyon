@@ -1218,7 +1218,7 @@ function pkHTML(p) {
 
   return `<div class="pk-card ${fav ? 'favori' : ''} ${(nb === null || nb < 0) ? 'dim' : ''}" data-id="${p.id}">
     <div class="pk-row" onclick="toggleAccordion(this)">
-      <button class="star-btn ${fav ? 'on' : ''}" onclick="toggleFav('${p.id}',event)" ontouchend="toggleFav('${p.id}',event)">${fav ? '★' : '☆'}</button>
+      <button class="star-btn ${fav ? 'on' : ''}" onclick="toggleFav('${p.id}',event)">${fav ? '★' : '☆'}</button>
       <div class="pk-logo" style="background:${logoBg};color:${logoFg}">${logoLbl}</div>
       <div class="pk-name">
         <div class="pk-name-txt">${p.nom}</div>
@@ -1409,7 +1409,7 @@ function vvHTML(v) {
 
   return `<div class="pk-card ${fav ? 'favori' : ''}" data-id="${v.id}">
     <div class="pk-row" onclick="toggleAccordion(this)">
-      <button class="star-btn ${fav ? 'on' : ''}" onclick="toggleFav('${v.id}',event)" ontouchend="toggleFav('${v.id}',event)">${fav ? '★' : '☆'}</button>
+      <button class="star-btn ${fav ? 'on' : ''}" onclick="toggleFav('${v.id}',event)">${fav ? '★' : '☆'}</button>
       <div class="pk-logo" style="background:var(--vv-bg);color:var(--vv-txt)">V'</div>
       <div class="pk-name">
         <div class="pk-name-txt">${v.nom}</div>
@@ -1825,7 +1825,9 @@ function renderMap() {
       if (!inDist(s.lat, s.lng)) return;
       if (!inSearch(citizNomG(s.nom), s.adresse)) return;
       if (cf.dispo && s.nb_dispo <= 0) return;
-      if (cf.elec === false && cf.therm !== false) return; // filtre type véhicule
+      // Filtre elec/therm : si seul elec coché → station sans élec exclue
+      if (!cf.elec && cf.therm) { if (!(s.vehicules||[]).some(v => !(v.propulsion||'').toLowerCase().includes('electric') && !(v.propulsion||'').toLowerCase().includes('hybrid'))) return; }
+      if (cf.elec && !cf.therm) { if (!(s.vehicules||[]).some(v => (v.propulsion||'').toLowerCase().includes('electric') || (v.propulsion||'').toLowerCase().includes('hybrid'))) return; }
       const col = s.nb_dispo > 0 ? colHex('green') : colHex('gray');
       const nbElecC = (s.vehicules||[]).filter(v => (v.propulsion||'').toLowerCase().includes('electric') || (v.propulsion||'').toLowerCase().includes('hybrid')).length;
       const nbThermC = (s.vehicules||[]).filter(v => !(v.propulsion||'').toLowerCase().includes('electric') && !(v.propulsion||'').toLowerCase().includes('hybrid')).length;
@@ -1837,6 +1839,8 @@ function renderMap() {
       if (!inDist(v.lat, v.lng)) return;
       if (!inSearch(v.nom, null)) return;
       const isElecL = (v.propulsion||'').toLowerCase().includes('electric') || (v.propulsion||'').toLowerCase().includes('hybrid');
+      if (cf.elec && !cf.therm && !isElecL) return;
+      if (!cf.elec && cf.therm && isElecL) return;
       const leoLbl = isElecL ? '⚡' : '⛽';
       const leoSub = v.autonomie_km ? v.autonomie_km+'km' : 'Dispo';
       addM(v.lat, v.lng, isElecL ? '#1565C0' : '#E65C00', 26, leoLbl, v.nom, leoSub, 'leoandgo', isElecL ? '#1565C0' : '#E65C00', 0, isElecL ? 1 : 0, v.id);
