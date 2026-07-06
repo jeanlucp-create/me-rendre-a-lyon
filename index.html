@@ -1796,8 +1796,8 @@ function renderMap() {
       if (cf.dispo && s.nb_dispo <= 0) return;
       if (cf.elec === false && cf.therm !== false) return; // filtre type véhicule
       const col = s.nb_dispo > 0 ? colHex('green') : colHex('gray');
-      const nbElecC = (s.vehicules||[]).filter(v => (v.propulsion||'').toLowerCase().includes('electric')).length;
-      const nbThermC = s.nb_dispo - nbElecC;
+      const nbElecC = (s.vehicules||[]).filter(v => (v.propulsion||'').toLowerCase().includes('electric') || (v.propulsion||'').toLowerCase().includes('hybrid')).length;
+      const nbThermC = (s.vehicules||[]).filter(v => !(v.propulsion||'').toLowerCase().includes('electric') && !(v.propulsion||'').toLowerCase().includes('hybrid')).length;
       addM(s.lat, s.lng, col, 26, String(s.nb_dispo), citizNomG(s.nom), s.nb_dispo+' véh. dispo', 'citiz', '#00A88E', nbThermC, nbElecC, s.id);
     });
     // Leo&Go — marqueurs véhicules individuels
@@ -1805,8 +1805,10 @@ function renderMap() {
       if (!v.lat || !v.lng) return;
       if (!inDist(v.lat, v.lng)) return;
       if (!inSearch(v.nom, null)) return;
-      const isElecL = (v.propulsion||'').toLowerCase().includes('electric');
-      addM(v.lat, v.lng, colHex('green'), 22, isElecL ? '⚡' : '⛽', v.nom, v.autonomie_km ? v.autonomie_km+'km' : 'Dispo', 'leoandgo', '#E65C00', 0, 0, v.id);
+      const isElecL = (v.propulsion||'').toLowerCase().includes('electric') || (v.propulsion||'').toLowerCase().includes('hybrid');
+      const leoLbl = isElecL ? '⚡' : '⛽';
+      const leoSub = v.autonomie_km ? v.autonomie_km+'km' : 'Dispo';
+      addM(v.lat, v.lng, isElecL ? '#1565C0' : '#E65C00', 26, leoLbl, v.nom, leoSub, 'leoandgo', isElecL ? '#1565C0' : '#E65C00', 0, isElecL ? 1 : 0, v.id);
     });
   }
 }
@@ -1834,6 +1836,8 @@ function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vv
     parking_tcl: { bg:'#E8F5E9', border:'#2E7D32', label:'P+R' },
     parking_op:  { bg:'#F9EEF4', border:'#9C2A5A', label:'P'   },
     velov:       { bg:'#E3F2FD', border:'#1565C0', label:"V'"  },
+    citiz:       { bg:'#E0F5F1', border:'#00A88E', label:'Ctz' },
+    leoandgo:    { bg:'#FFF3E0', border:'#E65C00', label:'L&G' },
   };
   const cfg = configs[type];
 
@@ -1846,10 +1850,11 @@ function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vv
     </svg>`;
   } else if (cfg) {
     const showNb = lbl !== '?';
+    const isAp = type === 'citiz' || type === 'leoandgo';
     const labelEl = `<text x="18" y="16" text-anchor="middle" font-size="8" font-family="system-ui,sans-serif" font-weight="800" fill="${cfg.border}">${cfg.label}</text>`;
     const discEl  = showNb
       ? `<circle cx="18" cy="26" r="10" fill="${color}"/>
-         <text x="18" y="30" text-anchor="middle" font-size="${String(lbl).length>2?8:10}" font-family="monospace" font-weight="700" fill="white">${lbl}</text>`
+         <text x="18" y="30" text-anchor="middle" font-size="${isAp?11:(String(lbl).length>2?8:10)}" font-family="system-ui,sans-serif" font-weight="700" fill="white">${lbl}</text>`
       : '';
     html = `<svg width="38" height="46" viewBox="0 0 36 44" overflow="visible" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.22));display:block">
       <path d="M18 2C9.2 2 2 9.2 2 18c0 10 16 24 16 24s16-14 16-24C34 9.2 26.8 2 18 2z" fill="${cfg.bg}" stroke="${cfg.border}" stroke-width="2"/>
