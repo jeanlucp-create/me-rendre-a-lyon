@@ -1,5 +1,12 @@
 // Cloudflare Worker — Lyon en mouvement
 // Agrège : P+R TCL + LPA/Indigo/Q-Park + Vélo'v + Citiz + Leo&Go
+//
+// v3m : Fusion LPA — si le flux multi-opérateurs renvoie
+//       places_disponibles=null pour un parking LPA, on va chercher
+//       la valeur dans le flux LPA-only (parking_temps_reel.json,
+//       source directe des matériels de péage LPA) via id_gestionnaire.
+//       Filet de sécurité en cas de panne ponctuelle du champ LPA
+//       dans le flux v2, sans dépendre uniquement de cette source.
 
 export default {
   async fetch(request) {
@@ -43,6 +50,7 @@ export default {
       // ── Récupération en parallèle de toutes les sources ──
       const [
         resParking,
+        resParkingLPA,
         resVelovInfo,
         resVelovStatus,
         resCitizInfo,
@@ -52,6 +60,8 @@ export default {
       ] = await Promise.all([
         // Parkings (P+R TCL + LPA + Indigo + Q-Park)
         fetch('https://data.grandlyon.com/geoserver/metropole-de-lyon/ows?SERVICE=WFS&VERSION=2.0.0&request=GetFeature&typename=metropole-de-lyon:parkings-de-la-metropole-de-lyon-disponibilites-temps-reel-v2&outputFormat=application/json&SRSNAME=EPSG:4326', { headers: glHeaders }),
+        // Parkings LPA seul — flux de secours (matériels de péage LPA en direct)
+        fetch('https://download.data.grandlyon.com/files/rdata/lpa_mobilite.donnees/parking_temps_reel.json'),
         // Vélo'v — stations
         fetch('https://download.data.grandlyon.com/files/rdata/jcd_jcdecaux.jcdvelov/station_information.json'),
         // Vélo'v — statut temps réel
@@ -68,6 +78,7 @@ export default {
 
       const [
         dataParking,
+        dataParkingLPA,
         dataVelovInfo,
         dataVelovStatus,
         dataCitizInfo,
@@ -76,6 +87,7 @@ export default {
         dataLeoTypes,
       ] = await Promise.all([
         resParking.json(),
+        resParkingLPA.ok ? resParkingLPA.json().catch(() => []) : Promise.resolve([]),
         resVelovInfo.json(),
         resVelovStatus.json(),
         resCitizInfo.json(),
@@ -83,6 +95,17 @@ export default {
         resLeoInfo.json(),
         resLeoTypes.json(),
       ]);
+
+      // ── FUSION LPA : map id_gestionnaire → dispo du flux LPA-only ──
+      const lpaDispoMap = {};
+      (Array.isArray(dataParkingLPA) ? dataParkingLPA : []).forEach(item => {
+        const id = item['Parking_schema:identifier'];
+        if (!id) return;
+        lpaDispoMap[id] = {
+          dispo: item.ferme ? 0 : item['mv:currentValue'],
+          date: item['dct:date'],
+        };
+      });
 
       // ── PARKINGS ──
       const allParkings = (dataParking.features || []).map(f => {
@@ -94,6 +117,17 @@ export default {
           lat = GPS_TCL[p.id_gestionnaire].lat;
           lng = GPS_TCL[p.id_gestionnaire].lng;
         }
+
+        // Filet de sécurité : si le flux principal ne donne pas de dispo pour
+        // un parking LPA, on va chercher dans le flux LPA-only (fallback).
+        let placesDispo = p.places_disponibles;
+        if (p.gestionnaire === 'LPA' && (placesDispo === null || placesDispo === undefined)) {
+          const fallback = lpaDispoMap[p.id_gestionnaire];
+          if (fallback && typeof fallback.dispo === 'number') {
+            placesDispo = fallback.dispo;
+          }
+        }
+
         return {
           id: p.id,
           nom: p.nom,
@@ -101,7 +135,7 @@ export default {
           id_gestionnaire: p.id_gestionnaire,
           adresse: p.adresse,
           url: p.url,
-          places_disponibles: p.places_disponibles,
+          places_disponibles: placesDispo,
           etat: p.etat,
           nb_places: p.nb_places,
           nb_pmr: p.nb_pmr,
@@ -216,6 +250,7 @@ export default {
           nb_velov: velov.length,
           nb_citiz: citiz.length,
           nb_leoandgo: leoandgo.length,
+          nb_lpa_fallback_used: Object.keys(lpaDispoMap).length,
           generated_at: new Date().toISOString(),
         }
       }), { headers: corsHeaders });
