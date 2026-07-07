@@ -1,4 +1,4 @@
-<!-- Me rendre à Lyon — v13j -->
+<!-- Me rendre à Lyon — v13k -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -276,6 +276,8 @@
     .loading-msg{text-align:center;color:var(--muted);font-size:12px;font-weight:600;padding:32px 0}
     .error-msg{color:var(--red);font-size:11px;text-align:center;padding:10px;background:rgba(255,59,48,.08);border:1px solid rgba(255,59,48,.2);border-radius:10px;margin-bottom:10px}
     .empty-msg{text-align:center;color:var(--muted);font-size:12px;font-weight:600;padding:24px 0}
+    .outage-banner{display:flex;align-items:flex-start;gap:8px;background:var(--orange-light);border:1.5px solid var(--orange-border);border-radius:10px;padding:9px 11px;margin:4px 0 8px;font-size:11px;font-weight:700;color:var(--orange-dark);line-height:1.4}
+    .outage-banner .oi{font-size:15px;line-height:1;flex-shrink:0}
     .legal{text-align:center;padding:14px 0 4px;font-size:8px;color:var(--muted);line-height:1.7}
     .legal a{color:var(--muted);text-decoration:underline}
 
@@ -517,7 +519,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ─────────────────────────────────────────────────────────────
-// Me rendre à Lyon — v13j
+// Me rendre à Lyon — v13k
 // Historique :
 //   v12a  : Autopartage (Citiz LPA + Leo&Go)
 //   v13a  : Refonte filtres — zones contextuelles VOIR
@@ -529,6 +531,12 @@
 //   v13g  : Vélo'v/Bornes décochés par défaut en P+R/Parking,
 //           filtre recherche appliqué sur vue carte
 //   v13h  : Horodatage dernière actualisation + bouton ↻ par vue
+//   v13i  : Autopartage Près de moi auto, popups Citiz/Leo&Go enrichies,
+//           Vélo'v/Bornes sur carte depuis P+R/Parking, boutons ⚡/⛽
+//   v13j  : (version intermédiaire fournie)
+//   v13k  : Bannière "données LPA temporairement indisponibles" si
+//           >=95% des parkings LPA ont places_disponibles=null
+//           (panne de source détectée automatiquement)
 // ─────────────────────────────────────────────────────────────
 const WORKER = 'https://me-rendre-a-lyon.jean-luc-perrotto.workers.dev';
 let data = {parkings:{tcl:[],operateurs:[]},velov:[],bornes:[]};
@@ -1051,6 +1059,23 @@ function ctxBtns(ctx, totalLabel) {
   return '';
 }
 
+// ── DÉTECTION PANNE SOURCE (LPA) ──
+// Si >= 95% des parkings d'un gestionnaire donné ont places_disponibles null
+// alors qu'ils ont habituellement une valeur, on considère que la source est en panne.
+function checkGestionnaireOutage(gestionnaire) {
+  const list = (data.parkings?.operateurs || []).filter(p => p.gestionnaire === gestionnaire);
+  if (!list.length) return null;
+  const nullCount = list.filter(p => p.places_disponibles === null || p.places_disponibles === undefined).length;
+  const ratio = nullCount / list.length;
+  return ratio >= 0.95 ? { total: list.length, nullCount, ratio } : null;
+}
+
+function outageBannerHTML(gestionnaire, label) {
+  const outage = checkGestionnaireOutage(gestionnaire);
+  if (!outage) return '';
+  return `<div class="outage-banner"><span class="oi">⚠️</span><span>Les données temps réel ${label} sont temporairement indisponibles (site en maintenance). Les places, tarifs et emplacements restent affichés.</span></div>`;
+}
+
 function renderList() {
   const q = document.getElementById('search').value.toLowerCase().trim();
   const el = document.getElementById('item-list');
@@ -1132,7 +1157,9 @@ function renderList() {
       html += `</div>`;
     }
     const updBadge = `<span class="last-update">Actualisé <span class="last-update-time">${fmtTime(lastLoadTime)}</span><button class="refresh-btn" onclick="manualRefresh()" title="Actualiser">↻</button></span>`;
-    html += `<div class="sec-lbl${favs.length ? ' sec-lbl-gray' : ''}">${lbl} · ${open} ouverts${favs.length ? '' : ctxBtns(sub)}${updBadge}</div><div class="parking-list">`;
+    html += `<div class="sec-lbl${favs.length ? ' sec-lbl-gray' : ''}">${lbl} · ${open} ouverts${favs.length ? '' : ctxBtns(sub)}${updBadge}</div>`;
+    if (sub === 'pk') html += outageBannerHTML('LPA', 'LPA');
+    html += `<div class="parking-list">`;
     rest.forEach(p => html += pkHTML(p));
     html += `</div>`;
   } else if (sub === 'vv') {
