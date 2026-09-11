@@ -1,4 +1,4 @@
-<!-- Me rendre à Lyon — v13k -->
+<!-- Me rendre à Lyon — v13n -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -116,6 +116,10 @@
     .pk-mini-ve{font-size:9px;font-weight:700;color:#1565C0;white-space:nowrap;display:flex;align-items:center;gap:1px}
     .pk-mini-sep{color:var(--border);font-size:9px}
     .pk-mini-gray{font-size:9px;font-weight:600;color:var(--muted);white-space:nowrap}
+    .lig-badges{display:inline-flex;gap:2px;align-items:center;flex-wrap:nowrap}
+    .lig-badge{display:inline-flex;align-items:center;justify-content:center;min-width:14px;height:14px;padding:0 3px;border-radius:4px;font-size:8px;font-weight:900;line-height:1;font-family:'Nunito',sans-serif}
+    .lig-badges-lg{gap:4px}
+    .lig-badges-lg .lig-badge{min-width:20px;height:20px;padding:0 5px;border-radius:6px;font-size:11px}
     .ec{font-size:10px}
 
     /* Partie droite ligne pliée */
@@ -306,7 +310,41 @@
     /* Sections déplié — Vélo'v fond bleu pâle, Bornes fond vert très pâle */
     .exp-section-vv  { background:#F0F7FF; border-radius:10px; padding:10px; margin-bottom:8px; border:1px solid #C5DDF4; }
     .exp-section-ve  { background:#F0FBF3; border-radius:10px; padding:10px; margin-bottom:8px; border:1px solid #A8DFB2; }
+    .exp-section-alt { background:#FFF4ED; border-radius:10px; padding:10px; margin-bottom:8px; border:1px solid #FFD2B3; }
     .exp-section-lbl { font-size:9px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; display:flex; align-items:center; gap:5px; }
+
+    /* Assistant Plan B — alternatives à proximité */
+    .alt-item{display:flex;align-items:center;gap:8px;padding:5px 0}
+    .alt-item + .alt-item{border-top:1px solid rgba(0,0,0,.06)}
+    .alt-ico{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;flex-shrink:0}
+    .alt-body{flex:1;min-width:0}
+    .alt-name{font-size:11px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .alt-meta{font-size:9px;color:var(--muted);font-weight:600}
+    .alt-go{padding:5px 9px;border-radius:7px;background:var(--orange);color:white;font-size:9px;font-weight:800;white-space:nowrap;flex-shrink:0;font-family:'Nunito',sans-serif;text-decoration:none;border:none;cursor:pointer;display:block;text-align:center}
+    .alt-actions{display:flex;flex-direction:row;gap:4px;flex-shrink:0}
+
+    /* "Aller à..." — P+R + itinéraire */
+    .dest-search-wrap{padding:12px 0}
+    .dest-input-row{display:flex;gap:6px;margin-bottom:4px}
+    .dest-input{flex:1;background:var(--white);border:1.5px solid var(--orange-border);border-radius:10px;padding:10px 12px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;color:var(--text);outline:none}
+    .dest-input::placeholder{color:var(--muted)}
+    .dest-sugg{background:var(--white);border:1.5px solid var(--orange-border);border-radius:10px;margin-bottom:8px;overflow:hidden}
+    .dest-sugg-item{padding:9px 12px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;border-bottom:1px solid var(--border)}
+    .dest-sugg-item:last-child{border-bottom:none}
+    .dest-sugg-item:active,.dest-sugg-item:hover{background:var(--orange-light)}
+    .dest-current{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--orange-light);border:1px solid var(--orange-border);border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:11px;font-weight:800;color:var(--orange-dark)}
+    .dest-current span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .dest-current-clear{background:none;border:none;color:var(--orange-dark);font-size:14px;font-weight:900;cursor:pointer;padding:0 4px;flex-shrink:0}
+    .dest-result-card{background:var(--white);border-radius:13px;border:1.5px solid var(--border);padding:11px 12px;margin-bottom:8px}
+    .dest-result-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .dest-result-ico{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;flex-shrink:0}
+    .dest-result-body{flex:1;min-width:0}
+    .dest-result-name{font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .dest-result-meta{font-size:10px;color:var(--muted);font-weight:600}
+    .dest-result-acts{display:flex;gap:6px}
+    .dest-act-btn{flex:1;text-align:center;padding:7px 8px;border-radius:8px;font-size:10px;font-weight:800;text-decoration:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
+    .dest-act-go{background:var(--orange-light);color:var(--orange-dark);border:1px solid var(--orange-border)}
+    .dest-act-itin{background:#E3F2FD;color:var(--blue);border:1px solid #B5D4F4}
 
     /* Groupe opérateur bornes */
     .op-group        { margin-bottom:8px; }
@@ -398,6 +436,7 @@
         <div class="ntab" id="tab-vv" onclick="switchSub('vv')">🚲 Vélo'v</div>
         <div class="ntab" id="tab-tcl" onclick="switchSub('tcl')">🚇 TCL</div>
         <div class="ntab" id="tab-ap" onclick="switchSub('ap')">🚗 Autopartage</div>
+        <div class="ntab" id="tab-dest" onclick="switchSub('dest')">🎯 Aller à...</div>
       </div>
     </div>
   </div>
@@ -519,7 +558,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ─────────────────────────────────────────────────────────────
-// Me rendre à Lyon — v13k
+// Me rendre à Lyon — v13n
 // Historique :
 //   v12a  : Autopartage (Citiz LPA + Leo&Go)
 //   v13a  : Refonte filtres — zones contextuelles VOIR
@@ -537,6 +576,59 @@
 //   v13k  : Bannière "données LPA temporairement indisponibles" si
 //           >=95% des parkings LPA ont places_disponibles=null
 //           (panne de source détectée automatiquement)
+//   v13l  : Assistant "Plan B" — dès qu'un parking (P+R ou payant)
+//           passe en rouge (0 place ou ≤15) ou en gris (donnée non
+//           fiable), la fiche détaillée propose jusqu'à 3 parkings
+//           alternatifs à proximité (tous types confondus, verts/
+//           oranges uniquement — jamais un autre quasi-complet) avec
+//           places dispo, distance et bouton "S'y rendre" (geo: vers
+//           l'appli de navigation du tél.). Même principe pour
+//           Vélo'v : station vide/hors service → jusqu'à 3 stations
+//           proches avec vélos dispo. Pas de Plan B pour autopartage
+//           (carte suffit) ni bornes (pas de dispo temps réel).
+//           Filtre "Favoris" par défaut : si un écran (P+R, Parkings,
+//           Vélo'v, Bornes, Autopartage) a au moins un favori enregistré,
+//           il s'ouvre filtré dessus au premier chargement de la session
+//           (défiltrable normalement ; ne se réactive pas tout seul
+//           ensuite, même après un rafraîchissement auto).
+//           Stations Vélo'v éphémères (déployées pour un événement, ex.
+//           festival) : mention "(station éphémère temporaire)" ajoutée
+//           après l'adresse partout où elle s'affiche.
+//           Fix : le bouton "★ Favoris" de l'onglet actif au démarrage
+//           se recolore désormais pour rester cohérent avec le filtre
+//           favoris appliqué automatiquement (renderZone2 manquant).
+//           Plan B Vélo'v : bouton "📋 Réserver" (copier adresse +
+//           ouvrir la réservation JCDecaux) ajouté à côté de
+//           "S'y rendre" pour chaque station alternative.
+//           Plan B parkings : si aucun P+R ne figure parmi les 3 plus
+//           proches, on ajoute en 4e le P+R disponible le plus proche
+//           (souvent gratuit/moins cher qu'un parking payant), même
+//           un peu plus loin.
+//           Plan B Vélo'v : détail méca/élec (⚙/⚡) réaffiché à côté
+//           du nombre de vélos pour aider à choisir.
+//   v13m  : Nouvel onglet "🎯 Aller à..." (rubrique Se déplacer) —
+//           "P+R + itinéraire". Saisie d'une adresse de destination
+//           (autocomplétion via l'API Adresse du gouvernement, base
+//           officielle, gratuite, sans clé), puis proposition des
+//           parkings disponibles les plus proches de cette destination
+//           (P+R ET parkings classiques confondus, verts/oranges
+//           uniquement), avec garantie d'au moins 1 P+R comme pour le
+//           Plan B. Deux actions par résultat : "🚗 Aller au parking"
+//           (geo: vers le parking) et "🚇 Itinéraire" (Google Maps,
+//           trajet en transport en commun du parking vers la
+//           destination).
+//   v13n  : Lignes métro/tram à proximité de chaque P+R, sous forme de
+//           badges colorés (couleur officielle Sytral) affichant le code
+//           de ligne. Champ `lignes_proches` calculé côté Worker (v3p) à
+//           partir des tracés officiels métro/funiculaire/tram (< 300 m
+//           du P+R), affiché partout où un P+R apparaît : liste (mini-
+//           badge), fiche détaillée (badges plus grands, section "Lignes
+//           à proximité"), Plan B (à côté de la distance) et résultats
+//           "Aller à..." (à côté de la distance). Ajouté aussi sur la
+//           carte (popup du marqueur P+R). Nécessite le déploiement du
+//           nouveau Worker v3p sur Cloudflare (le champ `lignes_proches`
+//           n'existe pas dans les versions de Worker antérieures — sans
+//           lui, les badges ne s'affichent simplement pas, aucune casse).
 // ─────────────────────────────────────────────────────────────
 const WORKER = 'https://me-rendre-a-lyon.jean-luc-perrotto.workers.dev';
 let data = {parkings:{tcl:[],operateurs:[]},velov:[],bornes:[]};
@@ -553,6 +645,8 @@ let distActive = false;
 const DIST_DEFAULT = 200;
 let distVal = DIST_DEFAULT;
 let favorites = JSON.parse(localStorage.getItem('mral_fav')||'[]');
+let favDefaultApplied = false; // n'appliquer le filtre "Favoris" par défaut qu'une fois, à l'ouverture
+let destCoords = null, destLabel = '', destSuggestions = []; // "Aller à..." — P+R + itinéraire
 let selected = null, refTimer = null;
 let userLat = null, userLng = null, nearActive = false;
 let map = null, markers = [];
@@ -578,6 +672,26 @@ function refreshTimestamp() {
 
 function manualRefresh() {
   loadData();
+}
+
+// ── FILTRE FAVORIS PAR DÉFAUT À L'OUVERTURE ──
+// Si un écran (P+R, Parkings, Vélo'v, Bornes, Autopartage) a au moins un
+// favori enregistré, on l'ouvre filtré dessus. Ne s'applique qu'une fois
+// au premier chargement de la session : si l'utilisateur défiltre ensuite,
+// ça ne revient pas tout seul (le rafraîchissement auto ne le réactive pas).
+function applyDefaultFavFilters() {
+  const cats = {
+    pr: data.parkings?.tcl || [],
+    pk: data.parkings?.operateurs || [],
+    vv: data.velov || [],
+    ve: data.bornes || [],
+    ap: [...(data.autopartage?.citiz || []), ...(data.autopartage?.leoandgo || [])]
+  };
+  Object.keys(cats).forEach(key => {
+    if (ctxFilters[key] && cats[key].some(x => isFav(x.id))) {
+      ctxFilters[key].fav = true;
+    }
+  });
 }
 
 function toggleFav(id, e) {
@@ -628,6 +742,21 @@ function colHex(c) {
   return {green:'#2ECC71',amber:'#FF9500',red:'#FF3B30',gray:'#AAA'}[c] || '#AAA';
 }
 
+// ── Lignes métro/tram à proximité d'un P+R (p.lignes_proches, calculé côté Worker) ──
+function ligTxtColor(hex) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+  return lum > 0.6 ? '#1A1A2E' : '#FFFFFF';
+}
+
+function lignesBadgesHTML(lignes, size) {
+  if (!lignes || !lignes.length) return '';
+  const cls = size === 'lg' ? 'lig-badges lig-badges-lg' : 'lig-badges';
+  return `<span class="${cls}">${lignes.map(x =>
+    `<span class="lig-badge" style="background:${x.c};color:${ligTxtColor(x.c)}">${x.l}</span>`
+  ).join('')}</span>`;
+}
+
 // Éclairs selon catégorie borne (1/2/3 selon puissance)
 function eclairs(cat) {
   if (cat === 'rapide')    return `<span class="ec" style="color:#2E7D32">⚡</span><span class="ec" style="color:#2E7D32">⚡</span><span class="ec" style="color:#2E7D32">⚡</span>`;
@@ -660,6 +789,11 @@ async function loadData() {
     // Puis injecter bornes et autopartage
     data.bornes = raw.bornes || [];
     data.autopartage = raw.autopartage || {citiz:[], leoandgo:[]};
+    if (!favDefaultApplied) {
+      applyDefaultFavFilters();
+      favDefaultApplied = true;
+      renderZone2(sub); // recolore le bouton ★ Favoris de l'onglet actif pour rester cohérent avec la liste filtrée
+    }
     refreshTimestamp();
     if (sub === 've' || sub === 'ap') renderList();
     else renderList(); // re-render pour afficher l'horodatage
@@ -862,10 +996,10 @@ function switchSub(s) {
   if (mv) mv.style.display = 'none';
   if (mapBtn) { mapBtn.innerHTML = '🗺 Carte'; mapBtn.classList.remove('on'); }
   const nearBtn = document.getElementById('near-btn');
-  if (nearBtn) { nearBtn.classList.remove('on'); nearBtn.style.display = (s === 'tcl') ? 'none' : ''; }
+  if (nearBtn) { nearBtn.classList.remove('on'); nearBtn.style.display = (s === 'tcl' || s === 'dest') ? 'none' : ''; }
   const distBtn = document.getElementById('dist-btn');
   if (distBtn) distBtn.classList.remove('on');
-  const statTabs = ['pr','pk','ve'], depTabs = ['vv','tcl','ap'];
+  const statTabs = ['pr','pk','ve'], depTabs = ['vv','tcl','ap','dest'];
   const isStat = statTabs.includes(s);
   document.getElementById('lbl-stat').className = 'nav-lbl' + (isStat ? ' active' : '');
   document.getElementById('lbl-dep').className  = 'nav-lbl' + (!isStat ? ' active' : '');
@@ -885,7 +1019,7 @@ function switchSub(s) {
   const z1 = document.getElementById('zone1');
   const z2 = document.getElementById('zone2');
   const z1s = document.getElementById('zone1-search');
-  if (s === 'tcl') {
+  if (s === 'tcl' || s === 'dest') {
     if (z1) z1.style.display = 'none';
     if (z2) z2.style.display = 'none';
     if (z1s) z1s.style.display = 'none';
@@ -893,9 +1027,9 @@ function switchSub(s) {
     if (z1) z1.style.display = 'flex';
     if (z2) z2.style.display = 'flex';
   }
-  // Masquer filter-block pour TCL
+  // Masquer filter-block pour TCL et "Aller à..." (recherche dédiée)
   const fb = document.getElementById('filter-block');
-  if (fb) fb.style.display = s === 'tcl' ? 'none' : 'flex';
+  if (fb) fb.style.display = (s === 'tcl' || s === 'dest') ? 'none' : 'flex';
   renderZone2(s);
   renderList();
   if (map) renderMap();
@@ -1097,6 +1231,11 @@ function renderList() {
     return;
   }
 
+  if (sub === 'dest') {
+    renderDestTab(el);
+    return;
+  }
+
   let list = [];
   if (sub === 'pr') list = data.parkings?.tcl || [];
   else if (sub === 'pk') list = data.parkings?.operateurs || [];
@@ -1218,6 +1357,7 @@ function pkHTML(p) {
   const logoFg = logoTxt[p.gestionnaire] || 'white';
   const logoLbl = p.gestionnaire === 'Q PARK' ? 'QPK' : (p.gestionnaire || 'P');
   const distBadge = nearActive && p._dist != null ? `<span class="pk-mini-gray">· ${fmtDist(p._dist)}</span>` : '';
+  const ligBadges = lignesBadgesHTML(p.lignes_proches);
 
   // Mini-icônes Vélo'v
   const vvProche = (p.velov_proches || [])[0];
@@ -1249,7 +1389,7 @@ function pkHTML(p) {
       <div class="pk-logo" style="background:${logoBg};color:${logoFg}">${logoLbl}</div>
       <div class="pk-name">
         <div class="pk-name-txt">${p.nom}</div>
-        <div class="pk-mini-icons">${vvMini}${veMini}${distBadge}</div>
+        <div class="pk-mini-icons">${ligBadges}${vvMini}${veMini}${distBadge}</div>
       </div>
       <div class="pk-right">
         <div>
@@ -1264,6 +1404,231 @@ function pkHTML(p) {
   </div>`;
 }
 
+// ── ASSISTANT "PLAN B" / "ALLER À..." — recherche de parkings dispo ──
+// Cherche jusqu'à `maxResults` parkings (P+R + payants confondus) avec des
+// places disponibles autour d'un point (lat,lng), en élargissant
+// progressivement le rayon de recherche si rien n'est trouvé tout près.
+// Garantit qu'au moins 1 P+R figure dans le résultat quand c'est possible
+// (souvent gratuit/moins cher qu'un parking payant), même un peu plus loin.
+// Réutilisé par le Plan B (autour d'un parking complet/en panne) et par
+// "Aller à..." (autour d'une adresse de destination).
+function isParkingAvailable(x) {
+  const xs = getStatus(x.places_disponibles, x.nb_places);
+  return xs.c === 'green' || xs.c === 'amber'; // on écarte le rouge et le gris : une vraie place, pas un quasi-complet
+}
+
+function nearestAvailableParkings(lat, lng, excludeId, maxResults) {
+  maxResults = maxResults || 3;
+  if (lat == null || lng == null) return [];
+  const all = [
+    ...(data.parkings?.tcl || []).map(x => ({...x, _cat: 'pr'})),
+    ...(data.parkings?.operateurs || []).map(x => ({...x, _cat: 'pk'}))
+  ];
+  const candidates = all
+    .filter(x => x.id !== excludeId && x.lat && x.lng && isParkingAvailable(x))
+    .map(x => ({...x, _dist: haversine(lat, lng, x.lat, x.lng)}));
+  const radii = [3000, 6000, Infinity]; // mètres : proche, élargi, sans limite
+  let picks = [];
+  for (const r of radii) {
+    const within = candidates.filter(x => x._dist <= r).sort((a, b) => a._dist - b._dist);
+    if (within.length) { picks = within.slice(0, maxResults); break; }
+  }
+  if (picks.length && !picks.some(a => a._cat === 'pr')) {
+    const nearestPr = candidates
+      .filter(x => x._cat === 'pr')
+      .sort((a, b) => a._dist - b._dist)[0];
+    if (nearestPr) picks = [...picks, nearestPr];
+  }
+  return picks;
+}
+
+function nearbyParkingAlternatives(p, maxResults) {
+  if (!p.lat || !p.lng) return [];
+  return nearestAvailableParkings(p.lat, p.lng, p.id, maxResults);
+}
+
+function alternativesHTML(p) {
+  const alts = nearbyParkingAlternatives(p, 3);
+  const logoColors = {TCL:'var(--tcl-bg)', LPA:'#e8a000', INDIGO:'#5E35B1', 'Q PARK':'#2E7D32'};
+  const logoTxt   = {TCL:'var(--tcl-txt)', LPA:'white',   INDIGO:'white',    'Q PARK':'white'};
+  let html = `<div class="exp-section-alt">
+    <div class="exp-section-lbl">🅿️ Plan B — parkings à proximité disponibles</div>`;
+  if (!alts.length) {
+    html += `<div class="empty-txt">Aucune alternative disponible trouvée pour le moment.</div>`;
+  } else {
+    alts.forEach(a => {
+      const aNb = a.places_disponibles, aCap = a.nb_places, aS = getStatus(aNb, aCap);
+      const logoBg = logoColors[a.gestionnaire] || '#888';
+      const logoFg = logoTxt[a.gestionnaire] || 'white';
+      const logoLbl = a.gestionnaire === 'Q PARK' ? 'QPK' : (a.gestionnaire || (a._cat === 'pr' ? 'P+R' : 'P'));
+      const navUrl = `geo:${a.lat},${a.lng}?q=${encodeURIComponent(a.nom)}`;
+      const ligBadgesAlt = a.lignes_proches && a.lignes_proches.length ? ` · ${lignesBadgesHTML(a.lignes_proches)}` : '';
+      html += `<div class="alt-item">
+        <div class="alt-ico" style="background:${logoBg};color:${logoFg}">${logoLbl}</div>
+        <div class="alt-body">
+          <div class="alt-name">${a.nom}</div>
+          <div class="alt-meta"><span class="c-${aS.c}">${aNb} places</span> · ${fmtDist(a._dist)}${ligBadgesAlt}</div>
+        </div>
+        <a class="alt-go" href="${navUrl}" target="_blank" rel="noopener">S'y rendre →</a>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+  return html;
+}
+
+// ── "ALLER À..." — P+R + itinéraire ──
+// Recherche d'adresse (API Adresse — base officielle gratuite, sans clé)
+// puis parkings disponibles les plus proches de la destination.
+async function searchDestinationInput() {
+  const inp = document.getElementById('dest-input');
+  const box = document.getElementById('dest-sugg-box');
+  if (!inp || !box) return;
+  const q = inp.value.trim();
+  if (q.length < 3) { box.innerHTML = ''; box.style.display = 'none'; return; }
+  try {
+    const r = await fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(q) + '&limit=5&lat=45.75&lon=4.85');
+    if (!r.ok) throw new Error('http');
+    const j = await r.json();
+    destSuggestions = j.features || [];
+    if (!destSuggestions.length) {
+      box.innerHTML = `<div class="dest-sugg-item" style="color:var(--muted);cursor:default">Aucun résultat</div>`;
+      box.style.display = 'block';
+      return;
+    }
+    box.innerHTML = destSuggestions.map((f, i) =>
+      `<div class="dest-sugg-item" onclick="selectDestSuggestion(${i})">${(f.properties?.label||'').replace(/</g,'&lt;')}</div>`
+    ).join('');
+    box.style.display = 'block';
+  } catch(e) {
+    box.innerHTML = `<div class="dest-sugg-item" style="color:var(--muted);cursor:default">Recherche d'adresse indisponible pour le moment</div>`;
+    box.style.display = 'block';
+  }
+}
+
+function selectDestSuggestion(i) {
+  const f = destSuggestions[i];
+  if (!f || !f.geometry) return;
+  destCoords = { lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0] };
+  destLabel = f.properties?.label || '';
+  destSuggestions = [];
+  renderList();
+}
+
+function clearDestSearch() {
+  destCoords = null; destLabel = ''; destSuggestions = [];
+  renderList();
+}
+
+function destResultsHTML() {
+  const picks = nearestAvailableParkings(destCoords.lat, destCoords.lng, null, 5);
+  const logoColors = {TCL:'var(--tcl-bg)', LPA:'#e8a000', INDIGO:'#5E35B1', 'Q PARK':'#2E7D32'};
+  const logoTxt   = {TCL:'var(--tcl-txt)', LPA:'white',   INDIGO:'white',    'Q PARK':'white'};
+  let html = `<div class="dest-current"><span>🎯 ${destLabel.replace(/</g,'&lt;')}</span><button class="dest-current-clear" onclick="clearDestSearch()" aria-label="Effacer">✕</button></div>`;
+  if (!picks.length) {
+    html += `<div class="empty-msg">Aucun parking disponible trouvé à proximité pour le moment.</div>`;
+    return html;
+  }
+  html += `<div class="sec-lbl">🅿️ Parkings disponibles les plus proches</div>`;
+  picks.forEach(a => {
+    const aNb = a.places_disponibles, aCap = a.nb_places, aS = getStatus(aNb, aCap);
+    const logoBg = logoColors[a.gestionnaire] || (a._cat === 'pr' ? 'var(--tcl-bg)' : '#888');
+    const logoFg = logoTxt[a.gestionnaire] || (a._cat === 'pr' ? 'var(--tcl-txt)' : 'white');
+    const logoLbl = a.gestionnaire === 'Q PARK' ? 'QPK' : (a.gestionnaire || (a._cat === 'pr' ? 'P+R' : 'P'));
+    const navUrl = `geo:${a.lat},${a.lng}?q=${encodeURIComponent(a.nom)}`;
+    const itinUrl = `https://www.google.com/maps/dir/?api=1&origin=${a.lat},${a.lng}&destination=${destCoords.lat},${destCoords.lng}&travelmode=transit`;
+    const ligBadgesDest = a.lignes_proches && a.lignes_proches.length ? ` · ${lignesBadgesHTML(a.lignes_proches)}` : '';
+    html += `<div class="dest-result-card">
+      <div class="dest-result-top">
+        <div class="dest-result-ico" style="background:${logoBg};color:${logoFg}">${logoLbl}</div>
+        <div class="dest-result-body">
+          <div class="dest-result-name">${a.nom}</div>
+          <div class="dest-result-meta"><span class="c-${aS.c}">${aNb} places</span> · ${fmtDist(a._dist)} de la destination${a._cat === 'pr' ? ' · P+R' : ''}${ligBadgesDest}</div>
+        </div>
+      </div>
+      <div class="dest-result-acts">
+        <a class="dest-act-btn dest-act-go" href="${navUrl}" target="_blank" rel="noopener">🚗 Aller au parking</a>
+        <a class="dest-act-btn dest-act-itin" href="${itinUrl}" target="_blank" rel="noopener">🚇 Itinéraire</a>
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
+function renderDestTab(el) {
+  el.innerHTML = `
+    <div class="dest-search-wrap">
+      <div class="sec-lbl">🎯 Où voulez-vous aller ?</div>
+      <div class="dest-input-row">
+        <input class="dest-input" id="dest-input" type="text" placeholder="Saisissez votre adresse de destination" autocomplete="off" oninput="searchDestinationInput()"/>
+      </div>
+      <div class="dest-sugg" id="dest-sugg-box" style="display:none"></div>
+      ${destCoords ? destResultsHTML() : `<div class="empty-txt">Entrez une adresse à Lyon pour découvrir le P+R ou le parking disponible le plus proche, avec un itinéraire jusqu'à destination.</div>`}
+    </div>
+    <div class="legal"><a href="https://data.grandlyon.com" target="_blank">Grand Lyon Open Data</a> — <a href="https://transport.data.gouv.fr/resources/licence-mobilites" target="_blank">Licence Mobilités</a> · © Grand Lyon — SYTRAL · © 2026 WYFY</div>`;
+  const inp = document.getElementById('dest-input');
+  if (inp && destCoords) inp.value = destLabel;
+}
+
+// Détecte une station Vélo'v éphémère (déployée pour un événement ponctuel :
+// festival, marché de Noël, Fête des Lumières...). Ces stations apparaissent
+// dans les données Grand Lyon avec un champ adresse générique du type
+// "Borne évènementielle n°X" au lieu d'une vraie adresse.
+function isEventVelov(v) {
+  const t = ((v.adresse || '') + ' ' + (v.nom || ''))
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, ''); // enlève les accents (évènementiel / événementiel)
+  return t.includes('venementiel') || t.includes('ephemere') || t.includes('temporaire');
+}
+
+// ── ASSISTANT "PLAN B" — VÉLO'V ──
+// Même principe que pour les parkings : si la station est vide/hors service,
+// on cherche jusqu'à `maxResults` stations proches avec des vélos dispo,
+// en élargissant le rayon si rien n'est trouvé tout près (réseau Vélo'v
+// beaucoup plus dense que les parkings, donc rayons plus petits).
+function nearbyVelovAlternatives(v, maxResults) {
+  maxResults = maxResults || 3;
+  if (!v.lat || !v.lng) return [];
+  const candidates = (data.velov || [])
+    .filter(x => x.id !== v.id && x.lat && x.lng && x.en_service && (x.velos_dispo || 0) > 0)
+    .map(x => ({...x, _dist: haversine(v.lat, v.lng, x.lat, x.lng)}));
+  const radii = [500, 1000, 2000, Infinity]; // mètres
+  for (const r of radii) {
+    const within = candidates.filter(x => x._dist <= r).sort((a, b) => a._dist - b._dist);
+    if (within.length) return within.slice(0, maxResults);
+  }
+  return [];
+}
+
+function velovAlternativesHTML(v) {
+  const alts = nearbyVelovAlternatives(v, 3);
+  let html = `<div class="exp-section-alt">
+    <div class="exp-section-lbl">🚲 Plan B — stations à proximité avec vélos</div>`;
+  if (!alts.length) {
+    html += `<div class="empty-txt">Aucune station avec vélo disponible trouvée pour le moment.</div>`;
+  } else {
+    alts.forEach(a => {
+      const navUrl = `geo:${a.lat},${a.lng}?q=${encodeURIComponent(a.nom)}`;
+      const nomAttr = (a.nom || '').replace(/"/g, '&quot;');
+      const adrAttr = (a.adresse || a.nom || '').replace(/"/g, '&quot;');
+      const mecaTxt = a.velos_meca > 0 ? ` (⚙${a.velos_meca}${a.velos_elec > 0 ? ` ⚡${a.velos_elec}` : ''})` : (a.velos_elec > 0 ? ` (⚡${a.velos_elec})` : '');
+      html += `<div class="alt-item">
+        <div class="alt-ico" style="background:var(--vv-bg);color:var(--vv-txt)">V'</div>
+        <div class="alt-body">
+          <div class="alt-name">${a.nom}</div>
+          <div class="alt-meta"><span class="c-green">${a.velos_dispo} vélo${a.velos_dispo !== 1 ? 's' : ''}${mecaTxt}</span> · ${fmtDist(a._dist)}</div>
+        </div>
+        <div class="alt-actions">
+          <button class="alt-go" data-lat="${a.lat}" data-lng="${a.lng}" data-nom="${nomAttr}" data-adr="${adrAttr}" onclick="copyAndReserveVelovInline(this)">📋 Réserver</button>
+          <a class="alt-go" href="${navUrl}" target="_blank" rel="noopener">S'y rendre →</a>
+        </div>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+  return html;
+}
+
 function pkExpandedHTML(p, s, cap, nb) {
   const occ = s.pct || 0;
   const barColor = s.c === 'green' ? 'var(--green)' : s.c === 'amber' ? 'var(--amber)' : 'var(--red)';
@@ -1273,6 +1638,12 @@ function pkExpandedHTML(p, s, cap, nb) {
   html += `<div class="exp-lbl" style="margin-bottom:4px">Disponibilité</div>
     <div class="occ-bar"><div class="occ-fill" style="width:${occ}%;background:${barColor}"></div></div>
     <div class="occ-meta"><span style="color:${barColor}">${nb !== null && nb >= 0 ? nb + ' libres' : '—'}</span><span>${cap || '?'} places</span></div>`;
+
+  // ── Lignes métro/tram à proximité (P+R uniquement) ──
+  if (p.lignes_proches && p.lignes_proches.length) {
+    html += `<div class="exp-lbl" style="margin-top:8px">Lignes à proximité</div>
+      <div style="margin-bottom:2px">${lignesBadgesHTML(p.lignes_proches, 'lg')}</div>`;
+  }
 
   // ── Tarifs (LPA) ──
   if (p.gestionnaire !== 'TCL' && (p.tarif_1h || p.tarif_2h || p.tarif_4h || p.tarif_24h)) {
@@ -1296,6 +1667,11 @@ function pkExpandedHTML(p, s, cap, nb) {
     <button class="acc-act-btn acc-act-copy" onclick="copyParkingAddress('${p.id}', this)">📋 Copier</button>
     ${mapBtn}
   </div>`;
+
+  // ── Assistant "Plan B" : badge rouge (0 place ou ≤15) ou donnée non fiable (gris) ──
+  if (s.c === 'red' || s.c === 'gray') {
+    html += alternativesHTML(p);
+  }
 
   // ── Vélo'v — section fond bleu pâle ──
   const cf2 = ctxFilters[sub] || {};
@@ -1412,7 +1788,7 @@ function vvHTML(v) {
   const mecaBadge = v.velos_meca > 0 ? `<span class="badge bm">⚙ ${v.velos_meca} méca</span>` : '';
   const elecBadge = v.velos_elec > 0 ? `<span class="badge be">⚡ ${v.velos_elec} élec</span>` : '';
   const adrBloc = v.adresse
-    ? `<div class="vv-exp-adr">📍 ${v.adresse}</div>` : '';
+    ? `<div class="vv-exp-adr">📍 ${v.adresse}${isEventVelov(v) ? ' (station éphémère temporaire)' : ''}</div>` : '';
 
   const expanded = `
     <div class="exp-lbl" style="margin-bottom:4px">Disponibilité</div>
@@ -1432,6 +1808,7 @@ function vvHTML(v) {
       ${v.lat && v.lng ? `<a class="vv-exp-reserve" style="flex:1;text-decoration:none;background:var(--orange-light);color:var(--orange-dark);border:1.5px solid var(--orange-border)" href="geo:${v.lat},${v.lng}?q=${encodeURIComponent(v.nom||'')}" target="_blank">📍 S'y rendre</a>` : ''}
       ${v.lat && v.lng ? `<button class="vv-exp-reserve" style="flex:1;background:var(--orange-light);color:var(--orange-dark);border:1.5px solid var(--orange-border)" onclick="showVelovOnMap('${v.id}')">🗺 Carte</button>` : ''}
     </div>
+    ${!ok ? velovAlternativesHTML(v) : ''}
     ${adrBloc}`;
 
   return `<div class="pk-card ${fav ? 'favori' : ''}" data-id="${v.id}">
@@ -1713,7 +2090,7 @@ function updateDetail(p) {
   // Adresse
   const adrBl = document.getElementById('vv-adresse-bloc');
   const adrTxt = document.getElementById('vv-adresse');
-  if (p.adresse && adrBl && adrTxt) { adrBl.style.display = 'block'; adrTxt.textContent = p.adresse; }
+  if (p.adresse && adrBl && adrTxt) { adrBl.style.display = 'block'; adrTxt.textContent = p.adresse + (isEventVelov(p) ? ' (station éphémère temporaire)' : ''); }
   else if (adrBl) adrBl.style.display = 'none';
 }
 
@@ -1780,7 +2157,9 @@ function renderMap() {
     if (cf.fav && !isFav(p.id)) return;
     if (cf.dispo && (p.places_disponibles||0) <= 0) return;
     const nb = p.places_disponibles, cap = p.nb_places, s = getStatus(nb, cap), fav = isFav(p.id);
-    addM(p.lat, p.lng, colHex(s.c), fav?34:26, (nb===null||nb<0)?'?':String(nb), p.nom, s.lbl, 'parking_tcl', '#2E7D32', 0, 0, p.id);
+    const ligExtra = (p.lignes_proches && p.lignes_proches.length)
+      ? `<div style="margin:2px 0 6px">${lignesBadgesHTML(p.lignes_proches)}</div>` : '';
+    addM(p.lat, p.lng, colHex(s.c), fav?34:26, (nb===null||nb<0)?'?':String(nb), p.nom, s.lbl, 'parking_tcl', '#2E7D32', 0, 0, p.id, ligExtra);
   });
   if (mapLayers.pk) (data.parkings?.operateurs||[]).forEach(p => {
     if (!p.lat || !p.lng) return;
@@ -1892,7 +2271,7 @@ function pinSVG(label, bg, border, nb, nbColor) {
   </svg>`;
 }
 
-function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vvElec, itemId) {
+function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vvElec, itemId, extraHTML) {
   // Config visuelle selon type explicite
   const configs = {
     parking_tcl: { bg:'#E8F5E9', border:'#2E7D32', label:'P+R' },
@@ -1950,7 +2329,7 @@ function addM(lat, lng, color, sz, lbl, name, sub, type, borderColor, vvMeca, vv
     ? `<div class="lp-name" onclick="showDetailFromMap('${itemId}','${type}')">${cleanName}</div>`
     : `<div class="lp-name">${cleanName}</div>`;
   const popup = L.popup({maxWidth:200, minWidth:160}).setContent(
-    `<div class="lp-popup">${nameHtml}<div class="lp-num" style="color:${color}">${lbl}</div><div class="lp-sub">${sub}</div>${vvDetail}
+    `<div class="lp-popup">${nameHtml}<div class="lp-num" style="color:${color}">${lbl}</div><div class="lp-sub">${sub}</div>${extraHTML||''}${vvDetail}
     <div class="lp-btns"><a href="${navUrl}" target="_blank" class="lp-btn lp-btn-nav">📍 S'y rendre</a>${tclBtn}${vvBtn}</div></div>`);
   const m = L.marker([lat,lng], {icon}).addTo(map).bindPopup(popup);
   m.on('click', () => m.openPopup()); markers.push(m);
