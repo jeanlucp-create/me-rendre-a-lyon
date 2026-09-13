@@ -1,4 +1,4 @@
-<!-- Me rendre à Lyon — v13u -->
+<!-- Me rendre à Lyon — v14a -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -401,6 +401,95 @@
     .ap-card .pk-chevron.open{transform:rotate(180deg)}
     /* Leo&Go véhicule card */
     .ap-leo-card{background:var(--white);border-radius:13px;border:1.5px solid var(--border);margin-bottom:6px;padding:10px 12px;display:flex;align-items:center;gap:8px}
+
+    /* ── MODE VOITURE (cv-) ── */
+    .header-logo{cursor:pointer}
+    .header-logo .hl-car{display:block}
+    .header-logo .hl-pin{display:none}
+    .header-logo.car-mode-active .hl-car{display:none}
+    .header-logo.car-mode-active .hl-pin{display:block}
+    .car-view{position:absolute;inset:0;background:var(--cream);overflow-y:auto;display:none;z-index:120;-webkit-overflow-scrolling:touch}
+    .cv-scr{display:none;height:100%;flex-direction:column}
+    .cv-scr.active{display:flex}
+    .cv-header{flex-shrink:0;padding:10px 16px 12px;background:var(--cream);border-bottom:1px solid var(--orange-border);position:sticky;top:0;z-index:2}
+    .cv-header-row{display:flex;align-items:center;gap:10px}
+    .cv-back{width:32px;height:32px;border-radius:10px;background:var(--white);border:1.5px solid var(--orange-border);display:flex;align-items:center;justify-content:center;color:var(--orange-dark);cursor:pointer;flex-shrink:0}
+    .cv-htitle{font-size:15px;font-weight:900;color:var(--text);letter-spacing:-.2px;line-height:1.15;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cv-live{display:flex;align-items:center;gap:5px;flex-shrink:0;background:var(--white);border:1.5px solid var(--orange-border);border-radius:100px;padding:5px 9px 5px 7px}
+    .cv-live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 0 0 rgba(46,204,113,.6);animation:cvpulse 2s infinite}
+    .cv-live-dot.flash{animation:cvflash .6s ease}
+    @keyframes cvpulse{0%{box-shadow:0 0 0 0 rgba(46,204,113,.55)}70%{box-shadow:0 0 0 6px rgba(46,204,113,0)}100%{box-shadow:0 0 0 0 rgba(46,204,113,0)}}
+    @keyframes cvflash{0%{transform:scale(1)}40%{transform:scale(1.8);background:var(--green)}100%{transform:scale(1)}}
+    .cv-live span{font-size:9px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+    .cv-body{flex:1;overflow-y:auto;padding:16px 16px 32px}
+
+    /* start screen */
+    .cv-start-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 6px 34px;gap:14px}
+    .cv-start-title{text-align:center;font-size:20px;font-weight:900;color:var(--text);letter-spacing:-.3px;margin-bottom:2px}
+    .cv-start-title span{color:var(--orange)}
+    .cv-start-sub{text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+    .cv-choice{display:flex;align-items:center;gap:14px;background:var(--white);border:1.5px solid var(--border);border-radius:20px;padding:18px 16px;cursor:pointer;transition:border-color .15s,background .15s,transform .1s}
+    .cv-choice:active{transform:scale(.98)}
+    .cv-choice.fav{border-color:var(--orange-border);background:#FFFAF5}
+    .cv-choice-ico{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+    .cv-choice.fav .cv-choice-ico{background:var(--orange-light);color:var(--orange-dark)}
+    .cv-choice.dest .cv-choice-ico{background:#EAF2FF;color:var(--blue)}
+    .cv-choice-txt{flex:1;min-width:0}
+    .cv-choice-h{font-size:15px;font-weight:900;color:var(--text);margin-bottom:2px}
+    .cv-choice-p{font-size:11px;font-weight:600;color:var(--muted);line-height:1.3}
+    .cv-choice-arrow{color:var(--muted);flex-shrink:0;font-size:18px}
+
+    /* setfav / search */
+    .cv-hint{background:var(--orange-light);border:1px solid var(--orange-border);border-radius:12px;padding:10px 12px;font-size:11px;font-weight:700;color:var(--orange-dark);line-height:1.4;margin-bottom:14px}
+    .cv-favpick{display:flex;align-items:center;gap:10px;background:var(--white);border:1.5px solid var(--border);border-radius:15px;padding:12px;cursor:pointer;margin-bottom:8px;transition:border-color .15s,transform .1s}
+    .cv-favpick:active{transform:scale(.98)}
+    .cv-favpick-ico{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:white}
+    .cv-favpick-txt{flex:1;min-width:0}
+    .cv-favpick-name{font-size:12.5px;font-weight:800;color:var(--text)}
+    .cv-favpick-meta{font-size:9.5px;font-weight:700;color:var(--muted);margin-top:1px}
+    .cv-favpick-num{text-align:right;flex-shrink:0;font-family:'Space Mono',monospace;font-size:16px;font-weight:900}
+    .cv-search-box{display:flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--orange-border);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+    .cv-search-input{border:none;outline:none;background:transparent;flex:1;font-size:14px;font-weight:700;color:var(--text);font-family:'Nunito',sans-serif}
+    .cv-search-input::placeholder{color:var(--muted);font-weight:600}
+    .cv-search-cta{width:100%;padding:15px;border-radius:14px;background:var(--orange);color:#fff;border:none;font-size:14px;font-weight:900;font-family:'Nunito',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 4px 14px rgba(255,107,53,.3);margin-bottom:10px}
+    .cv-empty{text-align:center;color:var(--muted);font-size:12px;font-weight:600;padding:24px 8px}
+
+    /* hero + list */
+    .cv-hero{background:var(--white);border:1.5px solid var(--border);border-radius:22px;padding:16px;margin-bottom:16px;box-shadow:0 8px 24px -12px rgba(26,26,46,.18)}
+    .cv-hero.swap{animation:cvswap .4s ease}
+    @keyframes cvswap{0%{transform:scale(.97);opacity:.4}100%{transform:scale(1);opacity:1}}
+    .cv-hero-badge{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:900;letter-spacing:.04em;padding:5px 10px;border-radius:100px;background:var(--orange-light);color:var(--orange-dark);margin-bottom:10px}
+    .cv-hero-badge.dest{background:#EAF2FF;color:var(--blue)}
+    .cv-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px}
+    .cv-hero-name{font-size:19px;font-weight:900;color:var(--text);letter-spacing:-.3px;line-height:1.15}
+    .cv-hero-mgr{font-size:10px;font-weight:700;color:var(--muted);margin-top:2px}
+    .cv-hero-count{text-align:right;flex-shrink:0}
+    .cv-hero-num{font-family:'Space Mono',monospace;font-size:38px;font-weight:900;line-height:.95;transition:color .3s}
+    .cv-hero-num.pulse{animation:cvnumpulse .5s ease}
+    @keyframes cvnumpulse{0%{transform:scale(1.3)}100%{transform:scale(1)}}
+    .cv-hero-cap{font-size:9px;font-weight:700;color:var(--muted)}
+    .cv-hero-meta{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--text);margin:10px 0 12px;flex-wrap:wrap}
+    .cv-hero-dot{width:3px;height:3px;border-radius:50%;background:var(--muted)}
+    .cv-hero-amn{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;align-items:center}
+    .cv-pill{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:800;padding:4px 8px;border-radius:7px}
+    .cv-pill.vv{background:var(--vv-bg);color:var(--vv-txt)}
+    .cv-pill.ev{background:#E6F9EE;color:#1E8449}
+    .cv-hero-warn{font-size:10px;font-weight:800;color:var(--amber);margin-top:2px;text-align:right}
+    .cv-cta{width:100%;padding:15px;border-radius:14px;background:var(--orange);color:#fff;border:none;font-size:14px;font-weight:900;font-family:'Nunito',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 4px 14px rgba(255,107,53,.3)}
+    .cv-cta:active{transform:scale(.98)}
+    .cv-sec-lbl{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:2px 4px 8px}
+    .cv-list{display:flex;flex-direction:column;gap:8px}
+    .cv-opt{display:flex;align-items:center;gap:10px;background:var(--white);border:1.5px solid var(--border);border-radius:15px;padding:11px 12px;cursor:pointer;transition:border-color .15s,transform .1s}
+    .cv-opt:active{transform:scale(.98)}
+    .cv-opt-rank{width:22px;height:22px;border-radius:7px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:var(--muted);flex-shrink:0}
+    .cv-opt-txt{flex:1;min-width:0}
+    .cv-opt-name{font-size:12.5px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cv-opt-meta{font-size:9.5px;font-weight:700;color:var(--muted);margin-top:1px}
+    .cv-opt-count{text-align:right;flex-shrink:0}
+    .cv-opt-num{font-family:'Space Mono',monospace;font-size:17px;font-weight:900;line-height:1}
+    .cv-opt-cap{font-size:8px;font-weight:700;color:var(--muted)}
+    .cv-opt-swap{width:26px;height:26px;border-radius:8px;background:var(--orange-light);color:var(--orange-dark);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+    .cv-change-link{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:800;color:var(--orange-dark);cursor:pointer;margin-left:8px;vertical-align:middle;text-decoration:underline}
   </style>
 </head>
 <body>
@@ -418,12 +507,18 @@
     <circle cx="130" cy="75" r="5" fill="#FF6B35" opacity=".4"/>
   </svg>
   <div class="header-top">
-    <div class="header-logo">
-      <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+    <div class="header-logo" id="header-logo-btn" onclick="toggleCarMode()" role="button" aria-label="Mode voiture" title="Mode voiture">
+      <svg class="hl-pin" width="24" height="24" viewBox="0 0 28 28" fill="none">
         <circle cx="14" cy="14" r="10" stroke="white" stroke-width="2"/>
         <path d="M14 4C14 4,8 10,8 14C8 18.4,10.7 22,14 22C17.3 22,20 18.4,20 14C20 10,14 4 14 4Z" fill="white" opacity=".9"/>
         <circle cx="14" cy="14" r="2.5" fill="#FF6B35"/>
         <line x1="4" y1="14" x2="24" y2="14" stroke="white" stroke-width="1.5" opacity=".5"/>
+      </svg>
+      <svg class="hl-car" width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M4 16.5V11a2 2 0 0 1 .3-1.05l1.9-3A2 2 0 0 1 7.9 6h8.2a2 2 0 0 1 1.7 1l1.9 3a2 2 0 0 1 .3 1v5.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4 13h16" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="7.5" cy="16.5" r="1.6" fill="white"/>
+        <circle cx="16.5" cy="16.5" r="1.6" fill="white"/>
       </svg>
     </div>
     <div>
@@ -488,6 +583,85 @@
       <div class="map-toggle" id="mt-ve" onclick="toggleMapLayer('ve')">⚡ Bornes</div>
     </div>
     <button class="locate-btn" onclick="locateUser()">📍</button>
+  </div>
+
+  <!-- MODE VOITURE -->
+  <div class="car-view" id="car-view">
+
+    <!-- écran départ : favoris ou aller à... -->
+    <div class="cv-scr active" id="cv-scr-start">
+      <div class="cv-body cv-start-body">
+        <div class="cv-start-title">Mode <span>voiture</span></div>
+        <div class="cv-start-sub">Interface simplifiée pour la conduite</div>
+        <div class="cv-choice fav" onclick="carGoFav()">
+          <div class="cv-choice-ico">⭐</div>
+          <div class="cv-choice-txt">
+            <div class="cv-choice-h">Mes favoris</div>
+            <div class="cv-choice-p">Direct vers votre parking habituel</div>
+          </div>
+          <div class="cv-choice-arrow">›</div>
+        </div>
+        <div class="cv-choice dest" onclick="carShow('cv-scr-search')">
+          <div class="cv-choice-ico">🎯</div>
+          <div class="cv-choice-txt">
+            <div class="cv-choice-h">Aller à…</div>
+            <div class="cv-choice-p">Trouver un parking près d'une adresse</div>
+          </div>
+          <div class="cv-choice-arrow">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- écran choix du favori (1er réglage ou "Changer") -->
+    <div class="cv-scr" id="cv-scr-setfav">
+      <div class="cv-header">
+        <div class="cv-header-row">
+          <div class="cv-back" onclick="carShow('cv-scr-start')"><i class="ti ti-arrow-back-up" aria-hidden="true"></i></div>
+          <div class="cv-htitle">⭐ Choisir mon parking favori</div>
+        </div>
+      </div>
+      <div class="cv-body">
+        <div class="cv-hint" id="cv-setfav-hint">Choisissez le parking d'où vous partez le plus souvent — il sera aussi ajouté à vos favoris ⭐. Vous pourrez en changer à tout moment.</div>
+        <div id="cv-favpick-list"></div>
+      </div>
+    </div>
+
+    <!-- écran recherche d'adresse (Aller à...) -->
+    <div class="cv-scr" id="cv-scr-search">
+      <div class="cv-header">
+        <div class="cv-header-row">
+          <div class="cv-back" onclick="carShow('cv-scr-start')"><i class="ti ti-arrow-back-up" aria-hidden="true"></i></div>
+          <div class="cv-htitle">🎯 Aller à…</div>
+        </div>
+      </div>
+      <div class="cv-body">
+        <div class="cv-search-box">
+          <input class="cv-search-input" id="cv-search-input" type="text" placeholder="Adresse, lieu…" autocomplete="off"/>
+        </div>
+        <button class="cv-search-cta" onclick="carSearchDest()">🔍 Rechercher</button>
+        <div id="cv-search-msg"></div>
+      </div>
+    </div>
+
+    <!-- écran conduite : favori/destination + alternatives -->
+    <div class="cv-scr" id="cv-scr-drive">
+      <div class="cv-header">
+        <div class="cv-header-row">
+          <div class="cv-back" onclick="carShow('cv-scr-start')"><i class="ti ti-arrow-back-up" aria-hidden="true"></i></div>
+          <div class="cv-htitle" id="cv-drive-title">Mode voiture</div>
+          <div class="cv-live">
+            <div class="cv-live-dot" id="cv-live-dot"></div>
+            <span id="cv-live-txt">actualisé à l'instant</span>
+          </div>
+        </div>
+      </div>
+      <div class="cv-body">
+        <div class="cv-hero" id="cv-hero"></div>
+        <div class="cv-sec-lbl">Autres parkings à proximité</div>
+        <div class="cv-list" id="cv-list"></div>
+      </div>
+    </div>
+
   </div>
 
   <!-- DETAIL VÉLO'V uniquement -->
@@ -568,7 +742,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ─────────────────────────────────────────────────────────────
-// Me rendre à Lyon — v13u
+// Me rendre à Lyon — v14a
 // Historique :
 //   v12a  : Autopartage (Citiz LPA + Leo&Go)
 //   v13a  : Refonte filtres — zones contextuelles VOIR
@@ -692,10 +866,37 @@
 //           (`× N`) quand plusieurs véhicules du même type sont dispo à
 //           la station. Nécessite le Worker v3s (sinon `vehicules` reste
 //           vide comme avant, aucune casse).
-//   v13u  : Ajout d'un 3e bouton "🗺 Carte" dans chaque résultat "Aller à..."
+//   v13u  : Ajout d'un 3e bouton "Carte" dans chaque résultat "Aller à..."
 //           (à côté de "Aller au parking" et "Itinéraire TCL"), pour ouvrir
 //           directement la carte centrée sur ce parking — réutilise
 //           `showParkingOnMap()`, déjà utilisé depuis la fiche parking.
+//   v14a  : MODE VOITURE — première version réelle (jusqu'ici : maquette
+//           cliquable seule). Accès via l'icône dans l'en-tête, à gauche du
+//           titre : icône voiture (mode normal → tap pour entrer en mode
+//           voiture) ⇄ icône du logo d'origine (mode voiture actif → tap pour
+//           revenir à la vue complète). En mode voiture, la navigation par
+//           onglets et les filtres sont masqués (interface simplifiée pour
+//           la conduite) et l'écran de démarrage propose "⭐ Mes favoris" ou
+//           "🎯 Aller à...".
+//           - Favoris : réutilise directement les ⭐ favoris déjà existants
+//           dans l'appli (filtrés aux P+R/parkings uniquement) — pas de
+//           notion de "favori voiture" séparée. Un seul favori → on y va
+//           directement ; plusieurs → écran de choix ; aucun → écran de
+//           choix sur tous les parkings, et le choix ajoute aussi ce parking
+//           aux ⭐ favoris normaux. Mémorisé dans localStorage
+//           (`mral_car_fav_id`), modifiable à tout moment via "Changer".
+//           - Aller à... : ré-utilise l'API adresse existante puis
+//           `nearestAvailableParkings()` centré sur l'adresse saisie.
+//           - Alternatives ("Autres parkings à proximité") : calculées via
+//           `nearestAvailableParkings()` — centrées sur le favori par
+//           défaut, mais sur la position GPS réelle si elle est disponible
+//           ET à moins de 500 m du favori (bascule silencieuse, sans
+//           bloquer si la géoloc est refusée/indisponible). Un tap sur une
+//           alternative l'échange avec le parking principal (`carSwap`).
+//           - Actualisation : rattachée au cycle existant de `loadData()`
+//           (2 min), plus une actualisation immédiate au retour au premier
+//           plan de l'appli (Page Visibility API) — comme validé sur la
+//           maquette. Aucune nouvelle source de données côté Worker.
 // ─────────────────────────────────────────────────────────────
 const WORKER = 'https://me-rendre-a-lyon.jean-luc-perrotto.workers.dev';
 const LIGNES_TCL_GEOM = {"lines":[{"code":"A","color":"#E8308A","family":"metro","segments":[[[45.74961,4.82687],[45.75064,4.82776],[45.75691,4.83171],[45.7572,4.83206],[45.75805,4.83428],[45.75839,4.83459],[45.75954,4.83527],[45.76034,4.83563],[45.76089,4.83573],[45.7678,4.83616],[45.76814,4.83634],[45.76838,4.83665],[45.76863,4.83751],[45.76871,4.84402],[45.77101,4.86824],[45.77103,4.87087],[45.77048,4.87452],[45.76425,4.90828],[45.76285,4.91475],[45.76096,4.9211]],[[45.76096,4.9211],[45.76285,4.91475],[45.76425,4.90828],[45.77048,4.87452],[45.77103,4.87087],[45.77101,4.86824],[45.76871,4.84402],[45.76863,4.83751],[45.76838,4.83665],[45.76814,4.83634],[45.7678,4.83616],[45.76089,4.83573],[45.76034,4.83563],[45.75954,4.83527],[45.75839,4.83459],[45.75805,4.83428],[45.7572,4.83206],[45.75691,4.83171],[45.75064,4.82776],[45.74961,4.82687]]]},{"code":"B","color":"#0075BF","family":"metro","segments":[[[45.77044,4.86318],[45.76873,4.85986],[45.76846,4.85941],[45.76821,4.85923],[45.76509,4.85957],[45.76283,4.85959],[45.76255,4.85951],[45.76213,4.85918],[45.76172,4.85827],[45.76107,4.85153],[45.76081,4.84997],[45.76046,4.84883],[45.75863,4.84657],[45.75812,4.84613],[45.7576,4.84607],[45.75387,4.84701],[45.75366,4.84692],[45.72413,4.82933],[45.72172,4.82769],[45.71991,4.82544],[45.71897,4.82404],[45.71811,4.82241],[45.71749,4.82008],[45.71677,4.81531],[45.71639,4.80917],[45.71624,4.80875],[45.71417,4.8049],[45.71246,4.80262],[45.71185,4.80227],[45.71101,4.80218],[45.70673,4.80281],[45.70593,4.80282],[45.70296,4.80351],[45.7004,4.80517]],[[45.7004,4.80517],[45.70296,4.80351],[45.70593,4.80282],[45.70673,4.80281],[45.71101,4.80218],[45.71185,4.80227],[45.71246,4.80262],[45.71417,4.8049],[45.71624,4.80875],[45.71639,4.80917],[45.71678,4.81535],[45.71749,4.82008],[45.71811,4.82241],[45.71897,4.82404],[45.71991,4.82544],[45.72172,4.82769],[45.72413,4.82933],[45.75366,4.84692],[45.75387,4.84701],[45.7576,4.84607],[45.75812,4.84613],[45.75863,4.84657],[45.76046,4.84883],[45.76081,4.84997],[45.76107,4.85153],[45.76172,4.85827],[45.76213,4.85918],[45.76255,4.85951],[45.76283,4.85959],[45.76509,4.85957],[45.76821,4.85923],[45.76846,4.85941],[45.76873,4.85986],[45.77044,4.86318]]]},{"code":"C","color":"#EC6608","family":"metro","segments":[[[45.78532,4.8326],[45.78226,4.82862],[45.78166,4.82802],[45.7807,4.82748],[45.77981,4.82744],[45.77899,4.82755],[45.77861,4.82775],[45.77568,4.82994],[45.77498,4.83022],[45.77468,4.83047],[45.77447,4.83073],[45.77441,4.83113],[45.77456,4.83236],[45.77445,4.83294],[45.77098,4.83622],[45.77068,4.83636],[45.77035,4.83631],[45.76973,4.83585],[45.76945,4.83579],[45.76798,4.83607]],[[45.76798,4.83607],[45.76945,4.83579],[45.76973,4.83585],[45.77035,4.83631],[45.77068,4.83636],[45.77098,4.83622],[45.77445,4.83294],[45.77456,4.83236],[45.77441,4.83113],[45.77447,4.83073],[45.77468,4.83047],[45.77498,4.83022],[45.77568,4.82994],[45.77861,4.82775],[45.77899,4.82755],[45.77981,4.82744],[45.7807,4.82748],[45.78166,4.82802],[45.78226,4.82862],[45.78532,4.8326]]]},{"code":"D","color":"#009E3D","family":"metro","segments":[[[45.70564,4.888],[45.70678,4.88795],[45.70801,4.88731],[45.70868,4.88719],[45.71233,4.88803],[45.7138,4.88817],[45.71695,4.88787],[45.71886,4.88782],[45.7215,4.88678],[45.72286,4.88718],[45.72382,4.88722],[45.72939,4.88671],[45.72967,4.88674],[45.73009,4.88695],[45.73179,4.8882],[45.733,4.88864],[45.73454,4.8895],[45.73508,4.88956],[45.73565,4.88944],[45.73608,4.88915],[45.73698,4.88809],[45.73953,4.88562],[45.74135,4.88431],[45.74199,4.88326],[45.74273,4.87961],[45.75597,4.84139],[45.75614,4.84051],[45.75614,4.8397],[45.75577,4.83632],[45.75604,4.83483],[45.75651,4.83402],[45.75796,4.83239],[45.75937,4.83003],[45.75978,4.82905],[45.76084,4.82242],[45.76134,4.81987],[45.76528,4.8062],[45.76557,4.80583],[45.76596,4.80558],[45.76737,4.80537],[45.7682,4.80537],[45.76922,4.80557],[45.77306,4.8053],[45.7747,4.80536],[45.77595,4.80528],[45.77629,4.80513],[45.77666,4.8048],[45.77751,4.8035],[45.77799,4.80315],[45.7784,4.80302],[45.7788,4.80302],[45.77917,4.80314],[45.77953,4.80337],[45.78069,4.80445]],[[45.78069,4.80445],[45.77953,4.80337],[45.77917,4.80314],[45.7788,4.80302],[45.7784,4.80302],[45.77799,4.80315],[45.77751,4.8035],[45.77666,4.8048],[45.77629,4.80513],[45.77595,4.80528],[45.7747,4.80536],[45.77306,4.8053],[45.76922,4.80557],[45.7682,4.80537],[45.76737,4.80537],[45.76596,4.80558],[45.76557,4.80583],[45.76528,4.8062],[45.76134,4.81987],[45.76084,4.82242],[45.75978,4.82905],[45.75937,4.83003],[45.75796,4.83239],[45.75651,4.83402],[45.75604,4.83483],[45.75577,4.83632],[45.75614,4.8397],[45.75614,4.84051],[45.75597,4.84139],[45.74273,4.87961],[45.74199,4.88326],[45.74135,4.88431],[45.73953,4.88562],[45.73698,4.88809],[45.73608,4.88915],[45.73565,4.88944],[45.73508,4.88956],[45.73454,4.8895],[45.733,4.88864],[45.73179,4.8882],[45.73009,4.88695],[45.72967,4.88674],[45.72939,4.88671],[45.72382,4.88722],[45.72286,4.88718],[45.7215,4.88678],[45.71886,4.88782],[45.71695,4.88787],[45.7138,4.88817],[45.71233,4.88803],[45.70868,4.88719],[45.70801,4.88731],[45.70678,4.88795],[45.70564,4.888]]]},{"code":"F1","color":"#992358","family":"funiculaire","segments":[[[45.76,4.82602],[45.75721,4.81656]],[[45.76001,4.82601],[45.75722,4.81655]]]},{"code":"F2","color":"#006F9E","family":"funiculaire","segments":[[[45.7622,4.82186],[45.7602,4.82516],[45.76002,4.826]],[[45.76221,4.82187],[45.76021,4.82517],[45.76003,4.82601]]]},{"code":"T1","color":"#004F9F","family":"tram","segments":[[[45.78686,4.8819],[45.78533,4.8826],[45.785,4.88338],[45.78409,4.88378],[45.78383,4.88366],[45.78199,4.8755],[45.78173,4.87481],[45.78137,4.87321],[45.78137,4.8728],[45.78171,4.87122],[45.78156,4.8704],[45.78159,4.86942],[45.78077,4.86576],[45.78065,4.86553],[45.78041,4.8655],[45.77912,4.8666],[45.77543,4.86753],[45.77527,4.86735],[45.77441,4.86505],[45.77409,4.86456],[45.77412,4.86362],[45.77394,4.86332],[45.77058,4.86296],[45.77018,4.86253],[45.76981,4.86185],[45.76964,4.86174],[45.76407,4.86203],[45.76381,4.86191],[45.76373,4.85824],[45.76362,4.8579],[45.76344,4.85772],[45.76303,4.85762],[45.76134,4.85792],[45.7612,4.85788],[45.76109,4.85769],[45.76058,4.85219],[45.75995,4.84247],[45.7598,4.84231],[45.75965,4.8423],[45.75583,4.84286],[45.75548,4.84284],[45.75109,4.83976],[45.75102,4.83933],[45.75183,4.83735],[45.75179,4.83697],[45.74807,4.83401],[45.74795,4.83373],[45.74962,4.82829],[45.75002,4.82769],[45.74996,4.82733],[45.74925,4.82683],[45.749,4.82635],[45.74773,4.82526],[45.7473,4.82473],[45.73849,4.81722],[45.73765,4.8168],[45.73681,4.81674],[45.73634,4.81685],[45.73404,4.81792],[45.73372,4.8185],[45.73342,4.81952],[45.7319,4.82152],[45.7316,4.82396],[45.73135,4.82996],[45.7313,4.83387],[45.73117,4.83441]],[[45.73119,4.83442],[45.73133,4.8339],[45.73135,4.83087],[45.73162,4.82425],[45.73196,4.82146],[45.73351,4.81942],[45.73375,4.81852],[45.73405,4.81795],[45.73633,4.8169],[45.73705,4.81677],[45.73765,4.81684],[45.73847,4.81725],[45.74725,4.82473],[45.7477,4.82528],[45.74891,4.82631],[45.74918,4.82683],[45.74994,4.8274],[45.74996,4.82775],[45.74961,4.82823],[45.74791,4.83367],[45.74807,4.83406],[45.75177,4.83699],[45.75178,4.8374],[45.75098,4.83935],[45.75106,4.83978],[45.7555,4.84289],[45.75962,4.84234],[45.75977,4.84234],[45.75991,4.84247],[45.76055,4.85242],[45.76107,4.85774],[45.76118,4.85793],[45.76131,4.85797],[45.76306,4.85767],[45.76342,4.85776],[45.76361,4.85794],[45.7637,4.85826],[45.76372,4.86171],[45.76383,4.862],[45.764,4.86207],[45.76962,4.86178],[45.76979,4.86188],[45.77018,4.86258],[45.77058,4.863],[45.77391,4.86335],[45.77409,4.86363],[45.77408,4.86465],[45.77438,4.86506],[45.77526,4.8674],[45.77547,4.86758],[45.77912,4.86664],[45.78038,4.86557],[45.78062,4.86556],[45.78074,4.86577],[45.78157,4.86948],[45.78153,4.87039],[45.78168,4.87122],[45.78134,4.8728],[45.78134,4.87321],[45.7817,4.87481],[45.78197,4.87555],[45.78381,4.88374],[45.78406,4.88385],[45.78501,4.88342],[45.78533,4.88265],[45.78688,4.88196]],[[45.78246,4.87763],[45.78136,4.87315],[45.78171,4.87122],[45.78156,4.8704],[45.7816,4.86953],[45.78071,4.86561],[45.78058,4.86549],[45.78041,4.8655],[45.77912,4.8666],[45.77543,4.86753],[45.77527,4.86735],[45.77441,4.86505],[45.77409,4.86456],[45.77412,4.86362],[45.77394,4.86332],[45.77058,4.86296],[45.77018,4.86253],[45.76981,4.86185],[45.76964,4.86174],[45.76407,4.86203],[45.76386,4.86197],[45.76375,4.86169],[45.76373,4.85824],[45.76362,4.8579],[45.76344,4.85772],[45.76303,4.85762],[45.76134,4.85792],[45.7611,4.85774],[45.76058,4.85219],[45.75995,4.84247],[45.7598,4.84231],[45.75965,4.8423],[45.75583,4.84286],[45.75548,4.84284],[45.75109,4.83976],[45.75102,4.83933],[45.75183,4.83735],[45.75179,4.83697],[45.74807,4.83401],[45.74795,4.83373],[45.74962,4.82829],[45.75002,4.82769],[45.74996,4.82733],[45.74925,4.82683],[45.749,4.82635],[45.74773,4.82526],[45.7473,4.82473],[45.73849,4.81722],[45.73765,4.8168],[45.73681,4.81674],[45.73634,4.81685],[45.73404,4.81792],[45.73372,4.8185],[45.73342,4.81952],[45.7319,4.82152],[45.7316,4.82396],[45.73135,4.82996],[45.7313,4.83387],[45.73117,4.83441]],[[45.73119,4.83442],[45.73133,4.8339],[45.73135,4.83087],[45.73162,4.82425],[45.73196,4.82146],[45.73351,4.81942],[45.73375,4.81852],[45.73405,4.81795],[45.73633,4.8169],[45.73705,4.81677],[45.73765,4.81684],[45.73847,4.81725],[45.74725,4.82473],[45.7477,4.82528],[45.74891,4.82631],[45.74918,4.82683],[45.74994,4.8274],[45.74996,4.82775],[45.74961,4.82823],[45.74791,4.83367],[45.74807,4.83406],[45.75177,4.83699],[45.75178,4.8374],[45.75098,4.83935],[45.75106,4.83978],[45.7555,4.84289],[45.75962,4.84234],[45.75977,4.84234],[45.75991,4.84247],[45.76055,4.85242],[45.76107,4.85774],[45.76118,4.85793],[45.76131,4.85797],[45.76306,4.85767],[45.76342,4.85776],[45.76361,4.85794],[45.7637,4.85826],[45.76372,4.86171],[45.76383,4.862],[45.764,4.86207],[45.76962,4.86178],[45.76979,4.86188],[45.77018,4.86258],[45.77058,4.863],[45.77391,4.86335],[45.77409,4.86363],[45.77408,4.86465],[45.77438,4.86506],[45.77526,4.8674],[45.77547,4.86758],[45.77912,4.86664],[45.78044,4.86553],[45.78068,4.86562],[45.78157,4.86948],[45.78153,4.87039],[45.78168,4.87122],[45.78133,4.87315],[45.78243,4.87765]]]},{"code":"T2","color":"#6BA230","family":"tram","segments":[[[45.74025,4.81877],[45.74733,4.8248],[45.7477,4.82528],[45.74891,4.82631],[45.74918,4.82683],[45.74985,4.82727],[45.74998,4.82763],[45.74957,4.82835],[45.7365,4.86925],[45.73659,4.86969],[45.73999,4.87422],[45.7426,4.878],[45.74265,4.87835],[45.7419,4.88292],[45.74125,4.88467],[45.7411,4.88583],[45.73909,4.89191],[45.73897,4.89282],[45.73632,4.90087],[45.73584,4.90172],[45.73526,4.90342],[45.73078,4.917],[45.73064,4.9172],[45.73044,4.9172],[45.72709,4.91542],[45.7261,4.91521],[45.72344,4.91506],[45.72259,4.91488],[45.71958,4.91729],[45.71948,4.91771],[45.7198,4.91891],[45.71991,4.92094],[45.72025,4.9225],[45.72018,4.92305],[45.71571,4.92982],[45.71477,4.93061],[45.71169,4.93538],[45.70972,4.93824],[45.70943,4.93852],[45.70889,4.9386],[45.70853,4.93837],[45.70831,4.93804],[45.70752,4.93614],[45.70711,4.93547],[45.70664,4.93497],[45.70569,4.9346],[45.70306,4.93495],[45.70154,4.93566],[45.70011,4.93583],[45.6991,4.93631],[45.6954,4.93589],[45.69514,4.93598],[45.69505,4.93628],[45.69502,4.93756],[45.69494,4.93774],[45.69469,4.93793],[45.69459,4.9382],[45.69464,4.93901],[45.69404,4.94518],[45.69421,4.94607],[45.69493,4.94714],[45.69497,4.94738],[45.69434,4.94903],[45.69389,4.94943],[45.69326,4.95028],[45.69307,4.95201],[45.69275,4.95346],[45.69264,4.95583]],[[45.69267,4.95584],[45.69279,4.95332],[45.69308,4.95213],[45.6933,4.95025],[45.69396,4.9494],[45.69438,4.94902],[45.695,4.94738],[45.69494,4.94709],[45.69424,4.94606],[45.69407,4.9451],[45.69467,4.93897],[45.69462,4.9382],[45.69471,4.93796],[45.69496,4.93777],[45.69505,4.93757],[45.69515,4.93602],[45.69538,4.93593],[45.69917,4.93635],[45.7002,4.93587],[45.70154,4.9357],[45.70299,4.93501],[45.70573,4.93465],[45.70662,4.935],[45.70708,4.93548],[45.70756,4.93628],[45.70829,4.93807],[45.70853,4.93841],[45.70888,4.93864],[45.70935,4.9386],[45.70973,4.93828],[45.71168,4.93545],[45.71473,4.93072],[45.71567,4.92993],[45.7202,4.92308],[45.72028,4.92251],[45.71994,4.92098],[45.71983,4.91894],[45.7195,4.91764],[45.71961,4.91731],[45.72254,4.91493],[45.72335,4.91509],[45.72586,4.91524],[45.72701,4.91547],[45.73044,4.91724],[45.73063,4.91725],[45.73078,4.91708],[45.73512,4.90393],[45.73591,4.90167],[45.73636,4.90084],[45.739,4.89282],[45.73911,4.89194],[45.74113,4.88583],[45.74129,4.88464],[45.74192,4.88296],[45.7427,4.87822],[45.74264,4.87794],[45.73996,4.87411],[45.73659,4.86962],[45.73653,4.86926],[45.74957,4.82844],[45.75002,4.82769],[45.74993,4.82729],[45.74925,4.82683],[45.749,4.82635],[45.74773,4.82526],[45.74738,4.8248],[45.74026,4.81874]]]},{"code":"T3","color":"#00A3A6","family":"tram","segments":[[[45.76049,4.86192],[45.75704,4.86178],[45.75527,4.8618],[45.75487,4.86213],[45.75365,4.86445],[45.75322,4.86604],[45.75252,4.87223],[45.75298,4.88124],[45.75343,4.88294],[45.7548,4.88571],[45.75524,4.88719],[45.75886,4.9134],[45.76126,4.92325],[45.7673,4.94712],[45.76795,4.94902],[45.76863,4.95045],[45.77455,4.96065],[45.7771,4.96705],[45.77732,4.96789],[45.77745,4.96908],[45.77732,4.97063],[45.77697,4.97182],[45.77656,4.97264],[45.7752,4.97474],[45.77455,4.97641],[45.77429,4.97736],[45.76758,5.03206],[45.76736,5.03264],[45.7666,5.03281],[45.76641,5.03302],[45.76609,5.03526]],[[45.76615,5.03527],[45.76644,5.0331],[45.76666,5.03287],[45.76748,5.0328],[45.76774,5.0321],[45.76811,5.02801],[45.77434,4.97726],[45.7752,4.97481],[45.7766,4.97264],[45.77703,4.97175],[45.77741,4.97024],[45.77747,4.9689],[45.77714,4.96706],[45.77452,4.96051],[45.7686,4.95033],[45.76793,4.94889],[45.76734,4.94715],[45.75893,4.91359],[45.75831,4.90962],[45.75526,4.88714],[45.75482,4.8856],[45.75344,4.88288],[45.75303,4.88136],[45.75255,4.87225],[45.75328,4.86584],[45.75376,4.86427],[45.75489,4.86216],[45.75543,4.8618],[45.76127,4.862]]]},{"code":"T4","color":"#662483","family":"tram","segments":[[[45.78154,4.87209],[45.78171,4.87122],[45.78156,4.8704],[45.78159,4.86942],[45.78077,4.86576],[45.78058,4.86549],[45.78037,4.86553],[45.77912,4.8666],[45.77543,4.86753],[45.77527,4.86735],[45.77441,4.86505],[45.77409,4.86456],[45.77412,4.86362],[45.77401,4.86337],[45.77058,4.86296],[45.77026,4.86264],[45.76968,4.86175],[45.76282,4.86206],[45.75826,4.86183],[45.75249,4.86168],[45.75172,4.86144],[45.75114,4.86114],[45.75071,4.86053],[45.75052,4.86041],[45.74543,4.85896],[45.74178,4.85807],[45.74153,4.85811],[45.74124,4.85824],[45.73955,4.85955],[45.73883,4.8602],[45.71183,4.88122],[45.71137,4.88174],[45.70815,4.88699],[45.70773,4.88742],[45.70722,4.88763],[45.70676,4.8877],[45.70345,4.88774],[45.70299,4.88759],[45.69713,4.88763],[45.69701,4.88757],[45.6969,4.8873],[45.69623,4.88247],[45.69596,4.88147],[45.69556,4.8807],[45.69319,4.87757],[45.69303,4.87694],[45.69326,4.87629],[45.69964,4.86628],[45.69985,4.86537],[45.69996,4.86054],[45.69974,4.86028],[45.69945,4.86026],[45.6982,4.86043],[45.69778,4.86058],[45.69743,4.86085],[45.69654,4.86217],[45.69614,4.86252],[45.6943,4.86285],[45.69348,4.86325],[45.69289,4.8639],[45.69226,4.86486],[45.69153,4.86534],[45.6908,4.86616],[45.69057,4.86609],[45.68994,4.86542],[45.68952,4.86519],[45.68821,4.86514]],[[45.76433,4.86201],[45.76282,4.86206],[45.75826,4.86183],[45.75249,4.86168],[45.75172,4.86144],[45.75114,4.86114],[45.75071,4.86053],[45.75052,4.86041],[45.74543,4.85896],[45.74178,4.85807],[45.74153,4.85811],[45.74124,4.85824],[45.73955,4.85955],[45.73883,4.8602],[45.71188,4.88118],[45.7115,4.88156],[45.71112,4.88215]],[[45.68821,4.86518],[45.6895,4.86523],[45.68999,4.86551],[45.69056,4.86613],[45.69082,4.86619],[45.69146,4.86544],[45.69221,4.86495],[45.69319,4.86357],[45.69371,4.86313],[45.69429,4.86289],[45.69584,4.86267],[45.69623,4.8625],[45.69664,4.86208],[45.69737,4.86097],[45.69797,4.86053],[45.69966,4.8603],[45.69993,4.86054],[45.69982,4.86543],[45.69957,4.86636],[45.69318,4.87636],[45.69301,4.87684],[45.69315,4.87757],[45.69554,4.88073],[45.69593,4.88148],[45.69622,4.88259],[45.69687,4.8873],[45.69694,4.88753],[45.69711,4.88767],[45.70302,4.88763],[45.70347,4.88778],[45.70668,4.88775],[45.70728,4.88765],[45.70779,4.88743],[45.70815,4.88705],[45.7114,4.88175],[45.71187,4.88123],[45.73885,4.86024],[45.74062,4.85877],[45.74153,4.85815],[45.74205,4.85817],[45.74457,4.85879],[45.75052,4.86045],[45.75072,4.86061],[45.75097,4.86105],[45.75123,4.86125],[45.75182,4.86155],[45.75262,4.86176],[45.75765,4.86185],[45.76287,4.8621],[45.76966,4.86179],[45.77031,4.86276],[45.77058,4.863],[45.77395,4.86337],[45.77409,4.86363],[45.77408,4.86465],[45.77438,4.86506],[45.77526,4.8674],[45.77547,4.86758],[45.77912,4.86664],[45.78038,4.86557],[45.78055,4.86552],[45.78074,4.86577],[45.78157,4.86948],[45.78153,4.87039],[45.78168,4.87122],[45.78151,4.87208]],[[45.71114,4.88218],[45.71154,4.88156],[45.71187,4.88123],[45.73885,4.86024],[45.74062,4.85877],[45.74153,4.85815],[45.74205,4.85817],[45.74457,4.85879],[45.75052,4.86045],[45.75072,4.86061],[45.75097,4.86105],[45.75123,4.86125],[45.75182,4.86155],[45.75249,4.86174],[45.75765,4.86185],[45.76287,4.8621],[45.76434,4.86205]]]},{"code":"T5","color":"#EC6608","family":"tram","segments":[[[45.74249,4.87928],[45.7419,4.88292],[45.74125,4.88467],[45.7411,4.88583],[45.73909,4.89191],[45.73897,4.89282],[45.73632,4.90087],[45.73584,4.90172],[45.73526,4.90342],[45.73074,4.91714],[45.73077,4.91738],[45.7309,4.91754],[45.73211,4.9182],[45.7324,4.91827],[45.73373,4.91772],[45.73617,4.91691],[45.73659,4.91692],[45.73682,4.91712],[45.73912,4.92715],[45.73932,4.93143],[45.73958,4.93398],[45.73954,4.93428],[45.73915,4.93506],[45.7389,4.93622],[45.73813,4.9379],[45.73797,4.9385],[45.73797,4.93931],[45.73859,4.94232],[45.73856,4.94287],[45.73827,4.94371],[45.73771,4.94467],[45.7372,4.94519],[45.73354,4.9468],[45.73205,4.9479]],[[45.73208,4.948],[45.73356,4.94683],[45.73721,4.94523],[45.73774,4.94468],[45.73834,4.94364],[45.73856,4.94301],[45.73859,4.94202],[45.73801,4.93939],[45.73798,4.93863],[45.73814,4.93795],[45.73893,4.93622],[45.73914,4.9352],[45.73953,4.93438],[45.73961,4.93398],[45.73935,4.9315],[45.73916,4.92722],[45.73685,4.9171],[45.73662,4.91689],[45.73612,4.91685],[45.73364,4.91771],[45.73244,4.91823],[45.73214,4.91817],[45.7309,4.91749],[45.73078,4.9171],[45.73512,4.90393],[45.7359,4.90169],[45.73636,4.90084],[45.739,4.89282],[45.73911,4.89194],[45.74113,4.88583],[45.74129,4.88464],[45.74192,4.88296],[45.74252,4.87929]]]},{"code":"T6","color":"#F191A3","family":"tram","segments":[[[45.78141,4.87267],[45.78127,4.87186],[45.78104,4.8716],[45.7808,4.87156],[45.77931,4.87221],[45.77883,4.87259],[45.77674,4.87366],[45.77658,4.87405],[45.77672,4.87657],[45.77526,4.87862],[45.77511,4.87873],[45.77374,4.87893],[45.77199,4.87908],[45.77158,4.87931],[45.77088,4.87936],[45.77071,4.87961],[45.77065,4.88021],[45.77047,4.88036],[45.76815,4.88019],[45.76635,4.88026],[45.76112,4.88084],[45.75832,4.88064],[45.75774,4.88244],[45.75769,4.88297],[45.75918,4.88885],[45.75939,4.89031],[45.75935,4.89055],[45.75918,4.89069],[45.75437,4.89125],[45.75419,4.89135],[45.75408,4.8916],[45.75391,4.89408],[45.7532,4.89739],[45.75304,4.89796],[45.75284,4.89813],[45.75126,4.89746],[45.75014,4.89715],[45.74791,4.89682],[45.74692,4.89657],[45.74377,4.89491],[45.74163,4.89348],[45.73854,4.89181],[45.73609,4.89029],[45.73312,4.88863],[45.73071,4.88778],[45.73061,4.8876],[45.73063,4.88737],[45.73328,4.87907],[45.72759,4.86208],[45.72769,4.86184],[45.72839,4.86133],[45.73024,4.86008],[45.7311,4.85971],[45.7312,4.85953],[45.72954,4.85312],[45.72936,4.85227],[45.72934,4.85142],[45.7294,4.84711],[45.73012,4.8382],[45.73115,4.83472]],[[45.78137,4.87266],[45.78122,4.87183],[45.7811,4.87168],[45.78084,4.87159],[45.77933,4.87224],[45.77886,4.87261],[45.77684,4.87364],[45.77661,4.87404],[45.77675,4.87657],[45.77527,4.87866],[45.77203,4.87912],[45.77165,4.87933],[45.77089,4.8794],[45.77074,4.87963],[45.77071,4.88015],[45.77052,4.88039],[45.76948,4.88036],[45.76909,4.88026],[45.76738,4.88024],[45.76524,4.88038],[45.76109,4.88088],[45.75833,4.88068],[45.75774,4.88252],[45.75772,4.88305],[45.75894,4.88763],[45.75922,4.8889],[45.75939,4.89054],[45.75913,4.89074],[45.75447,4.89128],[45.75421,4.89138],[45.7541,4.8917],[45.7539,4.89429],[45.75324,4.89739],[45.7531,4.89791],[45.75292,4.89815],[45.75274,4.89816],[45.75127,4.89751],[45.75006,4.89717],[45.74786,4.8969],[45.74705,4.89669],[45.74367,4.89489],[45.74214,4.89393],[45.74182,4.89364],[45.73939,4.89235],[45.73512,4.88976],[45.73311,4.88867],[45.73068,4.8878],[45.7306,4.88736],[45.73324,4.87909],[45.72752,4.86205],[45.7276,4.86186],[45.72838,4.8613],[45.73025,4.86003],[45.73108,4.85968],[45.73118,4.85947],[45.72951,4.85313],[45.72933,4.85228],[45.72931,4.85142],[45.72939,4.85038],[45.72938,4.8471],[45.73009,4.83819],[45.73112,4.83471]]]},{"code":"T7","color":"#992358","family":"tram","segments":[[[45.76847,4.98136],[45.77087,4.98125],[45.77149,4.98098],[45.77362,4.98103],[45.77378,4.9809],[45.77429,4.97736],[45.77455,4.97641],[45.7752,4.97474],[45.77666,4.97247],[45.7772,4.97114],[45.77744,4.96963],[45.77738,4.96824],[45.77691,4.96651],[45.77448,4.9605],[45.76874,4.95065],[45.76764,4.94821],[45.76718,4.94667],[45.76097,4.92208]],[[45.76109,4.922],[45.76668,4.94456],[45.76762,4.94804],[45.7686,4.95033],[45.77452,4.96051],[45.77691,4.96644],[45.77727,4.96752],[45.77741,4.96826],[45.77746,4.96978],[45.77723,4.97113],[45.7766,4.97264],[45.7752,4.97481],[45.77468,4.97613],[45.77434,4.97726],[45.77379,4.98095],[45.77364,4.98107],[45.77146,4.98103],[45.77082,4.9813],[45.76847,4.9814]]]}]};
@@ -719,6 +920,12 @@ let selected = null, refTimer = null;
 let userLat = null, userLng = null, nearActive = false;
 let map = null, markers = [];
 let mapLayers = {pr:true,pk:false,vv:false,ve:false};
+// ── MODE VOITURE ──
+let carModeActive = false;
+let carFavoriId = localStorage.getItem('mral_car_fav_id') || null;
+let carState = { source:'fav', hero:null, others:[], secondsAgo:0 };
+let carLastLoadTime = null;
+let carGeoLat = null, carGeoLng = null;
 
 // ── UTILITAIRES ──
 const isFav = id => favorites.includes(String(id));
@@ -866,6 +1073,7 @@ async function loadData() {
     if (sub === 've' || sub === 'ap') renderList();
     else renderList(); // re-render pour afficher l'horodatage
     if (map) renderMap();
+    if (carModeActive) carRefreshFromData();
   } catch(e) {
     document.getElementById('err-zone').innerHTML =
       `<div class="error-msg">⚠️ ${e.message}</div>`;
@@ -1621,7 +1829,7 @@ function destResultsHTML() {
       <div class="dest-result-acts">
         <a class="dest-act-btn dest-act-go" href="${navUrl}" target="_blank" rel="noopener">🚗 Aller au parking</a>
         <a class="dest-act-btn dest-act-itin" href="${itinUrl}" target="_blank" rel="noopener">🚇 Itinéraire TCL</a>
-        <button class="dest-act-btn dest-act-map" onclick="showParkingOnMap('${a.id}')">🗺 Carte</button>
+        <button class="dest-act-btn dest-act-map" onclick="showParkingOnMap('${a.id}')"><i class="ti ti-map-2" aria-hidden="true"></i> Carte</button>
       </div>
       <div class="dest-amenities-toggle" onclick="toggleDestAmenities(this)">
         <span>🚲⚡ Vélo'v &amp; bornes à proximité</span>
@@ -2603,6 +2811,295 @@ function copyAndReserveVelov() {
   });
 }
 
+// ── MODE VOITURE ──
+// Entrée simplifiée pour la conduite : bouton icône dans l'en-tête (voiture ⇄
+// logo). Réutilise les données/fonctions existantes (nearestAvailableParkings,
+// getStatus, isFav, toggleFav, haversine, fmtDist, lignesBadgesHTML) —
+// aucune nouvelle source de données.
+
+function carAllParkings() {
+  return [
+    ...(data.parkings?.tcl || []).map(x => ({...x, _cat: 'pr'})),
+    ...(data.parkings?.operateurs || []).map(x => ({...x, _cat: 'pk'}))
+  ];
+}
+
+function carFavoriteParkings() {
+  return carAllParkings().filter(p => isFav(p.id));
+}
+
+function toggleCarMode() {
+  if (carModeActive) carExit(); else carEnter();
+}
+
+function carEnter() {
+  carModeActive = true;
+  document.getElementById('header-logo-btn').classList.add('car-mode-active');
+  document.getElementById('list-view').style.display = 'none';
+  document.getElementById('map-view').style.display = 'none';
+  document.getElementById('detail-view').style.display = 'none';
+  const navLines = document.querySelector('.nav-lines');
+  const destBtn = document.querySelector('.header-dest-btn');
+  const fb = document.getElementById('filter-block');
+  if (navLines) navLines.style.display = 'none';
+  if (destBtn) destBtn.style.display = 'none';
+  if (fb) fb.style.display = 'none';
+  document.getElementById('car-view').style.display = 'block';
+  carShow('cv-scr-start');
+  carTryGeo();
+}
+
+function carExit() {
+  carModeActive = false;
+  document.getElementById('header-logo-btn').classList.remove('car-mode-active');
+  document.getElementById('car-view').style.display = 'none';
+  const navLines = document.querySelector('.nav-lines');
+  const destBtn = document.querySelector('.header-dest-btn');
+  const fb = document.getElementById('filter-block');
+  if (navLines) navLines.style.display = 'flex';
+  if (destBtn) destBtn.style.display = '';
+  if (fb) fb.style.display = (sub === 'tcl' || sub === 'dest') ? 'none' : 'flex';
+  document.getElementById('list-view').style.display = mapVisible ? 'none' : 'block';
+  document.getElementById('map-view').style.display = mapVisible ? 'block' : 'none';
+}
+
+function carShow(id) {
+  document.querySelectorAll('#car-view .cv-scr').forEach(s => s.classList.toggle('active', s.id === id));
+}
+
+function carTryGeo() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    pos => { carGeoLat = pos.coords.latitude; carGeoLng = pos.coords.longitude; },
+    () => { /* pas de toast : la géoloc est un bonus silencieux en mode voiture */ },
+    {timeout: 8000, maximumAge: 30000}
+  );
+}
+
+// ── Favori mode voiture ──
+window.carGoFav = function() {
+  const favs = carFavoriteParkings();
+  if (carFavoriId) {
+    const chosen = carAllParkings().find(p => p.id === carFavoriId);
+    if (chosen) { carEnterFavDrive(chosen); return; }
+  }
+  if (favs.length === 1) {
+    carFavoriId = favs[0].id;
+    localStorage.setItem('mral_car_fav_id', carFavoriId);
+    carEnterFavDrive(favs[0]);
+    return;
+  }
+  if (favs.length > 1) {
+    carRenderFavPickList(favs, false);
+    carShow('cv-scr-setfav');
+    return;
+  }
+  carRenderFavPickList(carAllParkings(), true);
+  carShow('cv-scr-setfav');
+};
+
+window.carGoChangeFav = function() {
+  const favs = carFavoriteParkings();
+  carRenderFavPickList(favs.length ? favs : carAllParkings(), !favs.length);
+  carShow('cv-scr-setfav');
+};
+
+function carRenderFavPickList(list, isEmptyState) {
+  const hint = document.getElementById('cv-setfav-hint');
+  if (hint) hint.textContent = isEmptyState
+    ? "Vous n'avez pas encore de parking favori. Choisissez celui d'où vous partez le plus souvent — il sera aussi ajouté à vos favoris ⭐. Vous pourrez en changer à tout moment."
+    : "Choisissez votre parking pour cette sortie. Vous pourrez en changer à tout moment.";
+  const logoColors = {TCL:'var(--tcl-bg)', LPA:'#e8a000', INDIGO:'#5E35B1', 'Q PARK':'#2E7D32'};
+  const logoTxt   = {TCL:'var(--tcl-txt)', LPA:'white',   INDIGO:'white',    'Q PARK':'white'};
+  let sorted = list.slice();
+  if (carGeoLat !== null) {
+    sorted = sorted.map(p => ({...p, _dist: haversine(carGeoLat, carGeoLng, p.lat, p.lng)}))
+      .sort((a, b) => (a._dist||99999) - (b._dist||99999));
+  } else {
+    sorted.sort((a, b) => (a.nom||'').localeCompare(b.nom||'', 'fr'));
+  }
+  let html = '';
+  sorted.forEach(p => {
+    const s = getStatus(p.places_disponibles, p.nb_places);
+    const logoBg = logoColors[p.gestionnaire] || (p._cat === 'pr' ? 'var(--tcl-bg)' : '#888');
+    const logoFg = logoTxt[p.gestionnaire] || (p._cat === 'pr' ? 'var(--tcl-txt)' : 'white');
+    const logoLbl = p.gestionnaire === 'Q PARK' ? 'QPK' : (p.gestionnaire || (p._cat === 'pr' ? 'P+R' : 'P'));
+    const distTxt = p._dist != null ? ` · ${fmtDist(p._dist)}` : '';
+    const nb = p.places_disponibles;
+    html += `<div class="cv-favpick" onclick="carPickFavori('${p.id}')">
+      <div class="cv-favpick-ico" style="background:${logoBg};color:${logoFg}">${logoLbl}</div>
+      <div class="cv-favpick-txt"><div class="cv-favpick-name">${p.nom}</div><div class="cv-favpick-meta">${p.gestionnaire||''}${distTxt}</div></div>
+      <div><div class="cv-favpick-num c-${s.c}">${(nb===null||nb<0)?'—':nb}</div><div class="pk-cap" style="text-align:right">/${p.nb_places||'?'}</div></div>
+    </div>`;
+  });
+  document.getElementById('cv-favpick-list').innerHTML = html || '<div class="cv-empty">Aucun parking trouvé</div>';
+}
+
+window.carPickFavori = function(id) {
+  const p = carAllParkings().find(x => x.id === id);
+  if (!p) return;
+  carFavoriId = id;
+  localStorage.setItem('mral_car_fav_id', id);
+  if (!isFav(id)) toggleFav(id, {preventDefault(){}, stopPropagation(){}, stopImmediatePropagation(){}});
+  carEnterFavDrive(p);
+};
+
+function carDesiredCenter(hero) {
+  if (carState.source === 'dest' && carState.destCenter) return carState.destCenter;
+  if (carGeoLat !== null && haversine(carGeoLat, carGeoLng, hero.lat, hero.lng) <= 500) {
+    return {lat: carGeoLat, lng: carGeoLng};
+  }
+  return {lat: hero.lat, lng: hero.lng};
+}
+
+function carEnterFavDrive(p) {
+  const center = carDesiredCenter(p);
+  const alts = nearestAvailableParkings(center.lat, center.lng, p.id, 3);
+  carState = {source:'fav', hero:{...p}, others: alts.map(a => ({...a})), secondsAgo:0, center};
+  document.getElementById('cv-drive-title').textContent = 'Mode voiture';
+  carRenderDrive(false);
+  carShow('cv-scr-drive');
+}
+
+// ── "Aller à..." mode voiture ──
+window.carSearchDest = async function() {
+  const inp = document.getElementById('cv-search-input');
+  const msg = document.getElementById('cv-search-msg');
+  const q = (inp?.value || '').trim();
+  if (q.length < 3) { msg.innerHTML = '<div class="cv-empty">Entrez au moins 3 caractères</div>'; return; }
+  msg.innerHTML = '<div class="cv-empty">Recherche…</div>';
+  try {
+    const r = await fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(q) + '&limit=1&lat=45.75&lon=4.85');
+    if (!r.ok) throw new Error('http');
+    const j = await r.json();
+    const f = (j.features || [])[0];
+    if (!f || !f.geometry) { msg.innerHTML = '<div class="cv-empty">Aucun résultat pour cette adresse</div>'; return; }
+    const lat = f.geometry.coordinates[1], lng = f.geometry.coordinates[0];
+    const label = f.properties?.label || q;
+    const picks = nearestAvailableParkings(lat, lng, null, 4);
+    if (!picks.length) { msg.innerHTML = '<div class="cv-empty">Aucun parking disponible trouvé à proximité</div>'; return; }
+    msg.innerHTML = '';
+    const hero = picks[0], others = picks.slice(1);
+    carState = {source:'dest', hero:{...hero}, others: others.map(a => ({...a})), secondsAgo:0, destCenter:{lat, lng}, center:{lat, lng}};
+    document.getElementById('cv-drive-title').textContent = 'Vers ' + label;
+    carRenderDrive(false);
+    carShow('cv-scr-drive');
+  } catch(e) {
+    msg.innerHTML = '<div class="cv-empty">Recherche d\'adresse indisponible pour le moment</div>';
+  }
+};
+
+// ── Rendu écran de conduite ──
+function carRenderDrive(animate) {
+  const h = carState.hero;
+  if (!h) return;
+  const s = getStatus(h.places_disponibles, h.nb_places);
+  const warn = (s.c === 'amber' || s.c === 'red') ? `<div class="cv-hero-warn">⚠ Se remplit vite</div>` : '';
+  const badgeTxt = carState.source === 'fav' ? '⭐ VOTRE PARKING FAVORI' : '🎯 RECOMMANDÉ POUR VOTRE ARRIVÉE';
+  const badgeClass = carState.source === 'fav' ? '' : 'dest';
+  const changeLink = carState.source === 'fav' ? `<span class="cv-change-link" onclick="carGoChangeFav()">Changer</span>` : '';
+  const distTxt = h._dist != null ? fmtDist(h._dist) : null;
+  const ligBadges = h.lignes_proches && h.lignes_proches.length ? lignesBadgesHTML(h.lignes_proches, 'lg') : '';
+  const vvP = (h.velov_proches || [])[0];
+  const vvPill = vvP && vvP.velos_dispo > 0 ? `<span class="cv-pill vv">🚲 ${vvP.velos_dispo} vélo${vvP.velos_dispo!==1?'s':''}</span>` : '';
+  const evPill = h.bornes && h.bornes.length ? `<span class="cv-pill ev">⚡ ${h.bornes_puissance_max || ''} kW</span>` : '';
+  const nb = h.places_disponibles;
+
+  document.getElementById('cv-hero').innerHTML = `
+    <div class="cv-hero-badge ${badgeClass}">${badgeTxt}${changeLink}</div>
+    <div class="cv-hero-top">
+      <div><div class="cv-hero-name">${h.nom}</div><div class="cv-hero-mgr">${h.gestionnaire||''}</div></div>
+      <div class="cv-hero-count"><div class="cv-hero-num c-${s.c}" id="cv-hero-num">${(nb===null||nb<0)?'—':nb}</div><div class="cv-hero-cap">/ ${h.nb_places||'?'} places</div>${warn}</div>
+    </div>
+    <div class="cv-hero-meta">${distTxt ? `<span>📍 ${distTxt}</span><span class="cv-hero-dot"></span>` : ''}${ligBadges}</div>
+    <div class="cv-hero-amn">${vvPill}${evPill}</div>
+    <button class="cv-cta" onclick="carNavigate()">🚗 Démarrer la navigation</button>
+  `;
+  if (animate) {
+    const heroEl = document.getElementById('cv-hero');
+    heroEl.classList.remove('swap'); void heroEl.offsetWidth; heroEl.classList.add('swap');
+  }
+
+  let listHtml = '';
+  carState.others.forEach((o, i) => {
+    const os = getStatus(o.places_disponibles, o.nb_places);
+    const onb = o.places_disponibles;
+    const oDist = o._dist != null ? fmtDist(o._dist) : '';
+    listHtml += `<div class="cv-opt" onclick="carSwap(${i})">
+      <div class="cv-opt-rank">${i+2}</div>
+      <div class="cv-opt-txt"><div class="cv-opt-name">${o.nom}</div><div class="cv-opt-meta">${oDist}${oDist?' · ':''}${o.gestionnaire||''}</div></div>
+      <div class="cv-opt-count"><div class="cv-opt-num c-${os.c}">${(onb===null||onb<0)?'—':onb}</div><div class="cv-opt-cap">/${o.nb_places||'?'}</div></div>
+      <div class="cv-opt-swap">⇅</div>
+    </div>`;
+  });
+  document.getElementById('cv-list').innerHTML = listHtml || '<div class="cv-empty">Aucune alternative disponible pour le moment</div>';
+}
+
+window.carSwap = function(i) {
+  const prevHero = carState.hero;
+  carState.hero = carState.others[i];
+  carState.others[i] = prevHero;
+  carRenderDrive(true);
+};
+
+window.carNavigate = function() {
+  const h = carState.hero;
+  if (!h || !h.lat || !h.lng) return;
+  window.open(`https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lng}`, '_blank');
+};
+
+// Ré-injecte les données fraîches (appelé depuis loadData()) dans l'écran de
+// conduite actif, sans perdre l'identité du favori/de la destination ni un
+// éventuel échange manuel (carSwap) — seuls les champs (places dispo, lignes,
+// vélov, bornes) et, si le centre de recherche change (bascule géoloc), la
+// liste des alternatives sont rafraîchis.
+function carRefreshFromData() {
+  const driveScr = document.getElementById('cv-scr-drive');
+  if (!driveScr || !driveScr.classList.contains('active') || !carState.hero) return;
+  const all = carAllParkings();
+  const byId = id => all.find(p => p.id === id);
+  const freshHero = byId(carState.hero.id);
+  if (!freshHero) return;
+  const center = carDesiredCenter(freshHero);
+  const centerChanged = !carState.center || haversine(carState.center.lat, carState.center.lng, center.lat, center.lng) > 50;
+  carState.hero = {...freshHero, _dist: haversine(center.lat, center.lng, freshHero.lat, freshHero.lng)};
+  if (centerChanged) {
+    carState.center = center;
+    carState.others = nearestAvailableParkings(center.lat, center.lng, freshHero.id, 3).map(a => ({...a}));
+  } else {
+    carState.others = carState.others.map(o => {
+      const f = byId(o.id);
+      return f ? {...f, _dist: haversine(center.lat, center.lng, f.lat, f.lng)} : o;
+    });
+  }
+  carState.secondsAgo = 0;
+  carLastLoadTime = new Date();
+  carRenderDrive(false);
+  const dot = document.getElementById('cv-live-dot');
+  if (dot) { dot.classList.remove('flash'); void dot.offsetWidth; dot.classList.add('flash'); }
+  const hn = document.getElementById('cv-hero-num');
+  if (hn) { hn.classList.remove('pulse'); void hn.offsetWidth; hn.classList.add('pulse'); }
+  const txt = document.getElementById('cv-live-txt');
+  if (txt) txt.textContent = "actualisé à l'instant";
+}
+
+// Horodatage "il y a Xs" + re-géolocalisation périodique pendant la conduite
+setInterval(() => {
+  if (!carModeActive) return;
+  const driveScr = document.getElementById('cv-scr-drive');
+  if (!driveScr || !driveScr.classList.contains('active')) return;
+  carState.secondsAgo = (carState.secondsAgo || 0) + 1;
+  const txt = document.getElementById('cv-live-txt');
+  if (txt) txt.textContent = carState.secondsAgo <= 1 ? "actualisé à l'instant" : `actualisé il y a ${carState.secondsAgo}s`;
+  if (carState.secondsAgo > 0 && carState.secondsAgo % 20 === 0) carTryGeo();
+}, 1000);
+
+// Retour au premier plan (on rouvre l'appli/l'onglet en conduisant) → on force
+// une actualisation immédiate plutôt que d'attendre le prochain cycle de 2 min.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && carModeActive) loadData();
+});
+
 // ── INIT ──
 renderZone2('pr');
 switchSub('pr');
@@ -2613,3 +3110,4 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
 </script>
 </body>
 </html>
+
