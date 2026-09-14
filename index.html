@@ -1,9 +1,9 @@
-<!-- Me rendre à Lyon — v14f -->
+<!-- Me rendre à Lyon — v14g -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,interactive-widget=resizes-content"/>
   <title>Me rendre à Lyon</title>
   <meta name="description" content="P+R TCL, Vélo'v, Parkings — Mobilité urbaine Lyon"/>
   <link rel="manifest" href="manifest.json"/>
@@ -759,7 +759,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ─────────────────────────────────────────────────────────────
-// Me rendre à Lyon — v14f
+// Me rendre à Lyon — v14g
 // Historique :
 //   v12a  : Autopartage (Citiz LPA + Leo&Go)
 //   v13a  : Refonte filtres — zones contextuelles VOIR
@@ -990,6 +990,20 @@
 //           le champ de saisie pouvait lui-même remonter hors de l'écran et
 //           on continuait de taper "à l'aveugle" sans le voir. Il reste
 //           désormais toujours visible, juste sous le titre de l'écran.
+//   v14g  : Le fix v14f (position "collante") ne suffisait pas sur téléphone
+//           réel : le champ disparaissait quand même, car le clavier tactile
+//           ne réduit que la zone "visuellement" visible et pas la hauteur
+//           de mise en page — le navigateur pensait alors qu'une partie de
+//           l'écran mode voiture était "cachée" et faisait défiler tout seul
+//           pour y accéder, ce qui repoussait l'en-tête et le champ hors de
+//           vue. Corrigé en deux temps : (1) balise <meta viewport> avec
+//           "interactive-widget=resizes-content" pour que la mise en page se
+//           redimensionne réellement avec le clavier ; (2) en secours,
+//           resynchronisation JS de la hauteur de l'écran mode voiture sur
+//           la zone visuelle réelle (`window.visualViewport`) à chaque
+//           ouverture/fermeture du clavier — l'écran tient alors tout seul
+//           dans l'espace visible et le navigateur n'a plus besoin de
+//           défiler quoi que ce soit.
 //           Débounce également allongé (500ms → 700ms) pour réduire les
 //           déclenchements prématurés en tapant lentement.
 const WORKER = 'https://me-rendre-a-lyon.jean-luc-perrotto.workers.dev';
@@ -2995,6 +3009,7 @@ function carEnter() {
   if (destBtn) destBtn.style.display = 'none';
   if (fb) fb.style.display = 'none';
   document.getElementById('car-view').style.display = 'block';
+  carSyncViewportHeight();
   carTryGeo();
 
   if (contextParking) {
@@ -3017,6 +3032,7 @@ function carExit() {
   if (fb) fb.style.display = (sub === 'tcl' || sub === 'dest') ? 'none' : 'flex';
   document.getElementById('list-view').style.display = mapVisible ? 'none' : 'block';
   document.getElementById('map-view').style.display = mapVisible ? 'block' : 'none';
+  document.getElementById('car-view').style.height = ''; // on relâche la hauteur forcée par carSyncViewportHeight()
   // Une mise à jour de l'app a été mise en attente pendant la conduite (voir plus
   // bas) : on l'applique maintenant qu'on quitte le mode voiture.
   if (pendingAppReload) { location.reload(); return; }
@@ -3024,6 +3040,25 @@ function carExit() {
 
 function carShow(id) {
   document.querySelectorAll('#car-view .cv-scr').forEach(s => s.classList.toggle('active', s.id === id));
+}
+
+// Sur mobile, quand le clavier tactile s'ouvre, la plupart des navigateurs ne
+// réduisent QUE la "visual viewport" (la zone réellement visible) et laissent
+// la "layout viewport" (celle utilisée par nos %/100% de hauteur) inchangée.
+// Résultat : le navigateur pense qu'une partie de l'écran (couverte par le
+// clavier) est "hors-champ" et fait défiler tout seul pour amener le champ de
+// saisie au-dessus du clavier — ce défilement automatique peut aller trop
+// loin et masquer l'en-tête + le champ d'adresse au lieu de simplement les
+// garder visibles. En resynchronisant nous-mêmes la hauteur réelle de
+// #car-view sur la "visual viewport" (qui, elle, se réduit correctement avec
+// le clavier), l'écran tient tout seul dans l'espace visible et le
+// navigateur n'a plus besoin de défiler quoi que ce soit.
+function carSyncViewportHeight() {
+  if (!carModeActive || !window.visualViewport) return;
+  document.getElementById('car-view').style.height = window.visualViewport.height + 'px';
+}
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', carSyncViewportHeight);
 }
 
 function carTryGeo() {
