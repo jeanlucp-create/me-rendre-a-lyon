@@ -1,4 +1,4 @@
-<!-- Me rendre à Lyon — v14v -->
+<!-- Me rendre à Lyon — v14w -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -232,10 +232,10 @@
     /* contenu déplié borne */
     .ve-expanded{display:none;border-top:1.5px solid var(--border);padding:12px}
     .ve-expanded.open{display:block}
-    .ve-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
-    .ve-detail-cell{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 10px}
+    .ve-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:10px}
+    .ve-detail-cell{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:7px 8px}
     .ve-detail-lbl{font-size:8px;color:var(--muted);font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
-    .ve-detail-val{font-size:12px;font-weight:800;color:var(--text)}
+    .ve-detail-val{font-size:11px;font-weight:800;color:var(--text)}
     .ve-chargemap{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;background:#E8F5E9;color:#2E7D32;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;text-decoration:none;margin-bottom:6px;border:1px solid #A8DFB2}
     .ve-nav{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:10px;background:var(--orange);color:white;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;text-decoration:none}
     .br{background:#E8F5E9;color:#2E7D32}
@@ -246,7 +246,7 @@
     .c-green{color:var(--green)} .c-amber{color:var(--amber)} .c-red{color:var(--red)} .c-gray{color:var(--muted)}
     .bg-green{background:var(--green)} .bg-amber{background:var(--amber)} .bg-red{background:var(--red)} .bg-gray{background:var(--muted)}
 
-    /* ── DETAIL VÉLO'V (conservé pour carte → fiche depuis popup) ── */
+    /* ── DÉTAIL PLEIN ÉCRAN (fiche depuis popup carte) — Vélo'v, Bornes, Citiz, Leo&Go ── */
     .detail-view{position:absolute;inset:0;background:var(--cream);overflow-y:auto;display:none;z-index:100;padding:12px 16px 32px;-webkit-overflow-scrolling:touch}
     .det-action-bar{position:sticky;top:0;z-index:10;background:var(--white);border-bottom:1px solid var(--orange-border);padding:8px 12px;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
     .det-actions{display:flex;gap:5px;width:100%;justify-content:center}
@@ -254,6 +254,7 @@
     .det-act-nav{background:var(--orange);color:white}
     .det-act-copy{background:var(--orange-light);color:var(--orange-dark);border-color:var(--orange-border)}
     .det-act-vv{background:var(--vv-bg);color:var(--vv-txt);border-color:#B5D4F4}
+    .det-act-citiz{background:#E0F5F1;color:#00A88E;border-color:#A8E0D4}
     .det-act-btn.copied{background:var(--green);color:white;border-color:var(--green)}
     .det-card{background:var(--white);border-radius:18px;border:1.5px solid var(--border);padding:16px;margin-bottom:10px}
 
@@ -682,7 +683,7 @@
 
   </div>
 
-  <!-- DETAIL VÉLO'V uniquement -->
+  <!-- DÉTAIL PLEIN ÉCRAN — Vélo'v, Bornes, Citiz, Leo&Go (depuis popup carte uniquement) -->
   <div class="detail-view" id="detail-view">
     <div class="det-action-bar" id="det-action-bar">
       <div class="det-actions">
@@ -694,7 +695,9 @@
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           Copier
         </button>
-        <a id="vv-det-btn" class="det-act-btn det-act-vv" href="https://velov.grandlyon.com" target="_blank" rel="noopener">
+        <!-- v14w : 3e bouton générique, reconfiguré par configureDetailActionBar() selon le type
+             (Vélo'v/Citiz/Leo&Go) ; masqué pour les Bornes, qui n'ont pas de site de réservation unique. -->
+        <a id="third-det-btn" class="det-act-btn det-act-vv" href="https://velov.grandlyon.com" target="_blank" rel="noopener">
           🚲 Vélo'v
         </a>
       </div>
@@ -743,6 +746,77 @@
           <div class="fp-horaires-txt" id="vv-adresse">—</div>
         </div>
       </div>
+
+      <!-- v14w : fiche Bornes — bandeau 2 boutons (pas de réservation), grille
+           Accès/Horaires/Tarif sur une seule ligne (retour Jean-Luc), adresse si connue. -->
+      <div id="sec-borne" style="display:none">
+        <div class="fp-header">
+          <button class="fp-back" onclick="closeDetail()"><i class="ti ti-arrow-back-up" aria-hidden="true"></i></button>
+          <div class="fp-title" id="bn-title">—</div>
+        </div>
+        <div class="fp-statut-row" style="margin-bottom:4px">
+          <span class="fp-num" id="bn-kw" style="color:#2E7D32">—</span>
+          <span class="fp-label">kW puissance max</span>
+          <span class="fp-badge" id="bn-badge" style="border-color:#2E7D32;color:#2E7D32">Recharge rapide</span>
+        </div>
+        <div class="fp-meta" style="margin-bottom:12px;align-items:center;flex-wrap:wrap">
+          <span class="fp-meta-item">Points de charge&nbsp;<span class="fp-meta-val" id="bn-pts">—</span></span>
+          <span class="fp-sep">·</span>
+          <span class="fp-meta-item">Opérateur&nbsp;<span class="fp-meta-val" id="bn-op">—</span></span>
+        </div>
+        <div style="font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px">Prises</div>
+        <div id="bn-prises" style="margin-bottom:10px"></div>
+        <div class="ve-detail-grid" id="bn-detail-grid"></div>
+        <div class="fp-horaires" id="bn-adresse-bloc" style="display:none">
+          <div class="fp-horaires-lbl">📍 Adresse</div>
+          <div class="fp-horaires-txt" id="bn-adresse">—</div>
+        </div>
+      </div>
+
+      <!-- v14w : fiche Autopartage Citiz — bandeau 3 boutons, un seul CTA "Réserver" pour
+           toute la station (le lien Citiz est le même quel que soit le véhicule choisi). -->
+      <div id="sec-citiz" style="display:none">
+        <div class="fp-header">
+          <button class="fp-back" onclick="closeDetail()"><i class="ti ti-arrow-back-up" aria-hidden="true"></i></button>
+          <div class="fp-title" id="cz-title">—</div>
+        </div>
+        <div class="fp-statut-row" style="margin-bottom:10px">
+          <span class="fp-num c-green" id="cz-dispo">—</span>
+          <span class="fp-label">véhicules disponibles</span>
+          <span class="fp-badge c-green" id="cz-badge">Disponible</span>
+        </div>
+        <div class="fp-meta" style="margin-bottom:8px;align-items:center;flex-wrap:wrap">
+          <span class="fp-meta-item">Capacité station&nbsp;<span class="fp-meta-val" id="cz-cap">—</span></span>
+        </div>
+        <div style="font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px">Véhicules à cette station</div>
+        <div id="cz-vehicules"></div>
+        <button onclick="copyAndReserveGeneric('https://www.citiz.coop')"
+          style="display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;border-radius:12px;background:#00A88E;color:white;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;margin-bottom:8px;margin-top:12px;width:100%;border:none;cursor:pointer">
+          🔑 Réserver sur Citiz
+        </button>
+        <div class="fp-horaires" id="cz-adresse-bloc" style="display:none">
+          <div class="fp-horaires-lbl">📍 Adresse</div>
+          <div class="fp-horaires-txt" id="cz-adresse">—</div>
+        </div>
+      </div>
+
+      <!-- v14w : fiche Autopartage Leo&Go — un véhicule = une fiche (pas de regroupement station) -->
+      <div id="sec-leoandgo" style="display:none">
+        <div class="fp-header">
+          <button class="fp-back" onclick="closeDetail()"><i class="ti ti-arrow-back-up" aria-hidden="true"></i></button>
+          <div class="fp-title" id="lg-title">—</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div class="ap-veh-ico" id="lg-icon" style="width:36px;height:36px;font-size:16px">🚗</div>
+          <div>
+            <div class="fp-meta-item">Autonomie&nbsp;<span class="fp-meta-val" id="lg-range">—</span></div>
+          </div>
+        </div>
+        <button onclick="copyAndReserveGeneric('https://www.leoandgo.com')"
+          style="display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;border-radius:12px;background:var(--orange);color:white;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;margin-bottom:8px;width:100%;border:none;cursor:pointer">
+          🔑 Réserver sur Leo&amp;Go
+        </button>
+      </div>
     </div>
     <div class="legal">
       <a href="https://data.grandlyon.com" target="_blank">Grand Lyon Open Data</a> —
@@ -760,7 +834,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ─────────────────────────────────────────────────────────────
-// Me rendre à Lyon — v14v
+// Me rendre à Lyon — v14w
 // Historique :
 //   v12a  : Autopartage (Citiz LPA + Leo&Go)
 //   v13a  : Refonte filtres — zones contextuelles VOIR
@@ -1355,6 +1429,43 @@
 //           échoue 8 fois de suite est désormais comptée en abandon (avant :
 //           dès la 4e) ; le délai entre tentatives reste plafonné à 3000ms
 //           même après plusieurs échecs consécutifs.
+//   v14w  : harmonisation des fiches Bornes/Autopartage avec le bandeau à 3
+//           boutons de Vélo'v (maquettée puis validée par Jean-Luc). Deux
+//           volets :
+//           1) Fiches plein écran (#detail-view, ouvertes depuis un marqueur
+//              carte) : Bornes, Citiz et Leo&Go ont maintenant chacune leur
+//              propre section (#sec-borne/#sec-citiz/#sec-leoandgo, à côté de
+//              #sec-velov) avec le même bandeau d'actions collant en bas.
+//              Bornes : 2 boutons seulement (S'y rendre / Carte) — pas de
+//              site de réservation unique pour une recharge, donc pas de 3e
+//              bouton ; adresse affichée dès qu'elle est connue (jamais
+//              oubliée, demande explicite de Jean-Luc). Citiz : 3 boutons
+//              (Copier & Réserver / S'y rendre / Carte vers citiz.coop) — un
+//              seul CTA de réservation pour toute la station, quel que soit
+//              le véhicule affiché. Leo&Go : 3 boutons identiques vers
+//              leoandgo.com, un véhicule = une fiche.
+//           2) Vue liste (accordéons) : même principe qu'un clic sur une
+//              station Vélo'v, harmonisé sur les 3 onglets qui ne l'avaient
+//              pas encore. Bornes (par groupe d'adresse) : 2 boutons
+//              (S'y rendre en geo: / Carte, qui recentre la carte sur le
+//              groupe) au lieu du petit lien "🗺 Y aller" isolé ; grille
+//              Accès/Horaires/Tarif compactée sur une seule ligne à 3
+//              colonnes (au lieu de 2 lignes) pour réduire la hauteur de la
+//              fiche dépliée. Autopartage Citiz : les véhicules de la
+//              station redeviennent purement informatifs (icône + nom +
+//              motorisation, sans bouton chacun) et UNE seule ligne de 3
+//              boutons apparaît par STATION (pas par véhicule), puisque
+//              "Réserver" renvoie toujours vers le même site Citiz quel que
+//              soit le véhicule choisi (retour explicite de Jean-Luc après
+//              une première maquette à 1 ligne par véhicule, corrigée).
+//              Leo&Go : 1 ligne de 3 boutons par véhicule (chaque entrée est
+//              déjà une station à elle seule, donc inchangé sur ce point).
+//              "S'y rendre" passe de liens Google Maps à des liens geo: pour
+//              Bornes/Citiz/Leo&Go, comme c'était déjà le cas pour Vélo'v.
+//           Aucun changement côté Worker (frontend uniquement). Validé par
+//           une maquette Claude Design (plusieurs allers-retours avec Jean-
+//           Luc) puis vérifié avec une suite Playwright dédiée (fiches et
+//           accordéons des 3 types, non-régression Vélo'v, presse-papiers).
 const WORKER = 'https://me-rendre-a-lyon.jean-luc-perrotto.workers.dev';
 const LIGNES_TCL_GEOM = {"lines":[{"code":"A","color":"#E8308A","family":"metro","segments":[[[45.74961,4.82687],[45.75064,4.82776],[45.75691,4.83171],[45.7572,4.83206],[45.75805,4.83428],[45.75839,4.83459],[45.75954,4.83527],[45.76034,4.83563],[45.76089,4.83573],[45.7678,4.83616],[45.76814,4.83634],[45.76838,4.83665],[45.76863,4.83751],[45.76871,4.84402],[45.77101,4.86824],[45.77103,4.87087],[45.77048,4.87452],[45.76425,4.90828],[45.76285,4.91475],[45.76096,4.9211]],[[45.76096,4.9211],[45.76285,4.91475],[45.76425,4.90828],[45.77048,4.87452],[45.77103,4.87087],[45.77101,4.86824],[45.76871,4.84402],[45.76863,4.83751],[45.76838,4.83665],[45.76814,4.83634],[45.7678,4.83616],[45.76089,4.83573],[45.76034,4.83563],[45.75954,4.83527],[45.75839,4.83459],[45.75805,4.83428],[45.7572,4.83206],[45.75691,4.83171],[45.75064,4.82776],[45.74961,4.82687]]]},{"code":"B","color":"#0075BF","family":"metro","segments":[[[45.77044,4.86318],[45.76873,4.85986],[45.76846,4.85941],[45.76821,4.85923],[45.76509,4.85957],[45.76283,4.85959],[45.76255,4.85951],[45.76213,4.85918],[45.76172,4.85827],[45.76107,4.85153],[45.76081,4.84997],[45.76046,4.84883],[45.75863,4.84657],[45.75812,4.84613],[45.7576,4.84607],[45.75387,4.84701],[45.75366,4.84692],[45.72413,4.82933],[45.72172,4.82769],[45.71991,4.82544],[45.71897,4.82404],[45.71811,4.82241],[45.71749,4.82008],[45.71677,4.81531],[45.71639,4.80917],[45.71624,4.80875],[45.71417,4.8049],[45.71246,4.80262],[45.71185,4.80227],[45.71101,4.80218],[45.70673,4.80281],[45.70593,4.80282],[45.70296,4.80351],[45.7004,4.80517]],[[45.7004,4.80517],[45.70296,4.80351],[45.70593,4.80282],[45.70673,4.80281],[45.71101,4.80218],[45.71185,4.80227],[45.71246,4.80262],[45.71417,4.8049],[45.71624,4.80875],[45.71639,4.80917],[45.71678,4.81535],[45.71749,4.82008],[45.71811,4.82241],[45.71897,4.82404],[45.71991,4.82544],[45.72172,4.82769],[45.72413,4.82933],[45.75366,4.84692],[45.75387,4.84701],[45.7576,4.84607],[45.75812,4.84613],[45.75863,4.84657],[45.76046,4.84883],[45.76081,4.84997],[45.76107,4.85153],[45.76172,4.85827],[45.76213,4.85918],[45.76255,4.85951],[45.76283,4.85959],[45.76509,4.85957],[45.76821,4.85923],[45.76846,4.85941],[45.76873,4.85986],[45.77044,4.86318]]]},{"code":"C","color":"#EC6608","family":"metro","segments":[[[45.78532,4.8326],[45.78226,4.82862],[45.78166,4.82802],[45.7807,4.82748],[45.77981,4.82744],[45.77899,4.82755],[45.77861,4.82775],[45.77568,4.82994],[45.77498,4.83022],[45.77468,4.83047],[45.77447,4.83073],[45.77441,4.83113],[45.77456,4.83236],[45.77445,4.83294],[45.77098,4.83622],[45.77068,4.83636],[45.77035,4.83631],[45.76973,4.83585],[45.76945,4.83579],[45.76798,4.83607]],[[45.76798,4.83607],[45.76945,4.83579],[45.76973,4.83585],[45.77035,4.83631],[45.77068,4.83636],[45.77098,4.83622],[45.77445,4.83294],[45.77456,4.83236],[45.77441,4.83113],[45.77447,4.83073],[45.77468,4.83047],[45.77498,4.83022],[45.77568,4.82994],[45.77861,4.82775],[45.77899,4.82755],[45.77981,4.82744],[45.7807,4.82748],[45.78166,4.82802],[45.78226,4.82862],[45.78532,4.8326]]]},{"code":"D","color":"#009E3D","family":"metro","segments":[[[45.70564,4.888],[45.70678,4.88795],[45.70801,4.88731],[45.70868,4.88719],[45.71233,4.88803],[45.7138,4.88817],[45.71695,4.88787],[45.71886,4.88782],[45.7215,4.88678],[45.72286,4.88718],[45.72382,4.88722],[45.72939,4.88671],[45.72967,4.88674],[45.73009,4.88695],[45.73179,4.8882],[45.733,4.88864],[45.73454,4.8895],[45.73508,4.88956],[45.73565,4.88944],[45.73608,4.88915],[45.73698,4.88809],[45.73953,4.88562],[45.74135,4.88431],[45.74199,4.88326],[45.74273,4.87961],[45.75597,4.84139],[45.75614,4.84051],[45.75614,4.8397],[45.75577,4.83632],[45.75604,4.83483],[45.75651,4.83402],[45.75796,4.83239],[45.75937,4.83003],[45.75978,4.82905],[45.76084,4.82242],[45.76134,4.81987],[45.76528,4.8062],[45.76557,4.80583],[45.76596,4.80558],[45.76737,4.80537],[45.7682,4.80537],[45.76922,4.80557],[45.77306,4.8053],[45.7747,4.80536],[45.77595,4.80528],[45.77629,4.80513],[45.77666,4.8048],[45.77751,4.8035],[45.77799,4.80315],[45.7784,4.80302],[45.7788,4.80302],[45.77917,4.80314],[45.77953,4.80337],[45.78069,4.80445]],[[45.78069,4.80445],[45.77953,4.80337],[45.77917,4.80314],[45.7788,4.80302],[45.7784,4.80302],[45.77799,4.80315],[45.77751,4.8035],[45.77666,4.8048],[45.77629,4.80513],[45.77595,4.80528],[45.7747,4.80536],[45.77306,4.8053],[45.76922,4.80557],[45.7682,4.80537],[45.76737,4.80537],[45.76596,4.80558],[45.76557,4.80583],[45.76528,4.8062],[45.76134,4.81987],[45.76084,4.82242],[45.75978,4.82905],[45.75937,4.83003],[45.75796,4.83239],[45.75651,4.83402],[45.75604,4.83483],[45.75577,4.83632],[45.75614,4.8397],[45.75614,4.84051],[45.75597,4.84139],[45.74273,4.87961],[45.74199,4.88326],[45.74135,4.88431],[45.73953,4.88562],[45.73698,4.88809],[45.73608,4.88915],[45.73565,4.88944],[45.73508,4.88956],[45.73454,4.8895],[45.733,4.88864],[45.73179,4.8882],[45.73009,4.88695],[45.72967,4.88674],[45.72939,4.88671],[45.72382,4.88722],[45.72286,4.88718],[45.7215,4.88678],[45.71886,4.88782],[45.71695,4.88787],[45.7138,4.88817],[45.71233,4.88803],[45.70868,4.88719],[45.70801,4.88731],[45.70678,4.88795],[45.70564,4.888]]]},{"code":"F1","color":"#992358","family":"funiculaire","segments":[[[45.76,4.82602],[45.75721,4.81656]],[[45.76001,4.82601],[45.75722,4.81655]]]},{"code":"F2","color":"#006F9E","family":"funiculaire","segments":[[[45.7622,4.82186],[45.7602,4.82516],[45.76002,4.826]],[[45.76221,4.82187],[45.76021,4.82517],[45.76003,4.82601]]]},{"code":"T1","color":"#004F9F","family":"tram","segments":[[[45.78686,4.8819],[45.78533,4.8826],[45.785,4.88338],[45.78409,4.88378],[45.78383,4.88366],[45.78199,4.8755],[45.78173,4.87481],[45.78137,4.87321],[45.78137,4.8728],[45.78171,4.87122],[45.78156,4.8704],[45.78159,4.86942],[45.78077,4.86576],[45.78065,4.86553],[45.78041,4.8655],[45.77912,4.8666],[45.77543,4.86753],[45.77527,4.86735],[45.77441,4.86505],[45.77409,4.86456],[45.77412,4.86362],[45.77394,4.86332],[45.77058,4.86296],[45.77018,4.86253],[45.76981,4.86185],[45.76964,4.86174],[45.76407,4.86203],[45.76381,4.86191],[45.76373,4.85824],[45.76362,4.8579],[45.76344,4.85772],[45.76303,4.85762],[45.76134,4.85792],[45.7612,4.85788],[45.76109,4.85769],[45.76058,4.85219],[45.75995,4.84247],[45.7598,4.84231],[45.75965,4.8423],[45.75583,4.84286],[45.75548,4.84284],[45.75109,4.83976],[45.75102,4.83933],[45.75183,4.83735],[45.75179,4.83697],[45.74807,4.83401],[45.74795,4.83373],[45.74962,4.82829],[45.75002,4.82769],[45.74996,4.82733],[45.74925,4.82683],[45.749,4.82635],[45.74773,4.82526],[45.7473,4.82473],[45.73849,4.81722],[45.73765,4.8168],[45.73681,4.81674],[45.73634,4.81685],[45.73404,4.81792],[45.73372,4.8185],[45.73342,4.81952],[45.7319,4.82152],[45.7316,4.82396],[45.73135,4.82996],[45.7313,4.83387],[45.73117,4.83441]],[[45.73119,4.83442],[45.73133,4.8339],[45.73135,4.83087],[45.73162,4.82425],[45.73196,4.82146],[45.73351,4.81942],[45.73375,4.81852],[45.73405,4.81795],[45.73633,4.8169],[45.73705,4.81677],[45.73765,4.81684],[45.73847,4.81725],[45.74725,4.82473],[45.7477,4.82528],[45.74891,4.82631],[45.74918,4.82683],[45.74994,4.8274],[45.74996,4.82775],[45.74961,4.82823],[45.74791,4.83367],[45.74807,4.83406],[45.75177,4.83699],[45.75178,4.8374],[45.75098,4.83935],[45.75106,4.83978],[45.7555,4.84289],[45.75962,4.84234],[45.75977,4.84234],[45.75991,4.84247],[45.76055,4.85242],[45.76107,4.85774],[45.76118,4.85793],[45.76131,4.85797],[45.76306,4.85767],[45.76342,4.85776],[45.76361,4.85794],[45.7637,4.85826],[45.76372,4.86171],[45.76383,4.862],[45.764,4.86207],[45.76962,4.86178],[45.76979,4.86188],[45.77018,4.86258],[45.77058,4.863],[45.77391,4.86335],[45.77409,4.86363],[45.77408,4.86465],[45.77438,4.86506],[45.77526,4.8674],[45.77547,4.86758],[45.77912,4.86664],[45.78038,4.86557],[45.78062,4.86556],[45.78074,4.86577],[45.78157,4.86948],[45.78153,4.87039],[45.78168,4.87122],[45.78134,4.8728],[45.78134,4.87321],[45.7817,4.87481],[45.78197,4.87555],[45.78381,4.88374],[45.78406,4.88385],[45.78501,4.88342],[45.78533,4.88265],[45.78688,4.88196]],[[45.78246,4.87763],[45.78136,4.87315],[45.78171,4.87122],[45.78156,4.8704],[45.7816,4.86953],[45.78071,4.86561],[45.78058,4.86549],[45.78041,4.8655],[45.77912,4.8666],[45.77543,4.86753],[45.77527,4.86735],[45.77441,4.86505],[45.77409,4.86456],[45.77412,4.86362],[45.77394,4.86332],[45.77058,4.86296],[45.77018,4.86253],[45.76981,4.86185],[45.76964,4.86174],[45.76407,4.86203],[45.76386,4.86197],[45.76375,4.86169],[45.76373,4.85824],[45.76362,4.8579],[45.76344,4.85772],[45.76303,4.85762],[45.76134,4.85792],[45.7611,4.85774],[45.76058,4.85219],[45.75995,4.84247],[45.7598,4.84231],[45.75965,4.8423],[45.75583,4.84286],[45.75548,4.84284],[45.75109,4.83976],[45.75102,4.83933],[45.75183,4.83735],[45.75179,4.83697],[45.74807,4.83401],[45.74795,4.83373],[45.74962,4.82829],[45.75002,4.82769],[45.74996,4.82733],[45.74925,4.82683],[45.749,4.82635],[45.74773,4.82526],[45.7473,4.82473],[45.73849,4.81722],[45.73765,4.8168],[45.73681,4.81674],[45.73634,4.81685],[45.73404,4.81792],[45.73372,4.8185],[45.73342,4.81952],[45.7319,4.82152],[45.7316,4.82396],[45.73135,4.82996],[45.7313,4.83387],[45.73117,4.83441]],[[45.73119,4.83442],[45.73133,4.8339],[45.73135,4.83087],[45.73162,4.82425],[45.73196,4.82146],[45.73351,4.81942],[45.73375,4.81852],[45.73405,4.81795],[45.73633,4.8169],[45.73705,4.81677],[45.73765,4.81684],[45.73847,4.81725],[45.74725,4.82473],[45.7477,4.82528],[45.74891,4.82631],[45.74918,4.82683],[45.74994,4.8274],[45.74996,4.82775],[45.74961,4.82823],[45.74791,4.83367],[45.74807,4.83406],[45.75177,4.83699],[45.75178,4.8374],[45.75098,4.83935],[45.75106,4.83978],[45.7555,4.84289],[45.75962,4.84234],[45.75977,4.84234],[45.75991,4.84247],[45.76055,4.85242],[45.76107,4.85774],[45.76118,4.85793],[45.76131,4.85797],[45.76306,4.85767],[45.76342,4.85776],[45.76361,4.85794],[45.7637,4.85826],[45.76372,4.86171],[45.76383,4.862],[45.764,4.86207],[45.76962,4.86178],[45.76979,4.86188],[45.77018,4.86258],[45.77058,4.863],[45.77391,4.86335],[45.77409,4.86363],[45.77408,4.86465],[45.77438,4.86506],[45.77526,4.8674],[45.77547,4.86758],[45.77912,4.86664],[45.78044,4.86553],[45.78068,4.86562],[45.78157,4.86948],[45.78153,4.87039],[45.78168,4.87122],[45.78133,4.87315],[45.78243,4.87765]]]},{"code":"T2","color":"#6BA230","family":"tram","segments":[[[45.74025,4.81877],[45.74733,4.8248],[45.7477,4.82528],[45.74891,4.82631],[45.74918,4.82683],[45.74985,4.82727],[45.74998,4.82763],[45.74957,4.82835],[45.7365,4.86925],[45.73659,4.86969],[45.73999,4.87422],[45.7426,4.878],[45.74265,4.87835],[45.7419,4.88292],[45.74125,4.88467],[45.7411,4.88583],[45.73909,4.89191],[45.73897,4.89282],[45.73632,4.90087],[45.73584,4.90172],[45.73526,4.90342],[45.73078,4.917],[45.73064,4.9172],[45.73044,4.9172],[45.72709,4.91542],[45.7261,4.91521],[45.72344,4.91506],[45.72259,4.91488],[45.71958,4.91729],[45.71948,4.91771],[45.7198,4.91891],[45.71991,4.92094],[45.72025,4.9225],[45.72018,4.92305],[45.71571,4.92982],[45.71477,4.93061],[45.71169,4.93538],[45.70972,4.93824],[45.70943,4.93852],[45.70889,4.9386],[45.70853,4.93837],[45.70831,4.93804],[45.70752,4.93614],[45.70711,4.93547],[45.70664,4.93497],[45.70569,4.9346],[45.70306,4.93495],[45.70154,4.93566],[45.70011,4.93583],[45.6991,4.93631],[45.6954,4.93589],[45.69514,4.93598],[45.69505,4.93628],[45.69502,4.93756],[45.69494,4.93774],[45.69469,4.93793],[45.69459,4.9382],[45.69464,4.93901],[45.69404,4.94518],[45.69421,4.94607],[45.69493,4.94714],[45.69497,4.94738],[45.69434,4.94903],[45.69389,4.94943],[45.69326,4.95028],[45.69307,4.95201],[45.69275,4.95346],[45.69264,4.95583]],[[45.69267,4.95584],[45.69279,4.95332],[45.69308,4.95213],[45.6933,4.95025],[45.69396,4.9494],[45.69438,4.94902],[45.695,4.94738],[45.69494,4.94709],[45.69424,4.94606],[45.69407,4.9451],[45.69467,4.93897],[45.69462,4.9382],[45.69471,4.93796],[45.69496,4.93777],[45.69505,4.93757],[45.69515,4.93602],[45.69538,4.93593],[45.69917,4.93635],[45.7002,4.93587],[45.70154,4.9357],[45.70299,4.93501],[45.70573,4.93465],[45.70662,4.935],[45.70708,4.93548],[45.70756,4.93628],[45.70829,4.93807],[45.70853,4.93841],[45.70888,4.93864],[45.70935,4.9386],[45.70973,4.93828],[45.71168,4.93545],[45.71473,4.93072],[45.71567,4.92993],[45.7202,4.92308],[45.72028,4.92251],[45.71994,4.92098],[45.71983,4.91894],[45.7195,4.91764],[45.71961,4.91731],[45.72254,4.91493],[45.72335,4.91509],[45.72586,4.91524],[45.72701,4.91547],[45.73044,4.91724],[45.73063,4.91725],[45.73078,4.91708],[45.73512,4.90393],[45.73591,4.90167],[45.73636,4.90084],[45.739,4.89282],[45.73911,4.89194],[45.74113,4.88583],[45.74129,4.88464],[45.74192,4.88296],[45.7427,4.87822],[45.74264,4.87794],[45.73996,4.87411],[45.73659,4.86962],[45.73653,4.86926],[45.74957,4.82844],[45.75002,4.82769],[45.74993,4.82729],[45.74925,4.82683],[45.749,4.82635],[45.74773,4.82526],[45.74738,4.8248],[45.74026,4.81874]]]},{"code":"T3","color":"#00A3A6","family":"tram","segments":[[[45.76049,4.86192],[45.75704,4.86178],[45.75527,4.8618],[45.75487,4.86213],[45.75365,4.86445],[45.75322,4.86604],[45.75252,4.87223],[45.75298,4.88124],[45.75343,4.88294],[45.7548,4.88571],[45.75524,4.88719],[45.75886,4.9134],[45.76126,4.92325],[45.7673,4.94712],[45.76795,4.94902],[45.76863,4.95045],[45.77455,4.96065],[45.7771,4.96705],[45.77732,4.96789],[45.77745,4.96908],[45.77732,4.97063],[45.77697,4.97182],[45.77656,4.97264],[45.7752,4.97474],[45.77455,4.97641],[45.77429,4.97736],[45.76758,5.03206],[45.76736,5.03264],[45.7666,5.03281],[45.76641,5.03302],[45.76609,5.03526]],[[45.76615,5.03527],[45.76644,5.0331],[45.76666,5.03287],[45.76748,5.0328],[45.76774,5.0321],[45.76811,5.02801],[45.77434,4.97726],[45.7752,4.97481],[45.7766,4.97264],[45.77703,4.97175],[45.77741,4.97024],[45.77747,4.9689],[45.77714,4.96706],[45.77452,4.96051],[45.7686,4.95033],[45.76793,4.94889],[45.76734,4.94715],[45.75893,4.91359],[45.75831,4.90962],[45.75526,4.88714],[45.75482,4.8856],[45.75344,4.88288],[45.75303,4.88136],[45.75255,4.87225],[45.75328,4.86584],[45.75376,4.86427],[45.75489,4.86216],[45.75543,4.8618],[45.76127,4.862]]]},{"code":"T4","color":"#662483","family":"tram","segments":[[[45.78154,4.87209],[45.78171,4.87122],[45.78156,4.8704],[45.78159,4.86942],[45.78077,4.86576],[45.78058,4.86549],[45.78037,4.86553],[45.77912,4.8666],[45.77543,4.86753],[45.77527,4.86735],[45.77441,4.86505],[45.77409,4.86456],[45.77412,4.86362],[45.77401,4.86337],[45.77058,4.86296],[45.77026,4.86264],[45.76968,4.86175],[45.76282,4.86206],[45.75826,4.86183],[45.75249,4.86168],[45.75172,4.86144],[45.75114,4.86114],[45.75071,4.86053],[45.75052,4.86041],[45.74543,4.85896],[45.74178,4.85807],[45.74153,4.85811],[45.74124,4.85824],[45.73955,4.85955],[45.73883,4.8602],[45.71183,4.88122],[45.71137,4.88174],[45.70815,4.88699],[45.70773,4.88742],[45.70722,4.88763],[45.70676,4.8877],[45.70345,4.88774],[45.70299,4.88759],[45.69713,4.88763],[45.69701,4.88757],[45.6969,4.8873],[45.69623,4.88247],[45.69596,4.88147],[45.69556,4.8807],[45.69319,4.87757],[45.69303,4.87694],[45.69326,4.87629],[45.69964,4.86628],[45.69985,4.86537],[45.69996,4.86054],[45.69974,4.86028],[45.69945,4.86026],[45.6982,4.86043],[45.69778,4.86058],[45.69743,4.86085],[45.69654,4.86217],[45.69614,4.86252],[45.6943,4.86285],[45.69348,4.86325],[45.69289,4.8639],[45.69226,4.86486],[45.69153,4.86534],[45.6908,4.86616],[45.69057,4.86609],[45.68994,4.86542],[45.68952,4.86519],[45.68821,4.86514]],[[45.76433,4.86201],[45.76282,4.86206],[45.75826,4.86183],[45.75249,4.86168],[45.75172,4.86144],[45.75114,4.86114],[45.75071,4.86053],[45.75052,4.86041],[45.74543,4.85896],[45.74178,4.85807],[45.74153,4.85811],[45.74124,4.85824],[45.73955,4.85955],[45.73883,4.8602],[45.71188,4.88118],[45.7115,4.88156],[45.71112,4.88215]],[[45.68821,4.86518],[45.6895,4.86523],[45.68999,4.86551],[45.69056,4.86613],[45.69082,4.86619],[45.69146,4.86544],[45.69221,4.86495],[45.69319,4.86357],[45.69371,4.86313],[45.69429,4.86289],[45.69584,4.86267],[45.69623,4.8625],[45.69664,4.86208],[45.69737,4.86097],[45.69797,4.86053],[45.69966,4.8603],[45.69993,4.86054],[45.69982,4.86543],[45.69957,4.86636],[45.69318,4.87636],[45.69301,4.87684],[45.69315,4.87757],[45.69554,4.88073],[45.69593,4.88148],[45.69622,4.88259],[45.69687,4.8873],[45.69694,4.88753],[45.69711,4.88767],[45.70302,4.88763],[45.70347,4.88778],[45.70668,4.88775],[45.70728,4.88765],[45.70779,4.88743],[45.70815,4.88705],[45.7114,4.88175],[45.71187,4.88123],[45.73885,4.86024],[45.74062,4.85877],[45.74153,4.85815],[45.74205,4.85817],[45.74457,4.85879],[45.75052,4.86045],[45.75072,4.86061],[45.75097,4.86105],[45.75123,4.86125],[45.75182,4.86155],[45.75262,4.86176],[45.75765,4.86185],[45.76287,4.8621],[45.76966,4.86179],[45.77031,4.86276],[45.77058,4.863],[45.77395,4.86337],[45.77409,4.86363],[45.77408,4.86465],[45.77438,4.86506],[45.77526,4.8674],[45.77547,4.86758],[45.77912,4.86664],[45.78038,4.86557],[45.78055,4.86552],[45.78074,4.86577],[45.78157,4.86948],[45.78153,4.87039],[45.78168,4.87122],[45.78151,4.87208]],[[45.71114,4.88218],[45.71154,4.88156],[45.71187,4.88123],[45.73885,4.86024],[45.74062,4.85877],[45.74153,4.85815],[45.74205,4.85817],[45.74457,4.85879],[45.75052,4.86045],[45.75072,4.86061],[45.75097,4.86105],[45.75123,4.86125],[45.75182,4.86155],[45.75249,4.86174],[45.75765,4.86185],[45.76287,4.8621],[45.76434,4.86205]]]},{"code":"T5","color":"#EC6608","family":"tram","segments":[[[45.74249,4.87928],[45.7419,4.88292],[45.74125,4.88467],[45.7411,4.88583],[45.73909,4.89191],[45.73897,4.89282],[45.73632,4.90087],[45.73584,4.90172],[45.73526,4.90342],[45.73074,4.91714],[45.73077,4.91738],[45.7309,4.91754],[45.73211,4.9182],[45.7324,4.91827],[45.73373,4.91772],[45.73617,4.91691],[45.73659,4.91692],[45.73682,4.91712],[45.73912,4.92715],[45.73932,4.93143],[45.73958,4.93398],[45.73954,4.93428],[45.73915,4.93506],[45.7389,4.93622],[45.73813,4.9379],[45.73797,4.9385],[45.73797,4.93931],[45.73859,4.94232],[45.73856,4.94287],[45.73827,4.94371],[45.73771,4.94467],[45.7372,4.94519],[45.73354,4.9468],[45.73205,4.9479]],[[45.73208,4.948],[45.73356,4.94683],[45.73721,4.94523],[45.73774,4.94468],[45.73834,4.94364],[45.73856,4.94301],[45.73859,4.94202],[45.73801,4.93939],[45.73798,4.93863],[45.73814,4.93795],[45.73893,4.93622],[45.73914,4.9352],[45.73953,4.93438],[45.73961,4.93398],[45.73935,4.9315],[45.73916,4.92722],[45.73685,4.9171],[45.73662,4.91689],[45.73612,4.91685],[45.73364,4.91771],[45.73244,4.91823],[45.73214,4.91817],[45.7309,4.91749],[45.73078,4.9171],[45.73512,4.90393],[45.7359,4.90169],[45.73636,4.90084],[45.739,4.89282],[45.73911,4.89194],[45.74113,4.88583],[45.74129,4.88464],[45.74192,4.88296],[45.74252,4.87929]]]},{"code":"T6","color":"#F191A3","family":"tram","segments":[[[45.78141,4.87267],[45.78127,4.87186],[45.78104,4.8716],[45.7808,4.87156],[45.77931,4.87221],[45.77883,4.87259],[45.77674,4.87366],[45.77658,4.87405],[45.77672,4.87657],[45.77526,4.87862],[45.77511,4.87873],[45.77374,4.87893],[45.77199,4.87908],[45.77158,4.87931],[45.77088,4.87936],[45.77071,4.87961],[45.77065,4.88021],[45.77047,4.88036],[45.76815,4.88019],[45.76635,4.88026],[45.76112,4.88084],[45.75832,4.88064],[45.75774,4.88244],[45.75769,4.88297],[45.75918,4.88885],[45.75939,4.89031],[45.75935,4.89055],[45.75918,4.89069],[45.75437,4.89125],[45.75419,4.89135],[45.75408,4.8916],[45.75391,4.89408],[45.7532,4.89739],[45.75304,4.89796],[45.75284,4.89813],[45.75126,4.89746],[45.75014,4.89715],[45.74791,4.89682],[45.74692,4.89657],[45.74377,4.89491],[45.74163,4.89348],[45.73854,4.89181],[45.73609,4.89029],[45.73312,4.88863],[45.73071,4.88778],[45.73061,4.8876],[45.73063,4.88737],[45.73328,4.87907],[45.72759,4.86208],[45.72769,4.86184],[45.72839,4.86133],[45.73024,4.86008],[45.7311,4.85971],[45.7312,4.85953],[45.72954,4.85312],[45.72936,4.85227],[45.72934,4.85142],[45.7294,4.84711],[45.73012,4.8382],[45.73115,4.83472]],[[45.78137,4.87266],[45.78122,4.87183],[45.7811,4.87168],[45.78084,4.87159],[45.77933,4.87224],[45.77886,4.87261],[45.77684,4.87364],[45.77661,4.87404],[45.77675,4.87657],[45.77527,4.87866],[45.77203,4.87912],[45.77165,4.87933],[45.77089,4.8794],[45.77074,4.87963],[45.77071,4.88015],[45.77052,4.88039],[45.76948,4.88036],[45.76909,4.88026],[45.76738,4.88024],[45.76524,4.88038],[45.76109,4.88088],[45.75833,4.88068],[45.75774,4.88252],[45.75772,4.88305],[45.75894,4.88763],[45.75922,4.8889],[45.75939,4.89054],[45.75913,4.89074],[45.75447,4.89128],[45.75421,4.89138],[45.7541,4.8917],[45.7539,4.89429],[45.75324,4.89739],[45.7531,4.89791],[45.75292,4.89815],[45.75274,4.89816],[45.75127,4.89751],[45.75006,4.89717],[45.74786,4.8969],[45.74705,4.89669],[45.74367,4.89489],[45.74214,4.89393],[45.74182,4.89364],[45.73939,4.89235],[45.73512,4.88976],[45.73311,4.88867],[45.73068,4.8878],[45.7306,4.88736],[45.73324,4.87909],[45.72752,4.86205],[45.7276,4.86186],[45.72838,4.8613],[45.73025,4.86003],[45.73108,4.85968],[45.73118,4.85947],[45.72951,4.85313],[45.72933,4.85228],[45.72931,4.85142],[45.72939,4.85038],[45.72938,4.8471],[45.73009,4.83819],[45.73112,4.83471]]]},{"code":"T7","color":"#992358","family":"tram","segments":[[[45.76847,4.98136],[45.77087,4.98125],[45.77149,4.98098],[45.77362,4.98103],[45.77378,4.9809],[45.77429,4.97736],[45.77455,4.97641],[45.7752,4.97474],[45.77666,4.97247],[45.7772,4.97114],[45.77744,4.96963],[45.77738,4.96824],[45.77691,4.96651],[45.77448,4.9605],[45.76874,4.95065],[45.76764,4.94821],[45.76718,4.94667],[45.76097,4.92208]],[[45.76109,4.922],[45.76668,4.94456],[45.76762,4.94804],[45.7686,4.95033],[45.77452,4.96051],[45.77691,4.96644],[45.77727,4.96752],[45.77741,4.96826],[45.77746,4.96978],[45.77723,4.97113],[45.7766,4.97264],[45.7752,4.97481],[45.77468,4.97613],[45.77434,4.97726],[45.77379,4.98095],[45.77364,4.98107],[45.77146,4.98103],[45.77082,4.9813],[45.76847,4.9814]]]}]};
 let data = {parkings:{tcl:[],operateurs:[]},velov:[],bornes:[]};
@@ -1506,6 +1617,20 @@ function kwClass(cat) {
   return cat === 'rapide' ? 'kw-r' : cat === 'acceleree' ? 'kw-a' : 'kw-n';
 }
 
+// v14w : couleur + libellé de catégorie de borne, réutilisés par la fiche plein écran
+// (les mêmes 3 catégories/couleurs que kwClass()/.kw-r/.kw-a/.kw-n, en version {hex,label}).
+function borneCatInfo(cat) {
+  return cat === 'rapide' ? {hex:'#2E7D32', label:'Recharge rapide'}
+       : cat === 'acceleree' ? {hex:'#1565C0', label:'Recharge accélérée'}
+       : {hex:'#E65C00', label:'Recharge normale'};
+}
+
+// v14w : nom Citiz — le champ peut être une chaîne ou un tableau [{text}] selon la source.
+// Version globale de l'utilitaire jusque-là dupliqué localement (renderAutopartage(), renderMap()).
+function citizNomStr(n) {
+  return Array.isArray(n) ? (n[0]?.text || '') : (n || '');
+}
+
 // ── CHARGEMENT ──
 async function loadData() {
   document.getElementById('err-zone').innerHTML = '';
@@ -1638,21 +1763,28 @@ function renderAutopartage(el, q) {
           s.vehicules.forEach(v => {
             const lbl = propLabel[(v.propulsion||'').toLowerCase()] || 'Véhicule';
             const qte = v.quantite > 1 ? ` <span style="font-size:9px;font-weight:800;color:var(--muted)">× ${v.quantite}</span>` : '';
+            // v14w : plus de boutons par véhicule — "Réserver" renvoie de toute façon vers le
+            // même site Citiz quel que soit le véhicule choisi (retour Jean-Luc). La liste des
+            // véhicules reste purement informative ; les boutons passent au niveau station.
             html += `<div class="ap-veh-row">
               <div class="ap-veh-ico ${propClass(v.propulsion)}">${propIcon(v.propulsion)}</div>
               <div class="ap-veh-info">
                 <div class="ap-veh-nom">${citizNom(v.nom)}${qte}</div>
                 <div class="ap-veh-range">${lbl}</div>
               </div>
-              <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
-                <a href="${navUrl}" target="_blank" rel="noopener" class="ap-btn-reserver">🗺 Y aller</a>
-                <a href="https://www.citiz.coop" target="_blank" rel="noopener" class="ap-btn-reserver ap-btn-reserve">Réserver</a>
-              </div>
             </div>`;
           });
         } else {
           html += `<div style="padding:8px 12px 10px;font-size:10px;color:var(--muted);font-style:italic">Aucun véhicule disponible</div>`;
         }
+        // v14w : harmonisation avec Vélo'v — 1 seule ligne de 3 boutons par STATION
+        // (Copier & Réserver / S'y rendre / Carte), pas une par véhicule.
+        const citizGeoUrl = s.lat && s.lng ? `geo:${s.lat},${s.lng}?q=${encodeURIComponent(citizNom(s.nom))}` : '';
+        html += `<div style="display:flex;gap:5px;padding:0 12px 10px;margin-top:2px">
+          <button class="vv-exp-reserve" style="flex:2;margin-bottom:0" data-nom="${citizNom(s.nom).replace(/"/g,'&quot;')}" data-adr="${(s.adresse||'').replace(/"/g,'&quot;')}" data-url="https://www.citiz.coop" onclick="copyAndReserveInline(this)">🔑 Copier &amp; Réserver</button>
+          ${citizGeoUrl ? `<a href="${citizGeoUrl}" target="_blank" rel="noopener" class="vv-exp-reserve" style="flex:1;text-decoration:none;background:var(--orange-light);color:var(--orange-dark);border:1.5px solid var(--orange-border);margin-bottom:0">📍 S'y rendre</a>` : ''}
+          ${s.lat && s.lng ? `<button class="vv-exp-reserve" style="flex:1;background:var(--orange-light);color:var(--orange-dark);border:1.5px solid var(--orange-border);margin-bottom:0" onclick="showCitizOnMap('${s.id}')">🗺 Carte</button>` : ''}
+        </div>`;
         html += `</div></div>`;
       });
     } else {
@@ -1684,18 +1816,23 @@ function renderAutopartage(el, q) {
     html += `<div class="ap-section-lbl" style="margin-top:4px">🚗 Leo&Go · ${leoandgo.length} véhicules disponibles</div>`;
     if (leoandgo.length) {
       leoandgo.slice(0, 30).forEach(v => {
-        const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${v.lat},${v.lng}`;
+        const geoUrl = v.lat && v.lng ? `geo:${v.lat},${v.lng}?q=${encodeURIComponent(v.nom||'')}` : '';
         const distBadge = v._dist != null ? `· ${fmtDist(v._dist)}` : '';
         const rangeStr = v.autonomie_km ? `${v.autonomie_km} km` : '—';
-        html += `<div class="ap-leo-card">
-          <div class="ap-logo ap-logo-leo">L&G</div>
-          <div class="ap-veh-ico ${propClass(v.propulsion)}" style="flex-shrink:0">${propIcon(v.propulsion)}</div>
-          <div class="ap-info">
-            <div class="ap-nom">${v.nom}</div>
-            <div class="ap-meta">Autonomie ${rangeStr} ${distBadge}</div>
+        html += `<div class="ap-leo-card" style="flex-direction:column;align-items:stretch;padding:10px 12px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div class="ap-logo ap-logo-leo">L&G</div>
+            <div class="ap-veh-ico ${propClass(v.propulsion)}" style="flex-shrink:0">${propIcon(v.propulsion)}</div>
+            <div class="ap-info">
+              <div class="ap-nom">${v.nom}</div>
+              <div class="ap-meta">Autonomie ${rangeStr} ${distBadge}</div>
+            </div>
           </div>
-          <a href="${navUrl}" target="_blank" rel="noopener" class="ap-btn-reserver">🗺 Y aller</a>
-          <a href="https://www.leoandgo.com" target="_blank" rel="noopener" class="ap-btn-reserver ap-btn-reserve">Réserver</a>
+          <div style="display:flex;gap:5px">
+            <button class="vv-exp-reserve" style="flex:2;margin-bottom:0" data-nom="${(v.nom||'').replace(/"/g,'&quot;')}" data-adr="" data-url="https://www.leoandgo.com" onclick="copyAndReserveInline(this)">🔑 Copier &amp; Réserver</button>
+            ${geoUrl ? `<a href="${geoUrl}" target="_blank" rel="noopener" class="vv-exp-reserve" style="flex:1;text-decoration:none;background:var(--orange-light);color:var(--orange-dark);border:1.5px solid var(--orange-border);margin-bottom:0">📍 S'y rendre</a>` : ''}
+            ${v.lat && v.lng ? `<button class="vv-exp-reserve" style="flex:1;background:var(--orange-light);color:var(--orange-dark);border:1.5px solid var(--orange-border);margin-bottom:0" onclick="showLeoGoOnMap('${v.id}')">🗺 Carte</button>` : ''}
+          </div>
         </div>`;
       });
       if (leoandgo.length > 30) {
@@ -2811,28 +2948,29 @@ function buildGroups(bList) {
 function renderGroups(groups, showDist) {
   let h = '';
   groups.forEach(g => {
-    const navUrl  = g.lat && g.lng ? `https://www.google.com/maps/dir/?api=1&destination=${g.lat},${g.lng}` : '#';
+    // v14w : harmonisation avec Vélo'v — "S'y rendre" en geo: (comme les autres fiches),
+    // le petit bouton "🗺 Y aller" en haut du groupe est remplacé par la ligne de boutons
+    // ci-dessous (retour Jean-Luc : même principe que l'accordéon Vélo'v).
+    const navUrl = `geo:${g.lat},${g.lng}?q=${encodeURIComponent(g.lieu||'')}`;
     const accBadge  = g.acc && g.acc !== 'Accès libre'
       ? `<span style="font-size:8px;color:var(--muted);font-weight:700"> · ${g.acc}</span>` : '';
     const distBadge = showDist && g.dist != null
       ? `<span style="font-size:8px;color:var(--muted);font-weight:600"> · ${fmtDist(g.dist)}</span>` : '';
-    // Accès + Horaires sur la même ligne, Tarif en dessous si présent
+    // v14w : Accès / Horaires / Tarif sur une seule ligne à 3 colonnes (retour Jean-Luc,
+    // au lieu de 2 colonnes + tarif en pleine largeur en dessous) — voir .ve-detail-grid.
     const accRow = g.acc
-      ? `<div class="ve-detail-cell"><div class="ve-detail-lbl">Accès</div><div class="ve-detail-val" style="font-size:11px">${g.acc}</div></div>` : '';
+      ? `<div class="ve-detail-cell"><div class="ve-detail-lbl">Accès</div><div class="ve-detail-val">${g.acc}</div></div>` : '';
     const horairesRow = g.horaires && g.horaires !== '—'
-      ? `<div class="ve-detail-cell"><div class="ve-detail-lbl">Horaires</div><div class="ve-detail-val" style="font-size:11px">${g.horaires}</div></div>` : '';
+      ? `<div class="ve-detail-cell"><div class="ve-detail-lbl">Horaires</div><div class="ve-detail-val">${g.horaires}</div></div>` : '';
     const tarifRow = g.tarif && g.tarif !== '—'
-      ? `<div class="ve-detail-cell" style="grid-column:1/-1"><div class="ve-detail-lbl">Tarification</div><div class="ve-detail-val" style="font-size:11px">${g.tarif}</div></div>` : '';
+      ? `<div class="ve-detail-cell"><div class="ve-detail-lbl">Tarif</div><div class="ve-detail-val">${g.tarif}</div></div>` : '';
     const detailGrid = (accRow || horairesRow || tarifRow)
       ? `<div class="ve-detail-grid" style="margin-top:8px">${accRow}${horairesRow}${tarifRow}</div>` : '';
 
     h += `<div class="op-group">
-      <div class="op-group-header" style="justify-content:space-between">
-        <div style="flex:1;min-width:0;overflow:hidden">
-          <span class="op-group-name">${g.lieu}</span>
-          <span style="font-size:9px;color:var(--muted);font-weight:600"> · ${g.op}</span>${accBadge}${distBadge}
-        </div>
-        <a href="${navUrl}" target="_blank" rel="noopener" style="padding:4px 10px;border-radius:20px;background:var(--orange);color:white;font-size:9px;font-weight:800;text-decoration:none;white-space:nowrap;flex-shrink:0;margin-left:6px">🗺 Y aller</a>
+      <div style="margin-bottom:4px">
+        <span class="op-group-name">${g.lieu}</span>
+        <span style="font-size:9px;color:var(--muted);font-weight:600"> · ${g.op}</span>${accBadge}${distBadge}
       </div>`;
     g.stations.forEach(b => {
       const kw  = b.puissance_max_kw || 0;
@@ -2848,6 +2986,13 @@ function renderGroups(groups, showDist) {
         ${priseTags}
       </div>`;
     });
+    // v14w : 2 boutons sur une ligne (S'y rendre + Carte) — pas de "Réserver" possible pour
+    // une borne, contrairement à Vélo'v/Autopartage (retour Jean-Luc).
+    const firstId = g.stations[0]?.id;
+    h += `<div style="display:flex;gap:5px;margin-top:8px">
+      <a href="${navUrl}" target="_blank" rel="noopener" class="vv-exp-reserve" style="flex:1;text-decoration:none;background:var(--orange-light);color:var(--orange-dark);border:1.5px solid var(--orange-border);margin-bottom:0">📍 S'y rendre</a>
+      ${firstId != null ? `<button class="vv-exp-reserve" style="flex:1;background:var(--orange-light);color:var(--orange-dark);border:1.5px solid var(--orange-border);margin-bottom:0" onclick="showBorneOnMap('${firstId}')">🗺 Carte</button>` : ''}
+    </div>`;
     h += detailGrid;
     h += `</div>`;
   });
@@ -2910,10 +3055,22 @@ function copyAndReserveVelovInline(btn) {
 }
 
 // ── DÉTAIL VÉLO'V (depuis popup carte uniquement) ──
-function showDetail(id, type) {
+// v14w : recherche l'objet source selon le type — Vélo'v (inchangé), plus Bornes/Citiz/Leo&Go
+// (fiches plein écran harmonisées avec le bandeau à boutons de la fiche Vélo'v).
+function findDetailItem(id, type) {
   id = String(id);
-  let item;
-  if (type === 'velov') item = (data.velov || []).find(v => String(v.id) === id);
+  if (type === 'velov') return (data.velov || []).find(v => String(v.id) === id);
+  if (type === 'borne') return (data.bornes || []).find(b => String(b.id) === id);
+  if (type === 'citiz') {
+    const s = (data.autopartage?.citiz || []).find(x => String(x.id) === id);
+    return s ? {...s, nom: citizNomStr(s.nom)} : null;
+  }
+  if (type === 'leoandgo') return (data.autopartage?.leoandgo || []).find(v => String(v.id) === id);
+  return null;
+}
+
+function showDetail(id, type) {
+  const item = findDetailItem(id, type);
   if (!item) return;
   selected = {...item, type};
   fromMap = false;
@@ -2923,13 +3080,13 @@ function showDetail(id, type) {
   if (mapVisible) { mapVisible = false; document.getElementById('map-btn').textContent = '🗺 Carte'; }
   updateDetail(selected);
   if (refTimer) clearInterval(refTimer);
-  refTimer = setInterval(refreshDetail, 120000);
+  // v14w : le rafraîchissement auto (données temps réel) ne concerne que Vélo'v pour l'instant —
+  // inutile de relancer un fetch réseau toutes les 2 min pour Bornes/Citiz/Leo&Go.
+  if (type === 'velov') refTimer = setInterval(refreshDetail, 120000);
 }
 
 function showDetailFromMap(id, type) {
-  id = String(id);
-  let item;
-  if (type === 'velov') item = (data.velov || []).find(v => String(v.id) === id);
+  const item = findDetailItem(id, type);
   if (!item) return;
   selected = {...item, type};
   fromMap = true;
@@ -2938,7 +3095,7 @@ function showDetailFromMap(id, type) {
   document.getElementById('list-view').style.display = 'none';
   updateDetail(selected);
   if (refTimer) clearInterval(refTimer);
-  refTimer = setInterval(refreshDetail, 120000);
+  if (type === 'velov') refTimer = setInterval(refreshDetail, 120000);
 }
 
 function closeDetail() {
@@ -2959,17 +3116,49 @@ function closeDetail() {
   }
 }
 
+// v14w : updateDetail() devient un simple aiguilleur — chaque type a sa propre fonction et
+// sa propre section HTML (sec-velov/sec-borne/sec-citiz/sec-leoandgo), affichée seule à la fois.
 function updateDetail(p) {
-  if (p.type !== 'velov') return;
-  // Barre d'actions
+  document.getElementById('sec-velov').style.display = p.type === 'velov' ? 'block' : 'none';
+  document.getElementById('sec-borne').style.display = p.type === 'borne' ? 'block' : 'none';
+  document.getElementById('sec-citiz').style.display = p.type === 'citiz' ? 'block' : 'none';
+  document.getElementById('sec-leoandgo').style.display = p.type === 'leoandgo' ? 'block' : 'none';
+  configureDetailActionBar(p);
+  if (p.type === 'velov') updateDetailVelov(p);
+  else if (p.type === 'borne') updateDetailBorne(p);
+  else if (p.type === 'citiz') updateDetailCitiz(p);
+  else if (p.type === 'leoandgo') updateDetailLeoGo(p);
+}
+
+// v14w : bandeau d'actions collant — "S'y rendre" et "Copier" sont génériques (via
+// selected.nom/adresse) ; le 3e bouton est reconfiguré ici selon le type, masqué pour les
+// Bornes (pas de site de réservation unique pour toutes les recharges).
+function configureDetailActionBar(p) {
   const navBtn = document.getElementById('nav-btn');
-  if (p.lat && p.lng) {
-    navBtn.href = `geo:${p.lat},${p.lng}?q=${encodeURIComponent(p.nom)}`;
+  if (navBtn && p.lat && p.lng) navBtn.href = `geo:${p.lat},${p.lng}?q=${encodeURIComponent(p.nom||'')}`;
+  const thirdBtn = document.getElementById('third-det-btn');
+  if (!thirdBtn) return;
+  if (p.type === 'velov') {
+    thirdBtn.style.display = '';
+    thirdBtn.className = 'det-act-btn det-act-vv';
+    thirdBtn.href = (p.lat && p.lng) ? `https://velov.grandlyon.com/#/map?lat=${p.lat}&lng=${p.lng}&zoom=17` : 'https://velov.grandlyon.com';
+    thirdBtn.textContent = "🚲 Vélo'v";
+  } else if (p.type === 'citiz') {
+    thirdBtn.style.display = '';
+    thirdBtn.className = 'det-act-btn det-act-citiz';
+    thirdBtn.href = 'https://www.citiz.coop';
+    thirdBtn.textContent = '🔑 Citiz';
+  } else if (p.type === 'leoandgo') {
+    thirdBtn.style.display = '';
+    thirdBtn.className = 'det-act-btn det-act-citiz';
+    thirdBtn.href = 'https://www.leoandgo.com';
+    thirdBtn.textContent = '🔑 Leo&Go';
+  } else {
+    thirdBtn.style.display = 'none';
   }
-  const vvDetBtn = document.getElementById('vv-det-btn');
-  if (vvDetBtn && p.lat && p.lng) {
-    vvDetBtn.href = `https://velov.grandlyon.com/#/map?lat=${p.lat}&lng=${p.lng}&zoom=17`;
-  }
+}
+
+function updateDetailVelov(p) {
   // Fiche
   document.getElementById('vv-title').textContent = p.nom || "Station Vélo'v";
   document.getElementById('vv-dispo').textContent = p.velos_dispo || 0;
@@ -3014,6 +3203,85 @@ function updateDetail(p) {
   const adrTxt = document.getElementById('vv-adresse');
   if (p.adresse && adrBl && adrTxt) { adrBl.style.display = 'block'; adrTxt.textContent = p.adresse + (isEventVelov(p) ? ' (station éphémère temporaire)' : ''); }
   else if (adrBl) adrBl.style.display = 'none';
+}
+
+// v14w : fiche Bornes — bandeau 2 boutons (pas de réservation), grille Accès/Horaires/Tarif
+// sur une seule ligne (retour Jean-Luc), et adresse affichée dès qu'elle est connue.
+function updateDetailBorne(b) {
+  const cat = borneCatInfo(b.categorie);
+  document.getElementById('bn-title').textContent = b.nom || 'Borne de recharge';
+  const kw = b.puissance_max_kw || 0;
+  const kwEl = document.getElementById('bn-kw');
+  kwEl.textContent = kw > 0 ? kw : '—';
+  kwEl.style.color = cat.hex;
+  const badgeEl = document.getElementById('bn-badge');
+  badgeEl.textContent = cat.label;
+  badgeEl.style.color = cat.hex;
+  badgeEl.style.borderColor = cat.hex;
+  document.getElementById('bn-pts').textContent = b.nb_points || 1;
+  document.getElementById('bn-op').textContent = b.operateur || '—';
+  const prises = (b.types_prise || '').split(',').map(s => s.trim()).filter(Boolean);
+  const priseTags = prises.map(pr => `<span class="prise-tag">${pr}</span>`).join('');
+  document.getElementById('bn-prises').innerHTML =
+    `<div class="op-prise-row"><span class="ec" style="color:${cat.hex}">⚡</span>
+     <span class="op-kw ${kwClass(b.categorie)}">${kw > 0 ? kw + ' kW' : '—'}</span>
+     <span class="op-pts">${b.nb_points || 1} pt${(b.nb_points||1) > 1 ? 's' : ''}</span>
+     ${priseTags}</div>`;
+  const acc = (b.condition_acces || '').trim();
+  const horaires = (b.horaires && b.horaires !== '—') ? b.horaires : '';
+  const tarif = (b.tarification && b.tarification !== '—') ? b.tarification : '';
+  let grid = '';
+  if (acc) grid += `<div class="ve-detail-cell"><div class="ve-detail-lbl">Accès</div><div class="ve-detail-val">${acc}</div></div>`;
+  if (horaires) grid += `<div class="ve-detail-cell"><div class="ve-detail-lbl">Horaires</div><div class="ve-detail-val">${horaires}</div></div>`;
+  if (tarif) grid += `<div class="ve-detail-cell"><div class="ve-detail-lbl">Tarif</div><div class="ve-detail-val">${tarif}</div></div>`;
+  document.getElementById('bn-detail-grid').innerHTML = grid;
+  // Adresse — ne pas l'oublier quand on l'a (retour Jean-Luc, v14w)
+  const adrBl = document.getElementById('bn-adresse-bloc');
+  const adrTxt = document.getElementById('bn-adresse');
+  if (b.adresse && adrBl && adrTxt) { adrBl.style.display = 'block'; adrTxt.textContent = b.adresse; }
+  else if (adrBl) adrBl.style.display = 'none';
+}
+
+// v14w : fiche Autopartage Citiz — un seul CTA "Réserver" pour toute la station : le lien
+// Citiz est le même quel que soit le véhicule choisi (retour Jean-Luc : pas un bouton par véhicule).
+function updateDetailCitiz(s) {
+  document.getElementById('cz-title').textContent = s.nom || 'Citiz';
+  const dispoEl = document.getElementById('cz-dispo');
+  dispoEl.textContent = s.nb_dispo || 0;
+  dispoEl.className = 'fp-num ' + (s.nb_dispo > 0 ? 'c-green' : 'c-gray');
+  const badgeEl = document.getElementById('cz-badge');
+  badgeEl.textContent = s.nb_dispo > 0 ? 'Disponible' : 'Indisponible';
+  badgeEl.className = 'fp-badge ' + (s.nb_dispo > 0 ? 'c-green' : 'c-gray');
+  document.getElementById('cz-cap').textContent = s.capacite || '—';
+  const propLabel = { combustion:'Thermique', hybrid:'Hybride', electric:'Électrique' };
+  let vehHtml = '';
+  (s.vehicules || []).forEach(v => {
+    const lbl = propLabel[(v.propulsion||'').toLowerCase()] || 'Véhicule';
+    const qte = v.quantite > 1 ? ` <span style="font-size:9px;font-weight:800;color:var(--muted)">× ${v.quantite}</span>` : '';
+    vehHtml += `<div class="ap-veh-row" style="padding-left:0;padding-right:0">
+      <div class="ap-veh-ico ${propClass(v.propulsion)}">${propIcon(v.propulsion)}</div>
+      <div class="ap-veh-info">
+        <div class="ap-veh-nom">${citizNomStr(v.nom)}${qte}</div>
+        <div class="ap-veh-range">${lbl}</div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('cz-vehicules').innerHTML = vehHtml || `<div style="padding:8px 0;font-size:10px;color:var(--muted);font-style:italic">Aucun véhicule disponible</div>`;
+  const adrBl = document.getElementById('cz-adresse-bloc');
+  const adrTxt = document.getElementById('cz-adresse');
+  if (s.adresse && adrBl && adrTxt) { adrBl.style.display = 'block'; adrTxt.textContent = s.adresse; }
+  else if (adrBl) adrBl.style.display = 'none';
+}
+
+// v14w : fiche Autopartage Leo&Go — chaque véhicule est déjà unique à un endroit précis
+// (pas de regroupement par station comme pour Citiz), donc une fiche = un véhicule.
+function updateDetailLeoGo(v) {
+  document.getElementById('lg-title').textContent = v.nom || 'Leo&Go';
+  const iconEl = document.getElementById('lg-icon');
+  iconEl.textContent = propIcon(v.propulsion);
+  iconEl.className = 'ap-veh-ico ' + propClass(v.propulsion);
+  iconEl.style.width = '36px'; iconEl.style.height = '36px'; iconEl.style.fontSize = '16px';
+  document.getElementById('lg-range').textContent = v.autonomie_km ? v.autonomie_km + ' km' : '—';
 }
 
 async function refreshDetail() {
@@ -3257,7 +3525,7 @@ function renderMap() {
     if (!inSearch(b.nom, b.adresse)) return;
     const col = b.categorie==='rapide'?'#2E7D32':b.categorie==='acceleree'?'#1565C0':'#E65C00';
     const kw = b.puissance_max_kw || 0;
-    addM(b.lat, b.lng, col, 22, kw > 0 ? kw+'k' : '⚡', b.nom, (b.operateur||'')+ ' · '+(b.nb_points||1)+' pt', 'borne', '#1A1A2E', 0, 0, null);
+    addM(b.lat, b.lng, col, 22, kw > 0 ? kw+'k' : '⚡', b.nom, (b.operateur||'')+ ' · '+(b.nb_points||1)+' pt', 'borne', '#1A1A2E', 0, 0, b.id);
   });
 
   // Bornes depuis P+R/Parking : uniquement les bornes des parkings affichés
@@ -3269,7 +3537,7 @@ function renderMap() {
       if (!b.lat || !b.lng) return;
       const col = b.categorie==='rapide'?'#2E7D32':b.categorie==='acceleree'?'#1565C0':'#E65C00';
       const kw = b.puissance_max_kw || 0;
-      addM(b.lat, b.lng, col, 22, kw > 0 ? kw+'k' : '⚡', b.nom, (b.operateur||'')+ ' · '+(b.nb_points||1)+' pt', 'borne', '#1A1A2E', 0, 0, null);
+      addM(b.lat, b.lng, col, 22, kw > 0 ? kw+'k' : '⚡', b.nom, (b.operateur||'')+ ' · '+(b.nb_points||1)+' pt', 'borne', '#1A1A2E', 0, 0, b.id);
     });
   }
 
@@ -3429,6 +3697,52 @@ function showVelovOnMap(id) {
   }, 250);
 }
 
+// v14w : fonction interne partagée par showBorneOnMap/showCitizOnMap/showLeoGoOnMap — centre
+// la carte sur un point et ouvre son popup, sur le modèle de showVelovOnMap() ci-dessus.
+function focusMapOnPoint(lat, lng, layers) {
+  mapLayers = layers;
+  updateMapToggleUI();
+  document.getElementById('list-view').style.display = 'none';
+  document.getElementById('detail-view').style.display = 'none';
+  if (carModeActive) document.getElementById('car-view').style.display = 'none';
+  document.getElementById('map-view').style.display = 'block';
+  document.getElementById('map-back-btn').style.display = 'flex';
+  mapVisible = true;
+  document.getElementById('map-btn').textContent = '☰ Liste';
+  if (!map) initMap(); else map.invalidateSize();
+  setTimeout(() => {
+    renderMap();
+    map.setView([lat, lng], 16);
+    setTimeout(() => {
+      markers.forEach(m => {
+        const ll = m.getLatLng();
+        if (Math.abs(ll.lat - lat) < 0.0001 && Math.abs(ll.lng - lng) < 0.0001) m.openPopup();
+      });
+    }, 300);
+  }, 250);
+}
+
+// Ouvrir la carte centrée sur une borne depuis l'accordéon (bouton "🗺 Carte" du groupe)
+function showBorneOnMap(id) {
+  const b = (data.bornes || []).find(x => String(x.id) === String(id));
+  if (!b || !b.lat || !b.lng) return;
+  focusMapOnPoint(b.lat, b.lng, {pr:false, pk:false, vv:false, ve:true, ap:false});
+}
+
+// Ouvrir la carte centrée sur une station Citiz depuis l'accordéon
+function showCitizOnMap(id) {
+  const s = (data.autopartage?.citiz || []).find(x => String(x.id) === String(id));
+  if (!s || !s.lat || !s.lng) return;
+  focusMapOnPoint(s.lat, s.lng, {pr:false, pk:false, vv:false, ve:false, ap:true});
+}
+
+// Ouvrir la carte centrée sur un véhicule Leo&Go depuis l'accordéon
+function showLeoGoOnMap(id) {
+  const v = (data.autopartage?.leoandgo || []).find(x => String(x.id) === String(id));
+  if (!v || !v.lat || !v.lng) return;
+  focusMapOnPoint(v.lat, v.lng, {pr:false, pk:false, vv:false, ve:false, ap:true});
+}
+
 // Ouvrir la carte centrée sur un parking depuis l'accordion
 function showParkingOnMap(id) {
   const p = [...(data.parkings?.tcl||[]),...(data.parkings?.operateurs||[])].find(x => x.id === id);
@@ -3513,6 +3827,41 @@ function copyAndReserveVelov() {
   let txt = selected.nom || '';
   if (selected.adresse) txt += ', ' + selected.adresse;
   const url = `https://velov.grandlyon.com/#/map?lat=${selected.lat}&lng=${selected.lng}&zoom=17`;
+  const open = () => { showToast('📋 Adresse copiée !'); setTimeout(() => window.open(url, '_blank'), 300); };
+  navigator.clipboard.writeText(txt).then(open).catch(() => {
+    const el = document.createElement('textarea');
+    el.value = txt; el.style.position = 'fixed'; el.style.opacity = '0';
+    document.body.appendChild(el); el.select();
+    document.execCommand('copy'); document.body.removeChild(el);
+    open();
+  });
+}
+
+// v14w : version générique de copyAndReserveVelov() pour les fiches Citiz/Leo&Go — le site de
+// réservation est le même quelle que soit la station/le véhicule, donc pas besoin de lat/lng ici.
+function copyAndReserveGeneric(url) {
+  if (!selected) return;
+  let txt = selected.nom || '';
+  if (selected.adresse) txt += ', ' + selected.adresse;
+  const open = () => { showToast('📋 Adresse copiée !'); setTimeout(() => window.open(url, '_blank'), 300); };
+  navigator.clipboard.writeText(txt).then(open).catch(() => {
+    const el = document.createElement('textarea');
+    el.value = txt; el.style.position = 'fixed'; el.style.opacity = '0';
+    document.body.appendChild(el); el.select();
+    document.execCommand('copy'); document.body.removeChild(el);
+    open();
+  });
+}
+
+// v14w : version générique de copyAndReserveVelovInline() pour les boutons "Copier & Réserver"
+// des accordéons Citiz/Leo&Go — l'URL de réservation est passée en data-url plutôt que fixée
+// en dur (celle de Vélo'v), tout le reste est identique.
+function copyAndReserveInline(btn) {
+  const nom = btn.dataset.nom || '';
+  const adresse = btn.dataset.adr || '';
+  const url = btn.dataset.url || '#';
+  let txt = nom;
+  if (adresse) txt += ', ' + adresse;
   const open = () => { showToast('📋 Adresse copiée !'); setTimeout(() => window.open(url, '_blank'), 300); };
   navigator.clipboard.writeText(txt).then(open).catch(() => {
     const el = document.createElement('textarea');
